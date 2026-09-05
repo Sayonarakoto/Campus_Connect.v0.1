@@ -1,9 +1,9 @@
 // server.js
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 const fs = require("fs");
 const mongoose = require("mongoose");
 
@@ -150,8 +150,9 @@ app.use("/api/events", require("./routes/eventRoutes"));
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "ABC School Backend Running",
+    message: "Campus Connect Backend Running",
     version: "1.0.0",
+    database: mongoose.connection.name,
     features: {
       gridfs: true,
       events: true
@@ -165,6 +166,7 @@ app.get("/api/health", (req, res) => {
     success: true,
     status: "healthy",
     mongodb: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    database: mongoose.connection.name,
     gridfs: "initialized",
     timestamp: new Date().toISOString()
   });

@@ -1,0 +1,331 @@
+css
+/* =========================================================
+   COMPACT SPORTS HISTORY SUMMARY / MEDAL CARDS
+   ========================================================= */
+
+.history-summary {
+  width: 100%;
+
+  display: grid;
+
+  /* Keep all 6 cards in one row on desktop */
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+
+  gap: 8px;
+
+  margin-bottom: 18px;
+}
+
+.summary-card {
+  min-width: 0;
+
+  background: #fff;
+
+  /* Compact size */
+  padding: 10px 11px;
+
+  min-height: 68px;
+
+  border-radius: 7px;
+
+  box-shadow: var(--shadow);
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  transition: var(--transition);
+
+  overflow: hidden;
+}
+
+.summary-card:hover {
+  transform: translateY(-1px);
+
+  box-shadow: var(--shadow-hover);
+}
+
+
+/* ---------------------------------------------------------
+   MEDAL CARD BORDER COLORS
+   --------------------------------------------------------- */
+
+.summary-card.gold {
+  border-left: 3px solid #f5a623;
+}
+
+.summary-card.silver {
+  border-left: 3px solid #b0b8c4;
+}
+
+.summary-card.bronze {
+  border-left: 3px solid #cd7f32;
+}
+
+
+/* ---------------------------------------------------------
+   COMPACT ICON
+   --------------------------------------------------------- */
+
+.summary-icon {
+  flex: 0 0 30px;
+
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background: var(--bg-soft);
+
+  border-radius: 6px;
+
+  font-size: 15px;
+
+  line-height: 1;
+}
+
+
+/* ---------------------------------------------------------
+   SUMMARY CONTENT
+   --------------------------------------------------------- */
+
+.summary-info {
+  flex: 1;
+
+  min-width: 0;
+}
+
+.summary-label {
+  display: block;
+
+  font-size: 0.62rem;
+
+  color: var(--text-faint);
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.25px;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.summary-value {
+  display: block;
+
+  font-size: 1.15rem;
+
+  font-weight: 700;
+
+  color: var(--text-dark);
+
+  line-height: 1.2;
+
+  margin-top: 2px;
+}
+
+
+/* =========================================================
+   EXTRA COMPACT DESKTOP
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+  .history-summary {
+    gap: 7px;
+  }
+
+  .summary-card {
+    padding: 9px 9px;
+
+    min-height: 64px;
+
+    gap: 7px;
+  }
+
+  .summary-icon {
+    flex-basis: 28px;
+
+    width: 28px;
+    height: 28px;
+
+    font-size: 14px;
+  }
+
+  .summary-label {
+    font-size: 0.58rem;
+  }
+
+  .summary-value {
+    font-size: 1.05rem;
+  }
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1024px) {
+
+  .history-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 8px;
+  }
+
+  .summary-card {
+    min-height: 64px;
+
+    padding: 9px 10px;
+  }
+
+  .summary-icon {
+    width: 29px;
+    height: 29px;
+
+    flex-basis: 29px;
+  }
+
+  .summary-label {
+    font-size: 0.62rem;
+  }
+
+  .summary-value {
+    font-size: 1.1rem;
+  }
+}
+
+
+/* =========================================================
+   MOBILE TABLET
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  .history-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 7px;
+
+    margin-bottom: 16px;
+  }
+
+  .summary-card {
+    min-height: 60px;
+
+    padding: 8px 9px;
+
+    gap: 7px;
+  }
+
+  .summary-icon {
+    width: 27px;
+    height: 27px;
+
+    flex-basis: 27px;
+
+    font-size: 13px;
+  }
+
+  .summary-label {
+    font-size: 0.58rem;
+  }
+
+  .summary-value {
+    font-size: 1rem;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .history-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 6px;
+  }
+
+  .summary-card {
+    min-height: 55px;
+
+    padding: 7px 8px;
+
+    gap: 6px;
+
+    border-radius: 6px;
+  }
+
+  .summary-icon {
+    width: 24px;
+    height: 24px;
+
+    flex-basis: 24px;
+
+    font-size: 12px;
+
+    border-radius: 5px;
+  }
+
+  .summary-label {
+    font-size: 0.52rem;
+
+    letter-spacing: 0.15px;
+  }
+
+  .summary-value {
+    font-size: 0.9rem;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+  .history-summary {
+    gap: 5px;
+  }
+
+  .summary-card {
+    min-height: 50px;
+
+    padding: 6px 7px;
+
+    gap: 5px;
+  }
+
+  .summary-icon {
+    width: 22px;
+    height: 22px;
+
+    flex-basis: 22px;
+
+    font-size: 11px;
+  }
+
+  .summary-label {
+    font-size: 0.48rem;
+  }
+
+  .summary-value {
+    font-size: 0.82rem;
+  }
+}
+

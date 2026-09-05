@@ -1,0 +1,366 @@
+/* ===================================================
+   SPORTS VERIFICATION
+=================================================== */
+
+.sports-page {
+    padding: 30px;
+    background: #f4f7fb;
+    min-height: 100vh;
+}
+
+.sports-header {
+    margin-bottom: 25px;
+}
+
+.sports-header h1 {
+    margin: 0;
+    font-size: 30px;
+    color: #1f2937;
+}
+
+.sports-header p {
+    margin-top: 8px;
+    color: #6b7280;
+    font-size: 15px;
+}
+
+/* ===================================================
+   LOADING
+=================================================== */
+
+.sports-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    font-size: 22px;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* ===================================================
+   SUMMARY
+=================================================== */
+
+.verification-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    transition: .25s;
+}
+
+.summary-card:hover {
+    transform: translateY(-4px);
+}
+
+.summary-card h3 {
+    margin: 0;
+    color: #374151;
+    font-size: 16px;
+}
+
+.summary-card span {
+    display: block;
+    margin-top: 12px;
+    font-size: 38px;
+    font-weight: bold;
+}
+
+.summary-card.pending {
+    border-left: 6px solid #f59e0b;
+}
+
+.summary-card.pending span {
+    color: #d97706;
+}
+
+.summary-card.verified {
+    border-left: 6px solid #16a34a;
+}
+
+.summary-card.verified span {
+    color: #16a34a;
+}
+
+/* ===================================================
+   TOOLBAR
+=================================================== */
+
+.verification-toolbar {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.verification-toolbar input,
+.verification-toolbar select {
+    padding: 12px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+}
+
+.verification-toolbar input {
+    flex: 1;
+    min-width: 250px;
+}
+
+.verification-toolbar select {
+    min-width: 220px;
+}
+
+.verification-toolbar input:focus,
+.verification-toolbar select:focus {
+    border-color: #2563eb;
+}
+
+/* ===================================================
+   TABLE
+=================================================== */
+
+.table-wrapper {
+    background: white;
+    border-radius: 12px;
+    overflow-x: auto;
+    box-shadow: 0 3px 10px rgba(0,0,0,.08);
+}
+
+.verification-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.verification-table thead {
+    background: #1e40af;
+    color: white;
+}
+
+.verification-table th {
+    padding: 15px;
+    text-align: left;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.verification-table td {
+    padding: 15px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 14px;
+}
+
+.verification-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+/* ===================================================
+   STATUS
+=================================================== */
+
+.status {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status.pending {
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+.status.verified {
+    background: #dcfce7;
+    color: #166534;
+}
+
+/* ===================================================
+   BUTTONS
+=================================================== */
+
+.primary-btn,
+.secondary-btn,
+.verify-btn {
+
+    border: none;
+
+    cursor: pointer;
+
+    transition: .25s;
+
+    border-radius: 8px;
+
+    font-weight: 600;
+
+}
+
+.primary-btn {
+
+    background: #2563eb;
+
+    color: white;
+
+    padding: 12px 28px;
+
+}
+
+.primary-btn:hover:not(:disabled) {
+
+    background: #1d4ed8;
+
+}
+
+.secondary-btn {
+
+    background: #6b7280;
+
+    color: white;
+
+    padding: 12px 20px;
+
+}
+
+.secondary-btn:hover {
+
+    background: #4b5563;
+
+}
+
+.verify-btn {
+
+    background: #16a34a;
+
+    color: white;
+
+    padding: 8px 18px;
+
+}
+
+.verify-btn:hover:not(:disabled) {
+
+    background: #15803d;
+
+}
+
+button:disabled {
+
+    opacity: .6;
+
+    cursor: not-allowed;
+
+}
+
+/* ===================================================
+   FOOTER
+=================================================== */
+
+.verification-footer {
+
+    margin-top: 25px;
+
+    display: flex;
+
+    justify-content: flex-end;
+
+}
+
+/* ===================================================
+   EMPTY
+=================================================== */
+
+.empty-row {
+
+    text-align: center;
+
+    padding: 40px;
+
+    color: #6b7280;
+
+    font-weight: 600;
+
+}
+
+/* ===================================================
+   RESPONSIVE
+=================================================== */
+
+@media (max-width: 992px) {
+
+    .verification-toolbar {
+
+        flex-direction: column;
+
+    }
+
+    .verification-toolbar input,
+    .verification-toolbar select,
+    .verification-toolbar button {
+
+        width: 100%;
+
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .sports-page {
+
+        padding: 15px;
+
+    }
+
+    .sports-header h1 {
+
+        font-size: 24px;
+
+    }
+
+    .summary-card span {
+
+        font-size: 30px;
+
+    }
+
+    .verification-table th,
+    .verification-table td {
+
+        padding: 12px;
+
+        font-size: 13px;
+
+    }
+
+}
+
+@media (max-width: 576px) {
+
+    .verification-summary {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .verification-footer {
+
+        justify-content: center;
+
+    }
+
+    .primary-btn {
+
+        width: 100%;
+
+    }
+
+}

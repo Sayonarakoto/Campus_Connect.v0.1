@@ -1,0 +1,539 @@
+css
+/* =========================================================
+   INSTITUTIONAL FOOTER - RESPONSIVE VERSION
+   ========================================================= */
+
+/* --- Brand Theme Base Standard Variables --- */
+:root {
+  --primary-color: #0c2340;
+  --secondary-color: #d4af37;
+  --text-dark: #222222;
+  --text-muted-light: #b0c2de;
+  --white: #ffffff;
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =========================================================
+   MAIN FOOTER
+   ========================================================= */
+
+.institutional-footer {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--primary-color);
+  color: var(--white);
+  padding: 70px 5% 20px;
+  border-top: 4px solid var(--secondary-color);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+}
+
+.institutional-footer *,
+.institutional-footer *::before,
+.institutional-footer *::after {
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   TOP GRID
+   ========================================================= */
+
+.footer-top-grid {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto 50px;
+
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 1fr 1.2fr;
+
+  gap: 40px;
+}
+
+/* Prevent grid children from causing horizontal overflow */
+.footer-column {
+  min-width: 0;
+  width: 100%;
+}
+
+/* =========================================================
+   COLUMN HEADINGS
+   ========================================================= */
+
+.footer-column h4 {
+  color: var(--secondary-color);
+  font-size: 1.15rem;
+  margin: 0 0 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* =========================================================
+   COLUMN TEXT
+   ========================================================= */
+
+.footer-column p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-muted-light);
+  margin: 0 0 12px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* =========================================================
+   LOGO SECTION
+   ========================================================= */
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  max-width: 100%;
+}
+
+.footer-logo h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin: 0;
+  color: var(--white);
+
+  /* Prevent very long logo text from overflowing */
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.footer-logo img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* =========================================================
+   SOCIAL ICONS
+   ========================================================= */
+
+.social-icon-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.social-badge {
+  flex: 0 0 36px;
+
+  width: 36px;
+  height: 36px;
+
+  background-color: rgba(255, 255, 255, 0.06);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+  cursor: pointer;
+
+  font-size: 1.1rem;
+
+  transition: var(--transition);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.social-badge:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   FOOTER NAVIGATION LINKS
+   ========================================================= */
+
+.footer-links-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links-list li {
+  margin-bottom: 12px;
+}
+
+.footer-links-list a {
+  color: var(--text-muted-light);
+  text-decoration: none;
+  font-size: 0.95rem;
+
+  transition: var(--transition);
+
+  display: inline-block;
+
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+.footer-links-list a:hover {
+  color: var(--white);
+  transform: translateX(4px);
+}
+
+/* =========================================================
+   NEWSLETTER
+   ========================================================= */
+
+.footer-newsletter-form {
+  width: 100%;
+  display: flex;
+  margin-top: 15px;
+
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.footer-newsletter-form input {
+  min-width: 0;
+  width: 100%;
+
+  padding: 12px 14px;
+
+  background-color: rgba(255, 255, 255, 0.08);
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: none;
+
+  color: var(--white);
+
+  font-size: 0.9rem;
+
+  flex: 1 1 auto;
+
+  outline: none;
+
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.footer-newsletter-form input::placeholder {
+  color: #8fa0b5;
+}
+
+.footer-newsletter-form input:focus {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: var(--secondary-color);
+}
+
+.newsletter-submit-btn {
+  flex: 0 0 auto;
+
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+
+  border: none;
+
+  padding: 0 18px;
+
+  font-weight: 700;
+  font-size: 0.9rem;
+
+  cursor: pointer;
+
+  transition: var(--transition);
+
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+
+  white-space: nowrap;
+}
+
+.newsletter-submit-btn:hover {
+  background-color: var(--white);
+}
+
+/* =========================================================
+   COPYRIGHT / BOTTOM BAR
+   ========================================================= */
+
+.footer-base-bar {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  padding-top: 25px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 20px;
+
+  font-size: 0.85rem;
+  color: var(--text-muted-light);
+}
+
+.footer-base-bar p {
+  margin: 0;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+
+.base-policy-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 20px;
+}
+
+.base-policy-links span {
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.base-policy-links span:hover {
+  color: var(--white);
+}
+
+/* =========================================================
+   LARGE TABLETS / SMALL LAPTOPS
+   1024px
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+  .institutional-footer {
+    padding-left: 4%;
+    padding-right: 4%;
+  }
+
+  .footer-top-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 40px 35px;
+  }
+}
+
+/* =========================================================
+   TABLETS
+   768px
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  .institutional-footer {
+    padding: 55px 30px 20px;
+  }
+
+  .footer-top-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 35px 25px;
+    margin-bottom: 40px;
+  }
+
+  .footer-column h4 {
+    font-size: 1.05rem;
+    margin-bottom: 15px;
+  }
+
+  .footer-column p,
+  .footer-links-list a {
+    font-size: 0.92rem;
+  }
+
+  .footer-logo h3 {
+    font-size: 1.25rem;
+  }
+
+  .footer-newsletter-form {
+    max-width: 100%;
+  }
+
+  .footer-base-bar {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+
+    gap: 15px;
+  }
+
+  .base-policy-links {
+    justify-content: center;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   600px
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .institutional-footer {
+    padding: 45px 20px 20px;
+  }
+
+  .footer-top-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+
+    margin-bottom: 35px;
+  }
+
+  .footer-column {
+    width: 100%;
+  }
+
+  .footer-column h4 {
+    font-size: 1rem;
+    margin-bottom: 14px;
+  }
+
+  .footer-column p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .footer-logo {
+    gap: 8px;
+  }
+
+  .footer-logo h3 {
+    font-size: 1.2rem;
+  }
+
+  .social-icon-row {
+    gap: 10px;
+  }
+
+  .social-badge {
+    width: 35px;
+    height: 35px;
+    flex-basis: 35px;
+  }
+
+  /* Newsletter stays inside screen */
+  .footer-newsletter-form {
+    width: 100%;
+  }
+
+  .footer-newsletter-form input {
+    min-width: 0;
+    padding: 11px 12px;
+    font-size: 0.85rem;
+  }
+
+  .newsletter-submit-btn {
+    padding: 0 14px;
+    font-size: 0.85rem;
+  }
+
+  .footer-base-bar {
+    padding-top: 20px;
+    font-size: 0.8rem;
+  }
+
+  .base-policy-links {
+    width: 100%;
+    gap: 12px 18px;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+   480px
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .institutional-footer {
+    padding: 40px 16px 18px;
+  }
+
+  .footer-top-grid {
+    gap: 28px;
+  }
+
+  .footer-column h4 {
+    font-size: 0.95rem;
+  }
+
+  .footer-column p,
+  .footer-links-list a {
+    font-size: 0.88rem;
+  }
+
+  .footer-logo h3 {
+    font-size: 1.1rem;
+  }
+
+  .social-badge {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+    font-size: 1rem;
+  }
+
+  /*
+    Newsletter button becomes slightly smaller
+    to prevent horizontal overflow.
+  */
+  .footer-newsletter-form input {
+    padding: 10px;
+    font-size: 0.82rem;
+  }
+
+  .newsletter-submit-btn {
+    padding: 0 11px;
+    font-size: 0.8rem;
+  }
+
+  .base-policy-links {
+    gap: 10px 15px;
+  }
+}
+
+/* =========================================================
+   VERY SMALL PHONES
+   360px
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+  .institutional-footer {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .footer-newsletter-form {
+    /*
+      Stack newsletter controls on very small screens.
+      This completely eliminates horizontal overflow.
+    */
+    flex-direction: column;
+    gap: 8px;
+    overflow: visible;
+  }
+
+  .footer-newsletter-form input {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+  }
+
+  .newsletter-submit-btn {
+    width: 100%;
+    min-height: 42px;
+    border-radius: 4px;
+  }
+
+  .base-policy-links {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+}

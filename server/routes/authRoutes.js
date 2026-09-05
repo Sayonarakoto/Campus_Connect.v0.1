@@ -1,0 +1,127 @@
+// routes/authRoutes.js
+const express = require("express");
+const router = express.Router();
+
+const User = require("../models/User");
+
+const {
+  register,
+  login,
+  profile,
+  getLeaveBalance,
+  getProfilePhoto,
+  updateProfilePhoto,
+  deleteProfilePhoto,
+  getFacultyList,
+  getAllUsers,
+  getUserById
+} = require("../controllers/authController");
+
+const authMiddleware = require("../middleware/authMiddleware");
+const upload = require("../middleware/upload");
+
+// =========================
+// PUBLIC ROUTES
+// =========================
+
+// Register with profile photo
+router.post(
+  "/register",
+  upload.single("profilePhoto"),
+  register
+);
+
+// Login
+router.post("/login", login);
+
+// Get profile photo (public)
+router.get("/photo/:fileId", getProfilePhoto);
+
+// =========================
+// PROTECTED ROUTES
+// Everything below this line requires login
+// =========================
+
+router.use(authMiddleware);
+
+// =========================
+// PROFILE
+// =========================
+
+router.get("/profile", profile);
+
+// =========================
+// PROFILE PHOTO MANAGEMENT
+// =========================
+
+// Update profile photo
+router.put(
+  "/profile/photo",
+  upload.single("profilePhoto"),
+  updateProfilePhoto
+);
+
+// Delete profile photo
+router.delete(
+  "/profile/photo",
+  deleteProfilePhoto
+);
+
+// =========================
+// FACULTY LIST
+// =========================
+
+router.get("/faculty", getFacultyList);
+
+// =========================
+// FACULTY LEAVE BALANCE
+// =========================
+
+router.get("/leave-balance", getLeaveBalance);
+
+// =========================
+// ADMIN ROUTES
+// =========================
+
+// Get all users (admin only)
+router.get("/users", getAllUsers);
+
+// Get user by ID (admin only)
+router.get("/users/:id", getUserById);
+
+// =========================
+// LEGACY FACULTY LIST (Backward compatibility)
+// =========================
+
+router.get("/faculty-list", async (req, res) => {
+  try {
+    const faculty = await User.find({
+      role: {
+        $in: ["faculty", "tutor"]
+      }
+    }).select(
+      "_id fullName email profilePhoto annualLeavePool usedLeaveDays department isLabStaff"
+    );
+
+    // Add profile photo URLs
+    const facultyWithPhotos = faculty.map(user => ({
+      ...user.toObject(),
+      profilePhotoUrl: user.profilePhoto?.fileId 
+        ? `/api/auth/photo/${user.profilePhoto.fileId}`
+        : null
+    }));
+
+    res.json({
+      success: true,
+      users: facultyWithPhotos
+    });
+  } catch (error) {
+    console.error("FACULTY LIST ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+module.exports = router;

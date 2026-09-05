@@ -1,0 +1,753 @@
+/* ==========================================================================
+   1. GLOBAL ARCHITECTURE & SYSTEM VARS
+   ========================================================================== */
+*, 
+*::before, 
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary-color: #0c2340;    /* Deep Navy */
+  --secondary-color: #d4af37;  /* Muted Academy Gold */
+  --text-dark: #222222;
+  --text-light: #555555;
+  --bg-light: #f8f9fa;
+  --white: #ffffff;
+  --transition: all 0.3s ease;
+}
+
+.about-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-dark);
+  line-height: 1.6;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Common Section Typography Component */
+.section-tagline {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--secondary-color);
+  font-weight: 700;
+  display: inline-block;
+  margin-bottom: 15px;
+}
+
+.section-subtitle {
+  color: var(--text-light);
+  max-width: 600px;
+  margin: 0 auto 50px auto;
+}
+
+/* ==========================================================================
+   2. PAGE HEADER (Hero Variant)
+   ========================================================================== */
+.about-header {
+  position: relative;
+  background-image: linear-gradient(rgba(12, 35, 64, 0.8), rgba(12, 35, 64, 0.8)), url('../assets/school.avif');
+  background-size: cover;
+  background-position: center;
+  height: 40vh;
+  min-height: 300px;
+  width: 100%;
+}
+
+.header-overlay {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  text-align: center;
+  padding: 0 20px;
+}
+
+.header-overlay h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  letter-spacing: -0.5px;
+}
+
+.breadcrumbs {
+  font-size: 0.95rem;
+  color: var(--secondary-color);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   3. WELCOME & PRESIDENTIAL ADDRESS
+   ========================================================================== */
+.about-intro {
+  padding: 80px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.intro-grid {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 50px;
+  align-items: center;
+}
+
+.intro-text h2 {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: 20px;
+}
+
+.intro-text p {
+  color: var(--text-light);
+  margin-bottom: 20px;
+  font-size: 1.05rem;
+}
+
+.intro-quote-card {
+  background-color: var(--bg-light);
+  padding: 40px;
+  border-left: 5px solid var(--primary-color);
+  border-radius: 0 8px 8px 0;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+}
+
+.intro-quote-card blockquote {
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--primary-color);
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
+
+.intro-quote-card cite {
+  font-weight: 700;
+  color: var(--text-dark);
+  display: block;
+  font-size: 0.95rem;
+}
+
+/* ==========================================================================
+   4. MISSION, VISION, & VALUES
+   ========================================================================== */
+.mission-vision-section {
+  background-color: var(--primary-color);
+  color: var(--white);
+  padding: 80px 20px;
+  width: 100%;
+}
+
+.mv-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.mv-card {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 40px 30px;
+  border-top: 4px solid var(--secondary-color);
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.mv-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-5px);
+}
+
+.mv-card h3 {
+  color: var(--secondary-color);
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+}
+
+.mv-card p {
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
+/* ==========================================================================
+   5. HISTORICAL MILESTONES (Timeline structure)
+   ========================================================================== */
+.history-section {
+  padding: 80px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  width: 100%;
+}
+
+.history-section h2 {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.timeline {
+  position: relative;
+  max-width: 800px;
+  margin: 40px auto 0 auto;
+  text-align: left;
+}
+
+/* Center vertical line */
+.timeline::after {
+  content: '';
+  position: absolute;
+  width: 2px;
+  background-color: var(--primary-color);
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  margin-left: -1px;
+  opacity: 0.2;
+}
+
+.timeline-item {
+  padding: 10px 40px;
+  position: relative;
+  background-color: inherit;
+  width: 50%;
+}
+
+/* Bullet markers mapping layout points */
+.timeline-item::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  right: -8px;
+  background-color: var(--white);
+  border: 4px solid var(--secondary-color);
+  top: 15px;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+/* Alternate Left/Right placements */
+.timeline-item:nth-child(odd) { left: 0; text-align: right; }
+.timeline-item:nth-child(even) { left: 50%; }
+.timeline-item:nth-child(even)::after { left: -8px; }
+
+.timeline-year {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  margin-bottom: 5px;
+}
+
+.timeline-content {
+  padding: 20px;
+  background: var(--bg-light);
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+}
+
+.timeline-content h4 {
+  color: var(--primary-color);
+  margin-bottom: 8px;
+  font-size: 1.15rem;
+}
+
+.timeline-content p {
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+
+/* ==========================================================================
+   6. LEADERSHIP & ADMINISTRATION (NEW Addition)
+   ========================================================================== */
+.leadership-section {
+  padding: 80px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  width: 100%;
+}
+
+.leadership-section h2 {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.leadership-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.leader-card {
+  background: var(--white);
+  padding: 35px 25px;
+  border-radius: 4px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.04);
+  text-align: center;
+  transition: var(--transition);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.leader-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+}
+
+.leader-image-placeholder {
+  width: 100px;
+  height: 100px;
+  background-color: var(--bg-light);
+  color: var(--primary-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  margin: 0 auto 20px auto;
+  border: 2px solid var(--secondary-color);
+}
+
+.leader-card h4 {
+  font-size: 1.3rem;
+  color: var(--primary-color);
+  margin-bottom: 5px;
+}
+
+.leader-title {
+  color: var(--secondary-color);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 15px;
+}
+
+.leader-bio {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   7. ACCREDITATIONS & DISTINCTIONS (NEW Addition)
+   ========================================================================== */
+.accreditation-section {
+  background-color: var(--bg-light);
+  padding: 80px 20px;
+  width: 100%;
+}
+
+.accreditation-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.accreditation-section h2 {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.accreditation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.accred-item {
+  background: var(--white);
+  padding: 40px 30px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.accred-item i {
+  font-size: 2.5rem;
+  color: var(--secondary-color);
+  margin-bottom: 20px;
+}
+
+.accred-item h4 {
+  color: var(--primary-color);
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+}
+
+.accred-item p {
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+
+/* ==========================================================================
+   8. GLOBAL FOOTPRINT & COLLABORATIONS (NEW Addition)
+   ========================================================================== */
+.global-footprint-section {
+  padding: 80px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.global-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+  align-items: center;
+}
+
+.global-content-text h2 {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: 20px;
+}
+
+.global-content-text p {
+  color: var(--text-light);
+  font-size: 1.05rem;
+  margin-bottom: 25px;
+}
+
+.global-stats-list {
+  list-style: none;
+}
+
+.global-stats-list li {
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+  color: var(--text-dark);
+  position: relative;
+  padding-left: 25px;
+}
+
+.global-stats-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--secondary-color);
+  font-weight: bold;
+}
+
+/* Architectural Tech Aesthetic for Network Placeholder */
+.global-map-placeholder {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #16335a 100%);
+  border-radius: 8px;
+  padding: 60px 40px;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--white);
+  box-shadow: 0 10px 25px rgba(12, 35, 64, 0.15);
+  border-bottom: 4px solid var(--secondary-color);
+}
+
+.map-overlay-content i {
+  font-size: 3.5rem;
+  color: var(--secondary-color);
+  margin-bottom: 20px;
+}
+
+.map-overlay-content p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* ==========================================================
+   RESPONSIVE DESIGN
+========================================================== */
+
+/* Large Laptop */
+@media (max-width:1200px){
+
+.about-intro,
+.history-section,
+.leadership-section,
+.global-footprint-section,
+.accreditation-wrapper{
+    max-width:95%;
+}
+
+}
+
+
+/* Tablet */
+@media (max-width:992px){
+
+.header-overlay h1{
+    font-size:2.4rem;
+}
+
+.intro-grid,
+.global-grid{
+    grid-template-columns:1fr;
+    gap:40px;
+}
+
+.intro-text,
+.global-content-text{
+    text-align:center;
+}
+
+.intro-text p,
+.global-content-text p{
+    text-align:justify;
+}
+
+.global-map-placeholder{
+    min-height:250px;
+}
+
+.mv-grid,
+.leadership-grid,
+.accreditation-grid{
+    grid-template-columns:repeat(2,1fr);
+}
+
+}
+
+
+/* Mobile */
+@media (max-width:768px){
+
+.about-header{
+    height:35vh;
+    min-height:220px;
+}
+
+.header-overlay h1{
+    font-size:2rem;
+}
+
+.breadcrumbs{
+    font-size:0.8rem;
+}
+
+.intro-text h2,
+.history-section h2,
+.leadership-section h2,
+.accreditation-section h2,
+.global-content-text h2{
+    font-size:1.8rem;
+}
+
+.about-intro,
+.mission-vision-section,
+.history-section,
+.leadership-section,
+.accreditation-section,
+.global-footprint-section{
+    padding:50px 15px;
+}
+
+
+/* Cards */
+
+.mv-grid,
+.leadership-grid,
+.accreditation-grid{
+    grid-template-columns:1fr;
+}
+
+
+/* Timeline */
+
+.timeline{
+
+    margin-top:30px;
+
+}
+
+.timeline::after{
+
+    left:18px;
+
+}
+
+.timeline-item{
+
+    width:100%;
+
+    left:0 !important;
+
+    padding-left:55px;
+
+    padding-right:0;
+
+    text-align:left !important;
+
+}
+
+.timeline-item::after{
+
+    left:10px !important;
+
+    right:auto;
+
+}
+
+.timeline-year{
+
+    font-size:1.3rem;
+
+}
+
+.timeline-content{
+
+    padding:18px;
+
+}
+
+
+/* Quote */
+
+.intro-quote-card{
+
+    padding:25px;
+
+}
+
+.intro-quote-card blockquote{
+
+    font-size:1rem;
+
+}
+
+
+/* Global */
+
+.global-map-placeholder{
+
+    padding:40px 20px;
+
+    min-height:220px;
+
+}
+
+.map-overlay-content i{
+
+    font-size:2.5rem;
+
+}
+
+.map-overlay-content p{
+
+    font-size:1rem;
+
+}
+
+}
+
+
+/* Small Phones */
+
+@media (max-width:576px){
+
+.header-overlay h1{
+
+    font-size:1.6rem;
+
+}
+
+.section-tagline{
+
+    font-size:.75rem;
+
+}
+
+.intro-text h2,
+.history-section h2,
+.leadership-section h2,
+.accreditation-section h2,
+.global-content-text h2{
+
+    font-size:1.5rem;
+
+}
+
+.intro-text p,
+.timeline-content p,
+.mv-card p,
+.accred-item p,
+.leader-bio,
+.global-content-text p{
+
+    font-size:.95rem;
+
+}
+
+.timeline-year{
+
+    font-size:1.15rem;
+
+}
+
+.mv-card,
+.leader-card,
+.accred-item{
+
+    padding:25px 18px;
+
+}
+
+.global-map-placeholder{
+
+    min-height:180px;
+
+}
+
+.map-overlay-content i{
+
+    font-size:2rem;
+
+}
+
+}
+
+
+/* Extra Small Phones */
+
+@media (max-width:400px){
+
+.header-overlay{
+
+    padding:15px;
+
+}
+
+.header-overlay h1{
+
+    font-size:1.35rem;
+
+}
+
+.breadcrumbs{
+
+    font-size:.7rem;
+
+}
+
+.leader-image-placeholder{
+
+    width:80px;
+    height:80px;
+    font-size:2rem;
+
+}
+
+}

@@ -1,0 +1,219 @@
+/* --- Brand Standard Theme Variables --- */
+:root {
+  --primary-color: #0c2340;    /* Deep Academic Navy */
+  --secondary-color: #d4af37;  /* Academy Muted Gold */
+  --text-dark: #222222;
+  --text-light: #666666;
+  --bg-canvas: #f4f6f9;        /* Soft Gray-Blue Canvas */
+  --white: #ffffff;
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-sm: 0 4px 6px rgba(12, 35, 64, 0.05);
+  --shadow-lg: 0 15px 30px rgba(12, 35, 64, 0.12);
+}
+
+/* --- Canvas Wrapper --- */
+.portal-page-wrapper {
+  background-color: var(--bg-canvas);
+  min-height: 100vh;
+  padding: 60px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.portal-container {
+  max-width: 1200px;
+  width: 100%;
+}
+
+/* --- Header Styling --- */
+.portal-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.portal-tagline {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: var(--secondary-color);
+  font-weight: 700;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.portal-header h1 {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  font-weight: 800;
+  margin: 0 0 15px 0;
+}
+
+.portal-header p {
+  color: var(--text-light);
+  font-size: 1.1rem;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+/* --- Dashboard Grid System --- */
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+/* --- Portal Individual Card --- */
+.portal-card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 35px 30px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid rgba(12, 35, 64, 0.06);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Accent bar at top of cards for structural weight */
+.portal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: var(--primary-color);
+  transition: var(--transition);
+}
+
+.portal-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(212, 175, 55, 0.3);
+}
+
+.portal-card:hover::before {
+  background-color: var(--secondary-color);
+}
+
+/* --- Card Typography & Icons --- */
+.portal-icon {
+  font-size: 2.2rem;
+  margin-bottom: 15px;
+  background-color: #f0f4f8;
+  display: inline-flex;
+  width: 60px;
+  height: 60px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.portal-card h2 {
+  font-size: 1.4rem;
+  color: var(--primary-color);
+  margin: 0 0 10px 0;
+  font-weight: 700;
+}
+
+.portal-desc {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 30px;
+}
+
+/* --- Institutional Buttons Row --- */
+.card-buttons {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 12px;
+}
+
+.portal-btn {
+  padding: 11px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.btn-login {
+  background-color: var(--primary-color);
+  color: var(--white);
+  border: 1px solid var(--primary-color);
+}
+
+.btn-login:hover {
+  background-color: #16365c;
+  border-color: #16365c;
+}
+
+.btn-register {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 1px solid rgba(12, 35, 64, 0.2);
+}
+
+.btn-register:hover {
+  background-color: #f0f4f8;
+  border-color: var(--primary-color);
+}
+
+/* --- Footer Security Notice --- */
+.portal-footer {
+  text-align: center;
+  color: var(--text-light);
+  font-size: 0.85rem;
+  margin-top: 20px;
+  opacity: 0.8;
+}
+
+/* --- Responsive Layout Tweaks --- */
+@media (max-width: 768px) {
+  .portal-page-wrapper {
+    padding: 40px 15px;
+  }
+  
+  .portal-header h1 {
+    font-size: 2rem;
+  }
+  
+  .portal-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .portal-card {
+    padding: 25px 20px;
+  }
+}
+/* Styling layout wrappers around portal loop icons */
+.portal-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  background-color: rgba(59, 130, 246, 0.1); /* Subtle theme accent background tint */
+  margin-bottom: 16px;
+}
+
+.portal-icon i {
+  font-size: 1.6rem;
+  color: #3b82f6; /* Standard enterprise blue node brand color */
+}
+
+/* Subtle transition polish when hovering over gateway options */
+.portal-card:hover .portal-icon i {
+  color: #d4af37; /* Clean shift to institutional gold accent focus */
+}

@@ -1,0 +1,67 @@
+.late-form{
+
+width:500px;
+
+margin:40px auto;
+
+padding:30px;
+
+background:#fff;
+
+border-radius:10px;
+
+box-shadow:0 5px 20px rgba(0,0,0,.1);
+
+display:flex;
+
+flex-direction:column;
+
+gap:15px;
+
+}
+
+.late-form h2{
+
+text-align:center;
+
+margin-bottom:10px;
+
+}
+
+.late-form input,
+
+.late-form textarea{
+
+padding:12px;
+
+border:1px solid #ccc;
+
+border-radius:6px;
+
+font-size:15px;
+
+}
+
+.late-form button{
+
+padding:12px;
+
+background:#2563eb;
+
+color:white;
+
+border:none;
+
+border-radius:6px;
+
+cursor:pointer;
+
+font-size:16px;
+
+}
+
+.late-form button:hover{
+
+background:#1d4ed8;
+
+}

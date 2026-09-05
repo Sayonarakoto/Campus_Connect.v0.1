@@ -1,0 +1,184 @@
+/* ========================================================================== 
+   ATTENDANCE MODULE (EXTENDS YOUR EXISTING DESIGN SYSTEM)
+   ========================================================================== */
+
+/* Page wrapper */
+.attendance-container {
+  padding: 40px 25px;
+  min-height: 100vh;
+  background: var(--bg-light);
+}
+
+/* Heading */
+.attendance-container h2 {
+  text-align: center;
+  color: var(--primary-color);
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 25px;
+}
+
+/* Batch input section */
+.attendance-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.attendance-controls input {
+  padding: 12px 14px;
+  border: 1px solid #dcdcdc;
+  border-radius: 6px;
+  font-size: 14px;
+  min-width: 180px;
+  transition: var(--transition);
+}
+
+.attendance-controls input:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 8px rgba(212,175,55,0.25);
+}
+
+/* Save all button */
+.save-all-btn {
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  padding: 12px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.save-all-btn:hover {
+  background: #173b69;
+  transform: translateY(-2px);
+}
+
+.save-all-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ========================================================================== 
+   TABLE DESIGN (CORE ATTENDANCE GRID)
+   ========================================================================== */
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.attendance-table thead {
+  background: var(--primary-color);
+  color: var(--white);
+}
+
+.attendance-table th,
+.attendance-table td {
+  padding: 14px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.attendance-table tbody tr:hover {
+  background: #f5f7fa;
+}
+
+/* Inputs inside table */
+.attendance-table input {
+  width: 80px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.attendance-table input:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+}
+
+/* ========================================================================== 
+   STATUS BADGES
+   ========================================================================== */
+
+.attendance-green {
+  color: var(--success);
+  font-weight: 700;
+}
+
+.attendance-warning {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+/* ========================================================================== 
+   ACTION BUTTON
+   ========================================================================== */
+
+.attendance-save-btn {
+  background: var(--success);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.attendance-save-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+/* ========================================================================== 
+   LOADING STATE
+   ========================================================================== */
+
+.attendance-loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-light);
+  font-size: 1.1rem;
+}
+
+/* ========================================================================== 
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 768px) {
+
+  .attendance-container {
+    padding: 25px 12px;
+  }
+
+  .attendance-table th,
+  .attendance-table td {
+    font-size: 12px;
+    padding: 10px;
+  }
+
+  .attendance-table input {
+    width: 60px;
+  }
+
+  .attendance-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .save-all-btn {
+    width: 100%;
+  }
+}

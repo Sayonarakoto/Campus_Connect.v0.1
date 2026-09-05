@@ -1,0 +1,39 @@
+# ==========================================
+# Campus Connect - Server .gitignore
+# ==========================================
+
+# Dependencies
+node_modules/
+
+# Environment variables & Secrets
+.env
+.env.*
+!.env.example
+
+# Local Uploads & Media Storage (keep directory structure via .gitkeep)
+uploads/*
+!uploads/.gitkeep
+uploads/dutyProofs/*
+!uploads/dutyProofs/.gitkeep
+uploads/profilePhotos/*
+!uploads/profilePhotos/.gitkeep
+uploads/promotions/*
+!uploads/promotions/.gitkeep
+
+upload/*
+!upload/.gitkeep
+upload/events/*
+!upload/events/.gitkeep
+
+# Logs & Runtime
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor & OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

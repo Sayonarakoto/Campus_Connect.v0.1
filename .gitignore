@@ -1,0 +1,81 @@
+# ==========================================
+# Campus Connect - Root .gitignore
+# ==========================================
+
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+jspm_packages/
+web_modules/
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+client/.env*.local
+client/.env.development.local
+client/.env.test.local
+client/.env.production.local
+server/.env
+server/.env.*
+!server/.env.example
+
+# Production Builds & Output
+client/build/
+dist/
+build/
+coverage/
+.nyc_output/
+
+# User Uploads & Media Storage (keep directory structure via .gitkeep)
+server/uploads/*
+!server/uploads/.gitkeep
+server/uploads/dutyProofs/*
+!server/uploads/dutyProofs/.gitkeep
+server/uploads/profilePhotos/*
+!server/uploads/profilePhotos/.gitkeep
+server/uploads/promotions/*
+!server/uploads/promotions/.gitkeep
+
+server/upload/*
+!server/upload/.gitkeep
+server/upload/events/*
+!server/upload/events/.gitkeep
+
+# Logs & Diagnostics
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime Data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Cache & Temporary Files
+.npm/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+
+# IDE & Editor Configurations
+.vscode/
+.idea/
+.qodo/
+*.sublime-project
+*.sublime-workspace
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

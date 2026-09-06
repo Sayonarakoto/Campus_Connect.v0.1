@@ -88,6 +88,7 @@ async function seedDatabase() {
       // -------------------------------------------------------------
       const hodEmail = `hod.${dept.code.toLowerCase()}@college.edu`;
       const hodId = `HOD${dept.prefix * 100 + 1}`;
+      const hodPhone = `98765${dept.prefix}001`;
       let hodUser = await User.findOne({ email: hodEmail });
 
       const hodPayload = {
@@ -96,10 +97,12 @@ async function seedDatabase() {
         department: dept.name,
         section: null,
         email: hodEmail,
+        phoneNumber: hodPhone,
         password: hashedPassword,
         isLabStaff: false,
         customData: {
           employeeId: hodId,
+          phoneNumber: hodPhone,
           department: dept.name
         }
       };
@@ -119,6 +122,7 @@ async function seedDatabase() {
         Name: hodPayload.fullName,
         "Login ID (Faculty ID)": hodId,
         Email: hodEmail,
+        Phone: hodPhone,
         "Lab Staff": "No"
       });
 
@@ -128,6 +132,7 @@ async function seedDatabase() {
       for (let f = 1; f <= 2; f++) {
         const facultyEmail = `faculty.${dept.code.toLowerCase()}${f}@college.edu`;
         const facultyId = `FAC${dept.prefix * 100 + f}`;
+        const facultyPhone = `98765${dept.prefix}01${f}`;
         let facUser = await User.findOne({ email: facultyEmail });
 
         const facPayload = {
@@ -136,10 +141,12 @@ async function seedDatabase() {
           department: dept.name,
           section: null,
           email: facultyEmail,
+          phoneNumber: facultyPhone,
           password: hashedPassword,
           isLabStaff: false,
           customData: {
             employeeId: facultyId,
+            phoneNumber: facultyPhone,
             department: dept.name
           }
         };
@@ -159,6 +166,7 @@ async function seedDatabase() {
           Name: facPayload.fullName,
           "Login ID (Faculty ID)": facultyId,
           Email: facultyEmail,
+          Phone: facultyPhone,
           "Lab Staff": "No"
         });
       }
@@ -169,6 +177,7 @@ async function seedDatabase() {
       for (let l = 1; l <= 2; l++) {
         const labEmail = `lab.${dept.code.toLowerCase()}${l}@college.edu`;
         const labId = `LAB${dept.prefix * 100 + l}`;
+        const labPhone = `98765${dept.prefix}02${l}`;
         let labUser = await User.findOne({ email: labEmail });
 
         const labPayload = {
@@ -177,10 +186,12 @@ async function seedDatabase() {
           department: dept.name,
           section: null,
           email: labEmail,
+          phoneNumber: labPhone,
           password: hashedPassword,
           isLabStaff: true,
           customData: {
             employeeId: labId,
+            phoneNumber: labPhone,
             department: dept.name
           }
         };
@@ -200,6 +211,7 @@ async function seedDatabase() {
           Name: labPayload.fullName,
           "Login ID (Faculty ID)": labId,
           Email: labEmail,
+          Phone: labPhone,
           "Lab Staff": "Yes"
         });
       }
@@ -211,6 +223,7 @@ async function seedDatabase() {
         const studentEmail = `student.${dept.code.toLowerCase()}${s}@college.edu`;
         const admissionNo = `${dept.prefix * 100 + s}`; // 4-digit unique string (e.g. 1001..1005)
         const regNo = `210100${dept.prefix * 100 + s}`; // 10-digit unique string (e.g. 2101001001)
+        const studentPhone = `98765${dept.prefix}10${s}`;
 
         // For Mechanical Engineering, assign Mech-A (1..3) or Mech-B (4..5)
         let studentSection = null;
@@ -225,11 +238,13 @@ async function seedDatabase() {
           department: dept.name,
           section: studentSection,
           email: studentEmail,
+          phoneNumber: studentPhone,
           password: hashedPassword,
           isLabStaff: false,
           customData: {
             admissionNo,
             regNo,
+            phoneNumber: studentPhone,
             department: dept.name,
             semester: 1,
             batchYear: "2024-2027",
@@ -279,6 +294,7 @@ async function seedDatabase() {
           Name: userPayload.fullName,
           "Login ID (Faculty ID)": admissionNo,
           Email: studentEmail,
+          Phone: studentPhone,
           "Lab Staff": studentSection || "N/A"
         });
       }

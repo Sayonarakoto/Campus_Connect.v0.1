@@ -263,27 +263,8 @@ const roleRegistrationSpecs = {
   security: {
     title: "Security Registration",
     badge: "Security",
-    instructions: "Register Security Staff.",
-    customFields: [
-      {
-        name: "gateIdentifier",
-        label: "Gate",
-        type: "select",
-        options: [
-          "Main Gate",
-          "North Gate",
-          "South Gate"
-        ],
-        required: true
-      },
-      {
-        name: "deviceId",
-        label: "Device ID",
-        type: "text",
-        placeholder: "Device UUID",
-        required: true
-      }
-    ]
+    instructions: "Register as Security Staff.",
+    customFields: []
   },
 
   /* ==========================
@@ -358,6 +339,7 @@ function Register() {
     adminClearanceLevel: "",
     systemPasskey: "",
     clearanceToken: "",
+    phoneNumber: "",
     isLabStaff: false
   });
 
@@ -534,6 +516,10 @@ function Register() {
       finalValue = finalValue.replace(/\D/g, "").slice(0, 4);
     } else if (name === "regNo") {
       finalValue = finalValue.replace(/\D/g, "").slice(0, 10);
+    } else if (name === "phoneNumber") {
+      finalValue = finalValue.replace(/\D/g, "").slice(0, 10);
+    } else if (name === "password" && normalizedRole === "security") {
+      finalValue = finalValue.replace(/\D/g, "").slice(0, 6);
     }
 
     setFormData(previous => ({
@@ -558,10 +544,27 @@ function Register() {
         return;
       }
 
-      if (!formData.password || formData.password.length < 6) {
-        alert("Password must be at least 6 characters long.");
-        setLoading(false);
-        return;
+      if (normalizedRole !== "admin") {
+        const phoneRegex = /^[6-9]\d{9}$/;
+        if (!formData.phoneNumber || !phoneRegex.test(formData.phoneNumber.trim())) {
+          alert("Please enter a valid 10-digit mobile number (starting with 6, 7, 8, or 9).");
+          setLoading(false);
+          return;
+        }
+      }
+
+      if (normalizedRole === "security") {
+        if (!formData.password || !/^\d{6}$/.test(formData.password.trim())) {
+          alert("Security passkey must be exactly 6 numeric digits.");
+          setLoading(false);
+          return;
+        }
+      } else {
+        if (!formData.password || formData.password.length < 6) {
+          alert("Password must be at least 6 characters long.");
+          setLoading(false);
+          return;
+        }
       }
 
       if (normalizedRole === "student") {
@@ -809,18 +812,42 @@ function Register() {
               />
             </div>
 
+            {/* PHONE NUMBER (All roles except Admin) */}
+            {normalizedRole !== "admin" && (
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Phone Number *</label>
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                  placeholder="10-digit mobile number"
+                  required
+                  maxLength={10}
+                />
+              </div>
+            )}
+
             {/* PASSWORD */}
             <div style={styles.formGroup}>
-              <label style={styles.label}>Password *</label>
+              <label style={styles.label}>
+                {normalizedRole === "security" ? "6-Digit Passkey *" : "Password *"}
+              </label>
               <input
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
                 style={styles.input}
-                placeholder="Create Password (min 6 characters)"
+                placeholder={
+                  normalizedRole === "security"
+                    ? "Enter 6-digit numeric passkey"
+                    : "Create Password (min 6 characters)"
+                }
                 required
                 minLength="6"
+                maxLength={normalizedRole === "security" ? 6 : undefined}
               />
             </div>
 

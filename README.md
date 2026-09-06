@@ -204,9 +204,9 @@ Campus_Connect.v0.1/
    PORT=5000
    CLIENT_URL=http://localhost:3000
    MONGO_URI=mongodb://127.0.0.1:27017/campus_connect
-   JWT_SECRET=your_super_secret_jwt_key
+   JWT_SECRET=your_jwt_secret_key_here
    NODE_ENV=development
-   SEED_DEFAULT_PASSWORD=password123
+   SEED_DEFAULT_PASSWORD=your_seed_password_here
    SEED_FILE=seed.js
    ```
 
@@ -237,35 +237,7 @@ npm run seed
 ```
 *(or `node seed.js`)*
 
-#### What Gets Seeded
-* **Departments**: Mechanical Engineering, Computer Engineering, Automobile Engineering, Electrical and Electronics Engineering, Civil Engineering, and Fire Technology and Safety.
-* **Per Department Breakdown**:
-  * **5 Students**: 4-digit admission numbers (`1001`–`1005`, `2001`–`2005`, etc.), 10-digit register numbers (`2101001001`...). Mechanical students are split into `Mech-A` and `Mech-B`; other departments have `null` section.
-  * **2 Faculty Members**: `isLabStaff: false`, IDs `FAC1001`, `FAC1002`, etc.
-  * **1 Head of Department (HOD)**: `role: "hod"`, `isLabStaff: false`, IDs `HOD1001`, etc.
-  * **2 Lab Staff Members**: `role: "faculty"`, `isLabStaff: true`, IDs `LAB1001`, `LAB1002`, etc.
-* **Total Accounts**: 60 Users + 30 linked Student profiles.
-* **Universal Password**: `password123` (configured via `SEED_DEFAULT_PASSWORD` in `.env`).
-
-#### Sample Login Credentials Matrix
-
-All accounts support logging in using either their **ID** or **Institutional Email**:
-
-| Department | Role | Name | Login ID (Admission No / Faculty ID) | Institutional Email | Password | Division / Section |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Mechanical** | Student | Student MECH 1 | `1001` | `student.mech1@college.edu` | `password123` | `Mech-A` |
-| **Mechanical** | Student | Student MECH 4 | `1004` | `student.mech4@college.edu` | `password123` | `Mech-B` |
-| **Mechanical** | Faculty | Prof. MECH Faculty 1 | `FAC1001` | `faculty.mech1@college.edu` | `password123` | N/A |
-| **Mechanical** | Faculty (Lab) | Lab Instructor MECH 1 | `LAB1001` | `lab.mech1@college.edu` | `password123` | N/A (Lab Staff) |
-| **Mechanical** | HOD | Dr. MECH HOD | `HOD1001` | `hod.mech@college.edu` | `password123` | N/A |
-| **Computer** | Student | Student COMP 1 | `2001` | `student.comp1@college.edu` | `password123` | Single Division |
-| **Computer** | Faculty | Prof. COMP Faculty 1 | `FAC2001` | `faculty.comp1@college.edu` | `password123` | N/A |
-| **Computer** | HOD | Dr. COMP HOD | `HOD2001` | `hod.comp@college.edu` | `password123` | N/A |
-| **Automobile** | Student | Student AUTO 1 | `3001` | `student.auto1@college.edu` | `password123` | Single Division |
-| **Automobile** | Faculty | Prof. AUTO Faculty 1 | `FAC3001` | `faculty.auto1@college.edu` | `password123` | N/A |
-| **EEE** | Student | Student EEE 1 | `4001` | `student.eee1@college.edu` | `password123` | Single Division |
-| **Civil** | Student | Student CIVIL 1 | `5001` | `student.civil1@college.edu` | `password123` | Single Division |
-| **Fire Tech** | Student | Student FTS 1 | `6001` | `student.fts1@college.edu` | `password123` | Single Division |
+  **Security & Privacy Notice**: Plaintext passwords, authentication secrets, and personal contact numbers are strictly excluded from public repository documentation. Password values match your local `SEED_DEFAULT_PASSWORD` environment configuration.
 
 > **Note**: The seed script is completely **idempotent**. Running `npm run seed` multiple times safely updates existing records without triggering duplicate key errors.
 

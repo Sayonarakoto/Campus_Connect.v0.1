@@ -16,15 +16,27 @@ function RoleAuth() {
 
   const [loading, setLoading] = useState(false);
 
+  const normalizedRole = role ? role.toLowerCase() : "";
+  const isSecurity = normalizedRole === "security";
+
   const handleInputChange = (e) => {
+    let val = e.target.value;
+    if (isSecurity && e.target.name === "password") {
+      val = val.replace(/\D/g, "").slice(0, 6);
+    }
     setCredentials({
       ...credentials,
-      [e.target.name]: e.target.value,
+      [e.target.name]: val,
     });
   };
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
+
+    if (isSecurity && (!credentials.password || !/^\d{6}$/.test(credentials.password.trim()))) {
+      alert("Please enter your 6-digit security passkey.");
+      return;
+    }
 
     setLoading(true);
 
@@ -37,9 +49,9 @@ function RoleAuth() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: credentials.email,
+            email: isSecurity ? undefined : credentials.email,
             password: credentials.password,
-            role: role.toLowerCase(),
+            role: normalizedRole,
           }),
         }
       );
@@ -111,8 +123,9 @@ console.log(
           <h2>Authentication Gateway</h2>
 
           <p>
-            Provide active institutional access credentials
-            to verify authorization routing layers.
+            {isSecurity
+              ? "Enter your assigned 6-digit security passkey to access the security terminal."
+              : "Provide active institutional access credentials to verify authorization routing layers."}
           </p>
         </header>
 
@@ -122,41 +135,46 @@ console.log(
             onSubmit={handleLoginSubmit}
             className="auth-institutional-form"
           >
+            {!isSecurity && (
+              <div className="auth-form-group">
+                <label>
+                  {normalizedRole === "student"
+                    ? "Admission Number or Email"
+                    : (normalizedRole === "faculty" || normalizedRole === "hod")
+                    ? "Faculty ID or Email"
+                    : "Institutional Email Address"}
+                </label>
+
+                <input
+                  type={["student", "faculty", "hod"].includes(normalizedRole) ? "text" : "email"}
+                  name="email"
+                  value={credentials.email}
+                  required={!isSecurity}
+                  onChange={handleInputChange}
+                  placeholder={
+                    normalizedRole === "student"
+                      ? "Enter 4-digit Admission No or Email"
+                      : (normalizedRole === "faculty" || normalizedRole === "hod")
+                      ? "Enter Faculty ID or Email"
+                      : "username@college.edu"
+                  }
+                />
+              </div>
+            )}
+
             <div className="auth-form-group">
               <label>
-                {role?.toLowerCase() === "student"
-                  ? "Admission Number or Email"
-                  : (role?.toLowerCase() === "faculty" || role?.toLowerCase() === "hod")
-                  ? "Faculty ID or Email"
-                  : "Institutional Email Address"}
+                {isSecurity ? "Security Passkey" : "Gateway Password"}
               </label>
-
-              <input
-                type={["student", "faculty", "hod"].includes(role?.toLowerCase()) ? "text" : "email"}
-                name="email"
-                value={credentials.email}
-                required
-                onChange={handleInputChange}
-                placeholder={
-                  role?.toLowerCase() === "student"
-                    ? "Enter 4-digit Admission No or Email"
-                    : (role?.toLowerCase() === "faculty" || role?.toLowerCase() === "hod")
-                    ? "Enter Faculty ID or Email"
-                    : "username@college.edu"
-                }
-              />
-            </div>
-
-            <div className="auth-form-group">
-              <label>Gateway Password</label>
 
               <input
                 type="password"
                 name="password"
                 value={credentials.password}
                 required
+                maxLength={isSecurity ? 6 : undefined}
                 onChange={handleInputChange}
-                placeholder="••••••••"
+                placeholder={isSecurity ? "Enter 6-digit passkey" : "••••••••"}
               />
             </div>
 
@@ -167,6 +185,8 @@ console.log(
             >
               {loading
                 ? "Authenticating..."
+                : isSecurity
+                ? "Verify Passkey & Access Dashboard"
                 : "Verify Credentials & Access Dashboard"}
             </button>
           </form>

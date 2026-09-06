@@ -25,27 +25,54 @@ exports.register = async (req, res) => {
       fullName,
       department,
       email,
+      phoneNumber,
       password,
       isLabStaff,
       ...customData
     } = req.body;
 
     // ==========================================
-    // VALIDATE PASSWORD & EMAIL
+    // VALIDATE PASSWORD
     // ==========================================
-    if (!password || password.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: "Password must be at least 6 characters long."
-      });
+    if (role === "security") {
+      if (!password || !/^\d{6}$/.test(password.toString().trim())) {
+        return res.status(400).json({
+          success: false,
+          message: "Security passkey must be exactly 6 numeric digits."
+        });
+      }
+    } else {
+      if (!password || password.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: "Password must be at least 6 characters long."
+        });
+      }
     }
 
+    // ==========================================
+    // VALIDATE EMAIL
+    // ==========================================
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !emailRegex.test(email.trim())) {
       return res.status(400).json({
         success: false,
         message: "Please enter a valid email address."
       });
+    }
+
+    // ==========================================
+    // VALIDATE PHONE NUMBER (ALL ROLES EXCEPT ADMIN)
+    // ==========================================
+    const userPhone = (phoneNumber || customData.phoneNumber)?.toString().trim() || null;
+    if (role !== "admin") {
+      const phoneRegex = /^[6-9]\d{9}$/;
+      if (!userPhone || !phoneRegex.test(userPhone)) {
+        return res.status(400).json({
+          success: false,
+          message: "Please enter a valid 10-digit mobile number (starting with 6, 7, 8, or 9)."
+        });
+      }
     }
 
     // ==========================================
@@ -193,6 +220,19 @@ exports.register = async (req, res) => {
           message: `An account with Faculty ID '${empId}' already exists for role '${role}'.`
         });
       }
+    } else if (role === "security") {
+      studentSection = null;
+      // Unique passkey check for security staff
+      const securityUsers = await User.find({ role: "security" });
+      for (const secUser of securityUsers) {
+        const isMatch = await bcrypt.compare(password.toString().trim(), secUser.password);
+        if (isMatch) {
+          return res.status(400).json({
+            success: false,
+            message: "This 6-digit passkey is already in use by another security staff member. Please choose a different passkey."
+          });
+        }
+      }
     } else {
       studentSection = null;
     }
@@ -206,12 +246,14 @@ exports.register = async (req, res) => {
       department: department || '',
       section: studentSection,
       email: email.toLowerCase().trim(),
+      phoneNumber: userPhone,
       password: hashedPassword,
       profilePhoto: profilePhotoData, // null or GridFS object
       isLabStaff: isLabStaffBool,
       customData: {
         ...customData,
         ...(customData.employeeId ? { employeeId: customData.employeeId.toString().trim() } : {}),
+        ...(userPhone ? { phoneNumber: userPhone } : {}),
         admissionNo: studentAdmissionNo,
         regNo: studentRegNo
       }
@@ -290,95 +332,136 @@ exports.login = async (req, res) => {
     const { email, password, role } = req.body;
     const identifier = (email || req.body.admissionNo || "")?.toString().trim();
 
-    if (!identifier || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter your credentials and password."
-      });
-    }
-
     // ==========================================
     // FIND USER
     // ==========================================
     let user = null;
 
-    if (role === "student") {
-      // Support student login by 4-digit admissionNo OR email
-      if (identifier.includes("@")) {
-        user = await User.findOne({ email: identifier.toLowerCase(), role: "student" });
-      } else {
-        const student = await Student.findOne({ admissionNo: identifier });
-        if (student && student.user) {
-          user = await User.findOne({ _id: student.user, role: "student" });
+    if (role === "security") {
+      const passkey = (password || req.body.passkey || "")?.toString().trim();
+      if (!passkey) {
+        return res.status(400).json({
+          success: false,
+          message: "Please enter your 6-digit security passkey."
+        });
+      }
+      if (!/^\d{6}$/.test(passkey)) {
+        return res.status(400).json({
+          success: false,
+          message: "Security passkey must be exactly 6 numeric digits."
+        });
+      }
+
+      const securityUsers = await User.find({ role: "security" });
+      if (!securityUsers || securityUsers.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No security accounts found. Please register first."
+        });
+      }
+
+      for (const secUser of securityUsers) {
+        const isMatch = await bcrypt.compare(passkey, secUser.password);
+        if (isMatch) {
+          user = secUser;
+          break;
         }
       }
 
       if (!user) {
-        // Fallback: check both email and admissionNo
-        user = await User.findOne({ email: identifier.toLowerCase(), role: "student" });
-        if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid security passkey."
+        });
+      }
+    } else {
+      if (!identifier || !password) {
+        return res.status(400).json({
+          success: false,
+          message: "Please enter your credentials and password."
+        });
+      }
+
+      if (role === "student") {
+        // Support student login by 4-digit admissionNo OR email
+        if (identifier.includes("@")) {
+          user = await User.findOne({ email: identifier.toLowerCase(), role: "student" });
+        } else {
           const student = await Student.findOne({ admissionNo: identifier });
           if (student && student.user) {
             user = await User.findOne({ _id: student.user, role: "student" });
           }
         }
-      }
 
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: "No student account found with this Admission Number or Email. Please check or register first."
-        });
-      }
-    } else if (role === "faculty" || role === "hod") {
-      // Support faculty and HOD login by Faculty ID (employeeId) OR email
-      if (identifier.includes("@")) {
-        user = await User.findOne({ email: identifier.toLowerCase(), role });
+        if (!user) {
+          // Fallback: check both email and admissionNo
+          user = await User.findOne({ email: identifier.toLowerCase(), role: "student" });
+          if (!user) {
+            const student = await Student.findOne({ admissionNo: identifier });
+            if (student && student.user) {
+              user = await User.findOne({ _id: student.user, role: "student" });
+            }
+          }
+        }
+
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: "No student account found with this Admission Number or Email. Please check or register first."
+          });
+        }
+      } else if (role === "faculty" || role === "hod") {
+        // Support faculty and HOD login by Faculty ID (employeeId) OR email
+        if (identifier.includes("@")) {
+          user = await User.findOne({ email: identifier.toLowerCase(), role });
+        } else {
+          const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          user = await User.findOne({
+            role,
+            "customData.employeeId": { $regex: new RegExp(`^${escapedId}$`, "i") }
+          });
+        }
+
+        if (!user) {
+          // Fallback check: check both email and customData.employeeId
+          const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          user = await User.findOne({
+            role,
+            $or: [
+              { email: identifier.toLowerCase() },
+              { "customData.employeeId": { $regex: new RegExp(`^${escapedId}$`, "i") } }
+            ]
+          });
+        }
+
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: `No ${role === "hod" ? "HOD" : "Faculty"} account found with this Faculty ID or Email. Please check or register first.`
+          });
+        }
       } else {
-        const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        user = await User.findOne({
-          role,
-          "customData.employeeId": { $regex: new RegExp(`^${escapedId}$`, "i") }
-        });
-      }
-
-      if (!user) {
-        // Fallback check: check both email and customData.employeeId
-        const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        user = await User.findOne({
-          role,
-          $or: [
-            { email: identifier.toLowerCase() },
-            { "customData.employeeId": { $regex: new RegExp(`^${escapedId}$`, "i") } }
-          ]
-        });
-      }
-
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: `No ${role === "hod" ? "HOD" : "Faculty"} account found with this Faculty ID or Email. Please check or register first.`
-        });
-      }
-    } else {
-      user = await User.findOne({ email: identifier.toLowerCase(), role });
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: "No account found. Please register first."
-        });
+        user = await User.findOne({ email: identifier.toLowerCase(), role });
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: "No account found. Please register first."
+          });
+        }
       }
     }
 
     // ==========================================
     // CHECK PASSWORD
     // ==========================================
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    if (!passwordMatch) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid password"
-      });
+    if (role !== "security") {
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      if (!passwordMatch) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid password"
+        });
+      }
     }
 
     // ==========================================
@@ -416,13 +499,15 @@ exports.login = async (req, res) => {
         fullName: user.fullName,
         department: user.department,
         email: user.email,
+        phoneNumber: user.phoneNumber,
         role: user.role,
         profilePhoto: user.profilePhoto,
         profilePhotoUrl: getProfilePhotoUrl(user.profilePhoto),
         isLabStaff: user.isLabStaff,
         isTempHOD: user.isTempHOD,
         tempHODDepartment: user.tempHODDepartment,
-        tempHODUntil: user.tempHODUntil
+        tempHODUntil: user.tempHODUntil,
+        customData: user.customData || {}
       }
     });
   } catch (error) {

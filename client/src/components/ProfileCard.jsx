@@ -64,6 +64,14 @@ export default function ProfileCard({ user }) {
 
         )}
 
+        {(user.phoneNumber || user.customData?.phoneNumber) && (
+
+          <p>
+            Phone : {user.phoneNumber || user.customData.phoneNumber}
+          </p>
+
+        )}
+
       </div>
 
     </div>

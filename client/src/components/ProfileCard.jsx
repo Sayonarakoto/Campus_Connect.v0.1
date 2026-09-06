@@ -51,7 +51,7 @@ export default function ProfileCard({ user }) {
         {user.customData?.employeeId && (
 
           <p>
-            Employee ID : {user.customData.employeeId}
+            Faculty ID : {user.customData.employeeId}
           </p>
 
         )}

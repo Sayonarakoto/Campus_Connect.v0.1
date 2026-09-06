@@ -31,13 +31,31 @@ exports.register = async (req, res) => {
     } = req.body;
 
     // ==========================================
+    // VALIDATE PASSWORD & EMAIL
+    // ==========================================
+    if (!password || password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long."
+      });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email.trim())) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email address."
+      });
+    }
+
+    // ==========================================
     // CHECK IF ACCOUNT EXISTS
     // ==========================================
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "Account already exists"
+        message: "Account already exists with this email address"
       });
     }
 
@@ -103,12 +121,76 @@ exports.register = async (req, res) => {
     // VALIDATE & PROCESS SECTION
     // ==========================================
     let studentSection = null;
-    if (department === "Mechanical Engineering") {
-      studentSection = customData?.section ? customData.section.trim() : null;
-      if (role === "student" && (!studentSection || !["Mech-A", "Mech-B"].includes(studentSection))) {
+    let studentAdmissionNo = null;
+    let studentRegNo = null;
+
+    if (role === "student") {
+      // Admission No validation (max 4 digits)
+      studentAdmissionNo = (customData.admissionNo || customData.rollNumber)?.toString().trim();
+      studentRegNo = customData.regNo ? customData.regNo.toString().trim() : null;
+
+      if (!studentAdmissionNo) {
         return res.status(400).json({
           success: false,
-          message: "Section is mandatory for Mechanical Engineering and must be 'Mech-A' or 'Mech-B'."
+          message: "Admission Number is required."
+        });
+      }
+
+      if (!/^\d{1,4}$/.test(studentAdmissionNo)) {
+        return res.status(400).json({
+          success: false,
+          message: "Admission Number must be a number up to 4 digits (e.g. 1001)."
+        });
+      }
+
+      // Register No validation (max 10 digits)
+      if (!studentRegNo) {
+        return res.status(400).json({
+          success: false,
+          message: "Register Number is required."
+        });
+      }
+
+      if (!/^\d{1,10}$/.test(studentRegNo)) {
+        return res.status(400).json({
+          success: false,
+          message: "Register Number must be a number up to 10 digits (e.g. 2101234567)."
+        });
+      }
+
+      // Check if student with admissionNo already exists
+      const existingStudent = await Student.findOne({ admissionNo: studentAdmissionNo });
+      if (existingStudent) {
+        return res.status(400).json({
+          success: false,
+          message: `A student with Admission Number '${studentAdmissionNo}' already exists.`
+        });
+      }
+
+      // Mechanical Engineering section validation
+      if (department === "Mechanical Engineering") {
+        studentSection = customData?.section ? customData.section.trim() : null;
+        if (!studentSection || !["Mech-A", "Mech-B"].includes(studentSection)) {
+          return res.status(400).json({
+            success: false,
+            message: "Section is mandatory for Mechanical Engineering and must be 'Mech-A' or 'Mech-B'."
+          });
+        }
+      } else {
+        studentSection = null;
+      }
+    } else if (["faculty", "hod"].includes(role) && customData.employeeId) {
+      studentSection = null;
+      const empId = customData.employeeId.toString().trim();
+      const escapedEmpId = empId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const existingStaff = await User.findOne({
+        role,
+        "customData.employeeId": { $regex: new RegExp(`^${escapedEmpId}$`, "i") }
+      });
+      if (existingStaff) {
+        return res.status(400).json({
+          success: false,
+          message: `An account with Faculty ID '${empId}' already exists for role '${role}'.`
         });
       }
     } else {
@@ -123,11 +205,16 @@ exports.register = async (req, res) => {
       fullName,
       department: department || '',
       section: studentSection,
-      email,
+      email: email.toLowerCase().trim(),
       password: hashedPassword,
       profilePhoto: profilePhotoData, // null or GridFS object
       isLabStaff: isLabStaffBool,
-      customData: customData
+      customData: {
+        ...customData,
+        ...(customData.employeeId ? { employeeId: customData.employeeId.toString().trim() } : {}),
+        admissionNo: studentAdmissionNo,
+        regNo: studentRegNo
+      }
     };
 
     console.log('👤 Creating user with profilePhoto:', userData.profilePhoto ? 'Has photo' : 'No photo');
@@ -142,7 +229,7 @@ exports.register = async (req, res) => {
       let parentUser = null;
       if (customData.parentEmail) {
         parentUser = await User.findOne({
-          email: customData.parentEmail,
+          email: customData.parentEmail.toLowerCase().trim(),
           role: "parent"
         });
       }
@@ -153,8 +240,9 @@ exports.register = async (req, res) => {
         department: department || '',
         semester: customData.semester ? Number(customData.semester) : 1,
         section: studentSection,
-        admissionNo: customData.rollNumber,
-        batch: customData.batchYear,
+        admissionNo: studentAdmissionNo,
+        regNo: studentRegNo,
+        batch: customData.batchYear || '',
         parentEmail: customData.parentEmail || '',
         profilePhoto: profilePhotoData,
         parent: parentUser ? parentUser._id : undefined
@@ -200,16 +288,86 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
+    const identifier = (email || req.body.admissionNo || "")?.toString().trim();
+
+    if (!identifier || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter your credentials and password."
+      });
+    }
 
     // ==========================================
     // FIND USER
     // ==========================================
-    const user = await User.findOne({ email, role });
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "No account found. Please register first."
-      });
+    let user = null;
+
+    if (role === "student") {
+      // Support student login by 4-digit admissionNo OR email
+      if (identifier.includes("@")) {
+        user = await User.findOne({ email: identifier.toLowerCase(), role: "student" });
+      } else {
+        const student = await Student.findOne({ admissionNo: identifier });
+        if (student && student.user) {
+          user = await User.findOne({ _id: student.user, role: "student" });
+        }
+      }
+
+      if (!user) {
+        // Fallback: check both email and admissionNo
+        user = await User.findOne({ email: identifier.toLowerCase(), role: "student" });
+        if (!user) {
+          const student = await Student.findOne({ admissionNo: identifier });
+          if (student && student.user) {
+            user = await User.findOne({ _id: student.user, role: "student" });
+          }
+        }
+      }
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "No student account found with this Admission Number or Email. Please check or register first."
+        });
+      }
+    } else if (role === "faculty" || role === "hod") {
+      // Support faculty and HOD login by Faculty ID (employeeId) OR email
+      if (identifier.includes("@")) {
+        user = await User.findOne({ email: identifier.toLowerCase(), role });
+      } else {
+        const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        user = await User.findOne({
+          role,
+          "customData.employeeId": { $regex: new RegExp(`^${escapedId}$`, "i") }
+        });
+      }
+
+      if (!user) {
+        // Fallback check: check both email and customData.employeeId
+        const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        user = await User.findOne({
+          role,
+          $or: [
+            { email: identifier.toLowerCase() },
+            { "customData.employeeId": { $regex: new RegExp(`^${escapedId}$`, "i") } }
+          ]
+        });
+      }
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: `No ${role === "hod" ? "HOD" : "Faculty"} account found with this Faculty ID or Email. Please check or register first.`
+        });
+      }
+    } else {
+      user = await User.findOne({ email: identifier.toLowerCase(), role });
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "No account found. Please register first."
+        });
+      }
     }
 
     // ==========================================

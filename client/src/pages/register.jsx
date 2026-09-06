@@ -38,11 +38,20 @@ const roleRegistrationSpecs = {
     instructions: "Complete all academic information before creating your account.",
     customFields: [
       {
-        name: "rollNumber",
-        label: "Roll Number",
+        name: "admissionNo",
+        label: "Admission No",
         type: "text",
-        placeholder: "STU2026001",
-        required: true
+        placeholder: "e.g. 1001 (Max 4 digits)",
+        required: true,
+        maxLength: 4
+      },
+      {
+        name: "regNo",
+        label: "Register No",
+        type: "text",
+        placeholder: "e.g. 2101234567 (Max 10 digits)",
+        required: true,
+        maxLength: 10
       },
       {
         name: "department",
@@ -116,7 +125,7 @@ const roleRegistrationSpecs = {
     customFields: [
       {
         name: "employeeId",
-        label: "Employee ID",
+        label: "Faculty ID",
         type: "text",
         placeholder: "FAC1001",
         required: true
@@ -147,7 +156,7 @@ const roleRegistrationSpecs = {
     customFields: [
       {
         name: "employeeId",
-        label: "Employee ID",
+        label: "Faculty ID",
         type: "text",
         placeholder: "HOD1001",
         required: true
@@ -179,7 +188,7 @@ const roleRegistrationSpecs = {
     customFields: [
       {
         name: "employeeId",
-        label: "Employee ID",
+        label: "Faculty ID",
         type: "text",
         placeholder: "PRI1001",
         required: true
@@ -332,6 +341,8 @@ function Register() {
     semester: "",
     batchYear: "",
     section: "",
+    admissionNo: "",
+    regNo: "",
     rollNumber: "",
     parentEmail: "",
     studentRollNumber: "",
@@ -517,9 +528,17 @@ function Register() {
   ========================================== */
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
+    let finalValue = type === "checkbox" ? checked : value;
+
+    if (name === "admissionNo") {
+      finalValue = finalValue.replace(/\D/g, "").slice(0, 4);
+    } else if (name === "regNo") {
+      finalValue = finalValue.replace(/\D/g, "").slice(0, 10);
+    }
+
     setFormData(previous => ({
       ...previous,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: finalValue,
       ...(name === "department" && value !== "Mechanical Engineering" ? { section: "" } : {})
     }));
   };
@@ -532,11 +551,44 @@ function Register() {
     setLoading(true);
 
     try {
-      if (normalizedRole === "student" && formData.department === "Mechanical Engineering") {
-        if (!formData.section || !["Mech-A", "Mech-B"].includes(formData.section)) {
-          alert("Section is mandatory for Mechanical Engineering. Please select Mech-A or Mech-B.");
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!formData.email || !emailRegex.test(formData.email.trim())) {
+        alert("Please enter a valid email address.");
+        setLoading(false);
+        return;
+      }
+
+      if (!formData.password || formData.password.length < 6) {
+        alert("Password must be at least 6 characters long.");
+        setLoading(false);
+        return;
+      }
+
+      if (normalizedRole === "student") {
+        if (!formData.admissionNo || !/^\d{1,4}$/.test(formData.admissionNo)) {
+          alert("Admission Number is required and must be a number with up to 4 digits (e.g. 1001).");
           setLoading(false);
           return;
+        }
+
+        if (!formData.regNo || !/^\d{1,10}$/.test(formData.regNo)) {
+          alert("Register Number is required and must be a number with up to 10 digits (e.g. 2101234567).");
+          setLoading(false);
+          return;
+        }
+
+        if (formData.parentEmail && !emailRegex.test(formData.parentEmail.trim())) {
+          alert("Please enter a valid parent email address.");
+          setLoading(false);
+          return;
+        }
+
+        if (formData.department === "Mechanical Engineering") {
+          if (!formData.section || !["Mech-A", "Mech-B"].includes(formData.section)) {
+            alert("Section is mandatory for Mechanical Engineering. Please select Mech-A or Mech-B.");
+            setLoading(false);
+            return;
+          }
         }
       }
 
@@ -662,6 +714,7 @@ function Register() {
         value={formData[field.name]}
         placeholder={field.placeholder}
         required={field.required}
+        maxLength={field.maxLength}
         style={styles.input}
         onChange={handleInputChange}
       />

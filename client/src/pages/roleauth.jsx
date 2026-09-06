@@ -123,15 +123,27 @@ console.log(
             className="auth-institutional-form"
           >
             <div className="auth-form-group">
-              <label>Institutional Email Address</label>
+              <label>
+                {role?.toLowerCase() === "student"
+                  ? "Admission Number or Email"
+                  : (role?.toLowerCase() === "faculty" || role?.toLowerCase() === "hod")
+                  ? "Faculty ID or Email"
+                  : "Institutional Email Address"}
+              </label>
 
               <input
-                type="email"
+                type={["student", "faculty", "hod"].includes(role?.toLowerCase()) ? "text" : "email"}
                 name="email"
                 value={credentials.email}
                 required
                 onChange={handleInputChange}
-                placeholder="username@abcschool.edu"
+                placeholder={
+                  role?.toLowerCase() === "student"
+                    ? "Enter 4-digit Admission No or Email"
+                    : (role?.toLowerCase() === "faculty" || role?.toLowerCase() === "hod")
+                    ? "Enter Faculty ID or Email"
+                    : "username@college.edu"
+                }
               />
             </div>
 

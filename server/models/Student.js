@@ -17,7 +17,14 @@ const StudentSchema = new mongoose.Schema(
     admissionNo: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
+      trim: true
+    },
+
+    regNo: {
+      type: String,
+      default: null,
+      trim: true
     },
 
     department: {

@@ -117,6 +117,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/:role/register" element={<Register />} />
+          <Route path="/:role/auth" element={<RoleAuth />} />
 
           <Route
             path="/hr/accounts/register"
@@ -135,15 +136,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <WorkspaceDashboard />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route 
-            path="/:role/auth" 
-            element={
-              <ProtectedRoute>
-                <RoleAuth />
               </ProtectedRoute>
             }
           />

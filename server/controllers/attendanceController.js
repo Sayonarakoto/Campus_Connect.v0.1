@@ -90,11 +90,19 @@ exports.getStudents = async (req, res) => {
 
   try {
 
-    const students = await Student.find({
-
+    const filter = {
       department: req.user.department
+    };
 
-    })
+    if (req.query.section) {
+      filter.section = req.query.section;
+    }
+
+    if (req.query.semester) {
+      filter.semester = Number(req.query.semester);
+    }
+
+    const students = await Student.find(filter)
     .select(
       "fullName admissionNo department semester section attendancePercentage academicYear"
     )

@@ -42,7 +42,18 @@ const StudentSchema = new mongoose.Schema(
 
     section: {
       type: String,
-      default: ""
+      default: null,
+      trim: true,
+      validate: {
+        validator: function (value) {
+          if (this.department === "Mechanical Engineering") {
+            return value === "Mech-A" || value === "Mech-B";
+          }
+          return value === null || value === undefined || value === "";
+        },
+        message: props =>
+          `Section is mandatory for Mechanical Engineering and must be 'Mech-A' or 'Mech-B'. Received: '${props.value}'`
+      }
     },
 
 // =========================

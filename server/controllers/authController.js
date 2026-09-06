@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const Student = require("../models/Student");
 const { uploadToGridFS, deleteFromGridFS, getBucket } = require("../config/gridfs");
 const mongoose = require("mongoose");
+const { requiresSection, getAllowedSections } = require("../constants/academicConfig");
 
 // ==========================================
 // HELPER: Get profile photo URL
@@ -99,12 +100,29 @@ exports.register = async (req, res) => {
     const isLabStaffBool = isLabStaff === true || isLabStaff === "true";
 
     // ==========================================
+    // VALIDATE & PROCESS SECTION
+    // ==========================================
+    let studentSection = null;
+    if (department === "Mechanical Engineering") {
+      studentSection = customData?.section ? customData.section.trim() : null;
+      if (role === "student" && (!studentSection || !["Mech-A", "Mech-B"].includes(studentSection))) {
+        return res.status(400).json({
+          success: false,
+          message: "Section is mandatory for Mechanical Engineering and must be 'Mech-A' or 'Mech-B'."
+        });
+      }
+    } else {
+      studentSection = null;
+    }
+
+    // ==========================================
     // CREATE USER
     // ==========================================
     const userData = {
       role,
       fullName,
       department: department || '',
+      section: studentSection,
       email,
       password: hashedPassword,
       profilePhoto: profilePhotoData, // null or GridFS object
@@ -133,6 +151,8 @@ exports.register = async (req, res) => {
         user: user._id,
         fullName,
         department: department || '',
+        semester: customData.semester ? Number(customData.semester) : 1,
+        section: studentSection,
         admissionNo: customData.rollNumber,
         batch: customData.batchYear,
         parentEmail: customData.parentEmail || '',

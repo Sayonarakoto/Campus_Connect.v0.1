@@ -57,6 +57,12 @@ const UserSchema = new mongoose.Schema(
       default: ""
     },
 
+    section: {
+      type: String,
+      default: null,
+      trim: true
+    },
+
     email: {
       type: String,
       required: true,

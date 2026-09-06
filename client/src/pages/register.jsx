@@ -68,8 +68,7 @@ const roleRegistrationSpecs = {
       {
         name: "section",
         label: "Section",
-        type: "text",
-        placeholder: "A",
+        type: "select",
         required: false
       },
       {
@@ -520,7 +519,8 @@ function Register() {
     const { name, value, type, checked } = event.target;
     setFormData(previous => ({
       ...previous,
-      [name]: type === "checkbox" ? checked : value
+      [name]: type === "checkbox" ? checked : value,
+      ...(name === "department" && value !== "Mechanical Engineering" ? { section: "" } : {})
     }));
   };
 
@@ -532,6 +532,14 @@ function Register() {
     setLoading(true);
 
     try {
+      if (normalizedRole === "student" && formData.department === "Mechanical Engineering") {
+        if (!formData.section || !["Mech-A", "Mech-B"].includes(formData.section)) {
+          alert("Section is mandatory for Mechanical Engineering. Please select Mech-A or Mech-B.");
+          setLoading(false);
+          return;
+        }
+      }
+
       const form = new FormData();
       
       // Role
@@ -584,6 +592,35 @@ function Register() {
       FIELD RENDERER
   ========================================== */
   const renderField = (field) => {
+    if (field.name === "section") {
+      const isMech = formData.department === "Mechanical Engineering";
+      if (!isMech) {
+        return (
+          <input
+            type="text"
+            name="section"
+            value=""
+            disabled
+            placeholder="Not applicable (Single division department)"
+            style={{ ...styles.input, backgroundColor: "#f0f2f5", color: "#8c9ba5", cursor: "not-allowed" }}
+          />
+        );
+      }
+      return (
+        <select
+          name="section"
+          value={formData.section || ""}
+          required={true}
+          style={styles.input}
+          onChange={handleInputChange}
+        >
+          <option value="">Select Section</option>
+          <option value="Mech-A">Mech-A</option>
+          <option value="Mech-B">Mech-B</option>
+        </select>
+      );
+    }
+
     if (field.type === "checkbox") {
       return (
         <input
@@ -809,38 +846,23 @@ function Register() {
             {/* ===========================
                 ROLE SPECIFIC FIELDS
             =========================== */}
-            {config.customFields.map(field => (
-              <div key={field.name} style={styles.formGroup}>
-                <label style={styles.label}>
-                  {field.label}
-                  {field.required && <span style={{ color: "red" }}> *</span>}
-                </label>
-                {renderField(field)}
-              </div>
-            ))}
+            {config.customFields.map(field => {
+              const isSection = field.name === "section";
+              const isMech = formData.department === "Mechanical Engineering";
+              const isRequired = isSection ? isMech : field.required;
 
-            {/* ===========================
-                COMPLIANCE
-            =========================== */}
-            <div style={{ margin: "25px 0", display: "flex", alignItems: "flex-start", gap: "10px" }}>
-              <input
-                id="compliance"
-                type="checkbox"
-                required
-                style={{ marginTop: "5px", cursor: "pointer" }}
-              />
-              <label
-                htmlFor="compliance"
-                style={{
-                  fontSize: "0.85rem",
-                  color: "var(--text-light)",
-                  cursor: "pointer"
-                }}
-              >
-                I certify that the information provided is correct and understand that false
-                information may result in rejection of this registration.
-              </label>
-            </div>
+              return (
+                <div key={field.name} style={styles.formGroup}>
+                  <label style={styles.label}>
+                    {field.label}
+                    {isRequired && <span style={{ color: "red" }}> *</span>}
+                  </label>
+                  {renderField(field)}
+                </div>
+              );
+            })}
+
+
 
             {/* ===========================
                 SUBMIT BUTTON

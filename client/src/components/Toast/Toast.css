@@ -88,6 +88,10 @@
   height: 16px;
 }
 
+.toast-icon-wrap i {
+  font-size: 15px;
+}
+
 /* Toast Content */
 .toast-content {
   flex: 1;
@@ -134,6 +138,10 @@
 .toast-close-btn svg {
   width: 14px;
   height: 14px;
+}
+
+.toast-close-btn i {
+  font-size: 13px;
 }
 
 /* Slide in animation */

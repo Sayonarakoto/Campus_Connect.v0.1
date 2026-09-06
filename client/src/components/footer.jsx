@@ -1,10 +1,24 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useToast } from "../context/ToastContext";
 import "./footer.css";
 
 function Footer() {
+  const location = useLocation();
+  const { showToast } = useToast();
+
+  // Public informational paths where the marketing footer is allowed to display
+  const publicPaths = ["/", "/about", "/contact"];
+  const isPublicPage = publicPaths.includes(location.pathname);
+
+  // Once a user is inside the dashboard or authentication flow, hide the footer completely
+  if (!isPublicPage) {
+    return null;
+  }
+
   const handleNewsletterSubmit = (e) => {
     e.preventDefault();
-    alert("Thank you for subscribing to St. Mary's Polytechnic College announcements.");
+    showToast("Thank you for subscribing to St. Mary's Polytechnic College announcements.", "success");
+    e.target.reset();
   };
 
   return (

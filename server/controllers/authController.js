@@ -735,7 +735,7 @@ exports.profile = async (req, res) => {
       profile = await Student.findOne({ user: user._id });
     }
 
-    res.json({
+    return res.json({
       success: true,
       user: {
         ...user.toObject(),
@@ -745,6 +745,75 @@ exports.profile = async (req, res) => {
     });
   } catch (error) {
     return sendErrorResponse(res, error, "Failed to retrieve user profile.");
+  }
+};
+
+// ==========================================
+// UPDATE SELF PROFILE
+// ==========================================
+exports.updateProfile = async (req, res) => {
+  try {
+    const { fullName, phoneNumber } = req.body;
+    const updates = {};
+
+    if (fullName !== undefined) {
+      const cleanName = fullName.trim();
+      if (!cleanName) {
+        return res.status(400).json({
+          success: false,
+          message: "Full name cannot be empty."
+        });
+      }
+      updates.fullName = cleanName;
+    }
+
+    if (phoneNumber !== undefined) {
+      const cleanPhone = phoneNumber.trim();
+      if (cleanPhone) {
+        const phoneRegex = /^[6-9]\d{9}$/;
+        if (!phoneRegex.test(cleanPhone)) {
+          return res.status(400).json({
+            success: false,
+            message: "Please enter a valid 10-digit mobile number (starting with 6, 7, 8, or 9)."
+          });
+        }
+        updates.phoneNumber = cleanPhone;
+      } else {
+        updates.phoneNumber = null;
+      }
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      });
+    }
+
+    // Sync student model if role is student
+    if (user.role === "student") {
+      const studentUpdates = {};
+      if (updates.fullName) studentUpdates.fullName = updates.fullName;
+      if (updates.phoneNumber) studentUpdates.studentPhone = updates.phoneNumber;
+      await Student.findOneAndUpdate({ user: user._id }, { $set: studentUpdates });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully.",
+      user: {
+        ...user.toObject(),
+        profilePhotoUrl: getProfilePhotoUrl(user.profilePhoto)
+      }
+    });
+  } catch (error) {
+    return sendErrorResponse(res, error, "Failed to update profile.");
   }
 };
 

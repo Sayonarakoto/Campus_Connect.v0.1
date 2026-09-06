@@ -12,6 +12,7 @@ const {
   sendParentLoginOTP,
   verifyParentLoginOTP,
   profile,
+  updateProfile,
   getLeaveBalance,
   getProfilePhoto,
   updateProfilePhoto,
@@ -67,6 +68,7 @@ router.use(authMiddleware);
 // =========================
 
 router.get("/profile", profile);
+router.put("/profile", updateProfile);
 
 // =========================
 // PROFILE PHOTO MANAGEMENT

@@ -6,13 +6,21 @@ new mongoose.Schema(
     leave: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "StudentLeave",
-      required: true
+      required: false,
+      default: null
     },
 
     student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
-      required: true
+      required: false,
+      default: null
+    },
+
+    targetUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null
     },
 
     action: {

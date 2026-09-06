@@ -237,12 +237,14 @@ exports.approveGatePass = async (req, res) => {
       });
     }
 
-    // Generate unique token
+    // Generate unique token & 3-digit verification OTP
     const qrToken = uuidv4();
+    const otpCode = Math.floor(100 + Math.random() * 900).toString();
 
     gatePass.status = "approved";
     gatePass.approverId = req.user.id;
     gatePass.qrToken = qrToken;
+    gatePass.otp = otpCode;
     gatePass.qrExpiry = new Date(Date.now() + 6 * 60 * 60 * 1000);
     
     // Track if approved by delegation (faculty approving HOD requests)
@@ -258,6 +260,7 @@ exports.approveGatePass = async (req, res) => {
       success: true,
       message: "Gate Pass Approved Successfully",
       qrToken,
+      otp: otpCode,
       qrImage,
       gatePass
     });
@@ -387,70 +390,231 @@ exports.getGatePassQR = async (req, res) => {
 
 
 // =============================
-// SECURITY - VERIFY QR
+// SECURITY - VERIFY QR / OTP / MANUAL ENTRY
 // =============================
 
 exports.verifyGatePass = async (req, res) => {
   try {
-    const { token } = req.body;
+    const { token, qr_token, studentId, studentIdString, student_id, otp, verification_otp } = req.body;
 
-    if (!token) {
+    const qrKey = token || qr_token;
+    const inputOtp = otp || verification_otp;
+    const inputStudent = studentId || studentIdString || student_id;
+
+    let gatePass = null;
+
+    if (qrKey) {
+      // 1. Search by QR token
+      gatePass = await GatePass.findOne({
+        qrToken: qrKey
+      })
+        .populate("studentId", "fullName email department customData")
+        .populate("approverId", "fullName email role")
+        .populate("selectedApproverId", "fullName email role");
+    } else if (inputStudent || inputOtp) {
+      // 2. Manual search: Find student if provided
+      let studentUserIds = [];
+      if (inputStudent && typeof inputStudent === "string") {
+        const queryStr = inputStudent.trim();
+        const matchedUsers = await User.find({
+          $or: [
+            { email: queryStr.toLowerCase() },
+            { fullName: { $regex: queryStr, $options: "i" } },
+            { "customData.admissionNo": queryStr },
+            { "customData.rollNumber": queryStr },
+            { "customData.regNo": queryStr }
+          ]
+        }).select("_id");
+        studentUserIds = matchedUsers.map((u) => u._id);
+        if (queryStr.match(/^[0-9a-fA-F]{24}$/)) {
+          studentUserIds.push(queryStr);
+        }
+      }
+
+      const passQuery = {
+        status: { $in: ["approved", "used"] }
+      };
+
+      if (studentUserIds.length > 0) {
+        passQuery.studentId = { $in: studentUserIds };
+      }
+
+      if (inputOtp) {
+        passQuery.otp = inputOtp.trim();
+      }
+
+      gatePass = await GatePass.findOne(passQuery)
+        .sort({ updatedAt: -1, createdAt: -1 })
+        .populate("studentId", "fullName email department customData")
+        .populate("approverId", "fullName email role")
+        .populate("selectedApproverId", "fullName email role");
+
+      // Fallback: If OTP wasn't stored on an older pass, check if pass matches student and is approved
+      if (!gatePass && studentUserIds.length > 0) {
+        gatePass = await GatePass.findOne({
+          studentId: { $in: studentUserIds },
+          status: "approved"
+        })
+          .sort({ updatedAt: -1, createdAt: -1 })
+          .populate("studentId", "fullName email department customData")
+          .populate("approverId", "fullName email role")
+          .populate("selectedApproverId", "fullName email role");
+      }
+    } else {
       return res.status(400).json({
         success: false,
-        message: "QR token is required"
+        is_valid: false,
+        display_status: "INVALID INPUT",
+        message: "QR code token or Student ID / OTP is required"
       });
     }
-
-    const gatePass = await GatePass.findOne({
-      qrToken: token
-    })
-    .populate("studentId", "fullName email department")
-    .populate("approverId", "fullName email role")
-    .populate("selectedApproverId", "fullName email role");
 
     if (!gatePass) {
       return res.status(404).json({
         success: false,
-        message: "Invalid QR Code"
+        is_valid: false,
+        display_status: "PASS NOT FOUND",
+        message: "No matching approved gate pass found for the provided details."
       });
     }
 
-    if (gatePass.status === "used") {
+    if (gatePass.status === "used" && gatePass.checkOutTime && gatePass.checkInTime) {
       return res.status(400).json({
         success: false,
-        message: "Pass Already Used"
+        is_valid: false,
+        display_status: "ALREADY USED",
+        message: "Pass has already been completed (Check-in & Check-out recorded)."
       });
     }
 
-    if (gatePass.qrExpiry < new Date()) {
+    if (gatePass.qrExpiry && gatePass.qrExpiry < new Date()) {
       gatePass.status = "expired";
       await gatePass.save();
 
       return res.status(400).json({
         success: false,
-        message: "Pass Expired"
+        is_valid: false,
+        display_status: "EXPIRED",
+        message: "This pass has expired."
       });
     }
 
+    const now = new Date();
     gatePass.status = "used";
-    gatePass.scannedAt = new Date();
+    gatePass.scannedAt = now;
     gatePass.scannedBy = req.user.id;
+
+    if (!gatePass.checkOutTime) {
+      gatePass.checkOutTime = now;
+    } else if (!gatePass.checkInTime) {
+      gatePass.checkInTime = now;
+    }
 
     await gatePass.save();
 
-    res.json({
+    const studentInfo = gatePass.studentId || {};
+    const passDetails = {
+      student_id: studentInfo.customData?.admissionNo || studentInfo.customData?.rollNumber || studentInfo.customData?.regNo || studentInfo._id || "N/A",
+      student_name: studentInfo.fullName || "Student",
+      pass_type: gatePass.passType === "special" ? "Special Pass" : "Gate Pass",
+      department: studentInfo.department || gatePass.department || "N/A",
+      date_valid_to: gatePass.qrExpiry || gatePass.returnTime,
+      approved_by: gatePass.approverId?.fullName || gatePass.selectedApproverId?.fullName || "Faculty/HOD",
+      purpose: gatePass.purpose || gatePass.reason || "N/A",
+      departure_time: gatePass.departureTime,
+      return_time: gatePass.returnTime,
+      check_out_time: gatePass.checkOutTime,
+      check_in_time: gatePass.checkInTime
+    };
+
+    return res.json({
       success: true,
-      studentName: gatePass.studentId.fullName,
-      email: gatePass.studentId.email,
-      department: gatePass.studentId.department,
-      approvedBy: gatePass.approverId ? gatePass.approverId.fullName : "N/A",
-      selectedApprover: gatePass.selectedApproverId ? gatePass.selectedApproverId.fullName : "N/A",
-      purpose: gatePass.purpose,
+      is_valid: true,
+      display_status: "ACCESS GRANTED",
+      message: `Pass verified successfully for ${passDetails.student_name}.`,
+      studentName: passDetails.student_name,
+      email: studentInfo.email || "N/A",
+      department: passDetails.department,
+      approvedBy: passDetails.approved_by,
+      purpose: passDetails.purpose,
       departureTime: gatePass.departureTime,
       returnTime: gatePass.returnTime,
-      status: "Verified & Used"
+      status: "Verified & Used",
+      pass_details: passDetails
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      is_valid: false,
+      display_status: "SERVER ERROR",
+      message: error.message
+    });
+  }
+};
+
+// =============================
+// SECURITY - GET LIVE CHECK-IN LOGS (9 Columns)
+// =============================
+
+exports.getSecurityLogs = async (req, res) => {
+  try {
+    const passes = await GatePass.find({
+      $or: [
+        { status: "used" },
+        { scannedAt: { $ne: null } },
+        { status: "approved" }
+      ]
+    })
+      .populate("studentId", "fullName email department customData")
+      .populate("approverId", "fullName email role")
+      .populate("selectedApproverId", "fullName email role")
+      .sort({ scannedAt: -1, updatedAt: -1, createdAt: -1 })
+      .limit(100);
+
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    const logs = passes.map((pass) => {
+      const depDate = pass.departureTime ? new Date(pass.departureTime) : new Date(pass.createdAt);
+      const retDate = pass.returnTime ? new Date(pass.returnTime) : null;
+      const scanDate = pass.scannedAt ? new Date(pass.scannedAt) : null;
+      const checkIn = pass.checkInTime ? new Date(pass.checkInTime) : null;
+      const checkOut = pass.checkOutTime ? new Date(pass.checkOutTime) : scanDate;
+
+      const dateStr = pass.date || depDate.toLocaleDateString();
+      const dayStr = pass.day || days[depDate.getDay()];
+
+      return {
+        _id: pass._id,
+        pass_id: pass._id,
+        studentName: pass.studentId?.fullName || "N/A",
+        studentId: pass.studentId?.customData?.admissionNo || pass.studentId?.customData?.rollNumber || pass.studentId?._id || "N/A",
+        passType: pass.passType === "special" ? "Special Pass" : "Gate Pass",
+        reason: pass.purpose || pass.reason || "Campus Exit",
+        department: pass.studentId?.department || pass.department || "N/A",
+        approver: pass.approverId?.fullName || pass.selectedApproverId?.fullName || "Faculty/HOD",
+        date: dateStr,
+        day: dayStr,
+        time: checkOut
+          ? checkOut.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+          : depDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        returnTime: retDate
+          ? retDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+          : "N/A",
+        checkInTime: checkIn
+          ? checkIn.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+          : "N/A",
+        checkOutTime: checkOut
+          ? checkOut.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+          : "N/A",
+        status: pass.status,
+        timestamp: pass.scannedAt || pass.updatedAt || pass.createdAt
+      };
     });
 
+    res.json({
+      success: true,
+      data: logs
+    });
   } catch (error) {
     res.status(500).json({
       success: false,

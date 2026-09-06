@@ -80,8 +80,9 @@ app.use("/upload", express.static(uploadDir));
 // Auth
 app.use("/api/auth", require("./routes/authRoutes"));
 
-// Gate Pass
+// Gate Pass & Security
 app.use("/api/gatepass", require("./routes/gatePassRoutes"));
+app.use("/api/security", require("./routes/gatePassRoutes"));
 
 // Staff Leave
 app.use("/api/staffleave", require("./routes/staffLeaveRoutes"));

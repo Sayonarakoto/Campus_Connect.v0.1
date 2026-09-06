@@ -19,10 +19,12 @@ const {
   deleteProfilePhoto,
   getFacultyList,
   getAllUsers,
-  getUserById
+  getUserById,
+  impersonate
 } = require("../controllers/authController");
 
 const authMiddleware = require("../middleware/authMiddleware");
+const roleMiddleware = require("../middleware/roleMiddleware");
 const upload = require("../middleware/upload");
 const {
   validateForgotPassword,
@@ -108,6 +110,9 @@ router.get("/users", getAllUsers);
 
 // Get user by ID (admin only)
 router.get("/users/:id", getUserById);
+
+// Admin Sudo / Impersonation (Context Switching)
+router.post("/impersonate", roleMiddleware("admin"), impersonate);
 
 // =========================
 // LEGACY FACULTY LIST (Backward compatibility)

@@ -1,0 +1,810 @@
+/* ==========================================================================
+   SECURITY DASHBOARD & VERIFICATION HUB STYLESHEET
+   Mobile-First Responsive Architecture - St. Mary's Polytechnic College
+   ========================================================================== */
+
+.security-dashboard-container {
+  min-height: 100vh;
+  padding: 16px;
+  background-color: var(--security-bg, #f8fafc);
+  transition: background-color 0.4s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  color: #0f172a;
+}
+
+@media (min-width: 768px) {
+  .security-dashboard-container {
+    padding: 24px 32px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   1. REAL-TIME STATUS HEADER BAR
+   -------------------------------------------------------------------------- */
+.security-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-radius: 12px;
+  color: #ffffff;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+  transition: background-color 0.35s ease;
+}
+
+.security-status-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin: 0;
+  text-align: center;
+  flex: 1;
+}
+
+@media (min-width: 768px) {
+  .security-status-title {
+    font-size: 1.55rem;
+    letter-spacing: 1px;
+  }
+}
+
+.security-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.security-time-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.security-logout-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.15s ease;
+}
+
+.security-logout-btn:hover {
+  background-color: #ef4444;
+  border-color: #ef4444;
+  transform: scale(1.05);
+}
+
+/* --------------------------------------------------------------------------
+   2. MAIN DASHBOARD CONTENT GRID
+   -------------------------------------------------------------------------- */
+.security-content-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.security-panel-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.06);
+}
+
+@media (min-width: 768px) {
+  .security-panel-card {
+    padding: 26px 30px;
+  }
+}
+
+.panel-card-title {
+  margin: 0 0 20px 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 12px;
+}
+
+.panel-card-title i {
+  color: #1e3a8a;
+}
+
+/* --------------------------------------------------------------------------
+   3. VERIFICATION HUB & PASS SELECTOR
+   -------------------------------------------------------------------------- */
+.pass-type-selector-box {
+  margin-bottom: 20px;
+}
+
+.selector-label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.pass-type-pills {
+  display: flex;
+  gap: 10px;
+}
+
+.pass-type-pill-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pass-type-pill-btn.active {
+  background-color: #1e3a8a;
+  color: #ffffff;
+  border: 1px solid #1e3a8a;
+  box-shadow: 0 2px 6px rgba(30, 58, 138, 0.25);
+}
+
+.pass-type-pill-btn.inactive {
+  background-color: #f8fafc;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.pass-type-pill-btn.inactive:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+/* QR Scanner Trigger Banner */
+.qr-scanner-trigger-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 10px;
+  background-color: #f8fafc;
+  margin-bottom: 22px;
+}
+
+@media (min-width: 600px) {
+  .qr-scanner-trigger-box {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.qr-trigger-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.qr-trigger-info i {
+  font-size: 1.6rem;
+  color: #1e3a8a;
+}
+
+.qr-trigger-text h4 {
+  margin: 0 0 3px 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.qr-trigger-text p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.btn-open-scanner {
+  background-color: #1e3a8a;
+  color: #ffffff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-open-scanner:hover {
+  background-color: #1e40af;
+  transform: translateY(-1px);
+}
+
+/* Section Divider */
+.divider-or-bar {
+  text-align: center;
+  position: relative;
+  margin: 24px 0 20px 0;
+}
+
+.divider-or-bar::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #e2e8f0;
+  z-index: 1;
+}
+
+.divider-or-text {
+  position: relative;
+  z-index: 2;
+  background-color: #ffffff;
+  padding: 0 16px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+/* Manual Input Entry */
+.manual-entry-section h4 {
+  margin: 0 0 14px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.manual-inputs-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 640px) {
+  .manual-inputs-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.manual-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.manual-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.manual-field input {
+  padding: 12px 14px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.manual-field input:focus {
+  border-color: #1e3a8a;
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
+}
+
+.manual-actions-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.btn-verify-submit {
+  flex: 1;
+  padding: 13px 20px;
+  background-color: #1e3a8a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.96rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-verify-submit:hover:not(:disabled) {
+  background-color: #1e40af;
+  transform: translateY(-1px);
+}
+
+.btn-verify-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-verify-reset {
+  padding: 13px 20px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-verify-reset:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+/* --------------------------------------------------------------------------
+   4. VERIFICATION RESULT BANNER & PASS DETAILS
+   -------------------------------------------------------------------------- */
+.result-alert-box {
+  margin-top: 22px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  animation: resultFadeIn 0.25s ease-out;
+}
+
+.result-alert-box.success {
+  background-color: #ecfdf5;
+  border: 1.5px solid #a7f3d0;
+  color: #065f46;
+}
+
+.result-alert-box.error {
+  background-color: #fef2f2;
+  border: 1.5px solid #fecaca;
+  color: #991b1b;
+}
+
+.result-alert-box i {
+  font-size: 1.25rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.pass-details-card {
+  margin-top: 14px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 18px;
+  animation: resultFadeIn 0.3s ease-out;
+}
+
+.pass-details-heading {
+  margin: 0 0 14px 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pass-details-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 540px) {
+  .pass-details-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.detail-label {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 0.94rem;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   5. CAMERA SCANNER MODAL
+   -------------------------------------------------------------------------- */
+.scanner-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+.scanner-modal-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  padding: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.scanner-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.scanner-modal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scanner-camera-viewport {
+  width: 100%;
+  min-height: 280px;
+  background-color: #0f172a;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.scanner-camera-viewport video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 10px;
+}
+
+.btn-scanner-cancel {
+  margin-top: 16px;
+  width: 100%;
+  padding: 12px;
+  border: 1.5px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #334155;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-scanner-cancel:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+/* --------------------------------------------------------------------------
+   6. TODAY'S CHECK-INS (9 COLUMNS DUAL-MODE LOG)
+   -------------------------------------------------------------------------- */
+.log-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 600px) {
+  .log-toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.log-search-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.log-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.log-search-input {
+  width: 100%;
+  padding: 10px 14px 10px 34px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.log-search-input:focus {
+  border-color: #1e3a8a;
+}
+
+.btn-log-refresh {
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.btn-log-refresh:hover {
+  background-color: #e2e8f0;
+}
+
+/* --- DESKTOP TABLE VIEW (≥ 769px) --- */
+.log-desktop-table-container {
+  display: none;
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+@media (min-width: 769px) {
+  .log-desktop-table-container {
+    display: block;
+  }
+}
+
+.log-nine-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.log-nine-table th {
+  background-color: #f8fafc;
+  color: #334155;
+  padding: 12px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.log-nine-table td {
+  padding: 12px 14px;
+  font-size: 0.88rem;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.log-nine-table tr:hover td {
+  background-color: #f8fafc;
+}
+
+/* Status & Pass Type Badges */
+.badge-pass-type {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-pass-gate {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-pass-special {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badge-status-pill {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-status-used {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.badge-status-approved {
+  background-color: #e0e7ff;
+  color: #3730a3;
+}
+
+/* --- MOBILE COMPACT CARD VIEW (< 769px) --- */
+.log-mobile-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 769px) {
+  .log-mobile-cards-container {
+    display: none;
+  }
+}
+
+.log-mobile-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.log-mobile-card:active {
+  transform: scale(0.99);
+}
+
+.mobile-card-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mobile-card-student-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.mobile-card-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #64748b;
+  flex-wrap: wrap;
+}
+
+.mobile-dept-pill {
+  background-color: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.mobile-card-reason {
+  font-size: 0.86rem;
+  color: #334155;
+  background-color: #f8fafc;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin: 2px 0;
+  line-height: 1.35;
+}
+
+.mobile-card-row-times {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 6px;
+  border-top: 1px dashed #e2e8f0;
+  font-size: 0.82rem;
+  color: #475569;
+}
+
+.mobile-time-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mobile-card-approver {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+.empty-log-state {
+  text-align: center;
+  padding: 36px 16px;
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.empty-log-state i {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  display: block;
+}
+
+/* Animations */
+@keyframes resultFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

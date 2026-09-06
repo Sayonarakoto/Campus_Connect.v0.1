@@ -12,6 +12,7 @@ const {
   rejectGatePass,
   getGatePassQR,
   verifyGatePass,
+  getSecurityLogs,
   getAllGatePassesAdmin,
   getAvailableApprovers  // New controller
 } = require("../controllers/gatePassController");
@@ -87,12 +88,41 @@ router.put(
 // SECURITY ROUTES
 // =====================================
 
-// Verify QR Code
+// Verify QR Code or OTP Manual Entry
 router.post(
   "/verify",
   authMiddleware,
-  roleMiddleware("security"),
+  roleMiddleware("security", "admin"),
   verifyGatePass
+);
+
+router.post(
+  "/verify-qr",
+  authMiddleware,
+  roleMiddleware("security", "admin"),
+  verifyGatePass
+);
+
+router.post(
+  "/verify-otp",
+  authMiddleware,
+  roleMiddleware("security", "admin"),
+  verifyGatePass
+);
+
+// Get Live Logs for Security Dashboard
+router.get(
+  "/logs",
+  authMiddleware,
+  roleMiddleware("security", "admin"),
+  getSecurityLogs
+);
+
+router.get(
+  "/security-logs",
+  authMiddleware,
+  roleMiddleware("security", "admin"),
+  getSecurityLogs
 );
 
 

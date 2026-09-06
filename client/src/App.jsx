@@ -10,6 +10,7 @@ import Login from "./pages/login";
 import Contact from "./pages/contact";
 import Register from "./pages/register";
 import RoleAuth from "./pages/roleauth";
+import ForgotPassword from "./pages/ForgotPassword";
 
 import GatePassRequest from "./pages/GatePass/GatePassRequest";
 import GatePassApproval from "./pages/GatePass/GatePassapproval";
@@ -118,6 +119,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/:role/register" element={<Register />} />
           <Route path="/:role/auth" element={<RoleAuth />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           <Route
             path="/hr/accounts/register"

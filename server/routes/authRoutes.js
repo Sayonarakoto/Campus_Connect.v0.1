@@ -7,6 +7,10 @@ const User = require("../models/User");
 const {
   register,
   login,
+  forgotPassword,
+  resetPassword,
+  sendParentLoginOTP,
+  verifyParentLoginOTP,
   profile,
   getLeaveBalance,
   getProfilePhoto,
@@ -19,6 +23,12 @@ const {
 
 const authMiddleware = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload");
+const {
+  validateForgotPassword,
+  validateResetPassword,
+  validateParentSendOTP,
+  validateParentVerifyOTP
+} = require("../middleware/validateAuth");
 
 // =========================
 // PUBLIC ROUTES
@@ -33,6 +43,14 @@ router.post(
 
 // Login
 router.post("/login", login);
+
+// Password recovery with 6-digit OTP
+router.post("/forgot-password", validateForgotPassword, forgotPassword);
+router.post("/reset-password", validateResetPassword, resetPassword);
+
+// Parent passwordless OTP login (Email or Mobile Number)
+router.post("/parent/send-otp", validateParentSendOTP, sendParentLoginOTP);
+router.post("/parent/verify-otp", validateParentVerifyOTP, verifyParentLoginOTP);
 
 // Get profile photo (public)
 router.get("/photo/:fileId", getProfilePhoto);

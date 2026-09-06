@@ -1,18 +1,43 @@
 // controllers/authController.js
-const User = require("../models/User");
+const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const Student = require("../models/Student");
-const { uploadToGridFS, deleteFromGridFS, getBucket } = require("../config/gridfs");
 const mongoose = require("mongoose");
+const User = require("../models/User");
+const Student = require("../models/Student");
+const OTP = require("../models/OTP");
+const emailService = require("../services/emailService");
+const { uploadToGridFS, deleteFromGridFS, getBucket } = require("../config/gridfs");
 const { requiresSection, getAllowedSections } = require("../constants/academicConfig");
 
 // ==========================================
-// HELPER: Get profile photo URL
+// HELPERS
 // ==========================================
 const getProfilePhotoUrl = (profilePhoto) => {
   if (!profilePhoto || !profilePhoto.fileId) return null;
   return `/api/auth/photo/${profilePhoto.fileId}`;
+};
+
+/**
+ * Generates a cryptographically random 6-digit numeric OTP string.
+ * @returns {string} 6-digit numeric OTP
+ */
+const generateOTP = () => {
+  return crypto.randomInt(100000, 999999).toString();
+};
+
+/**
+ * Masks an email address for privacy (e.g. 'john.doe@example.com' -> 'j*****e@example.com')
+ * @param {string} email 
+ * @returns {string} Masked email
+ */
+const maskEmail = (email) => {
+  if (!email || !email.includes("@")) return email;
+  const [local, domain] = email.split("@");
+  if (local.length <= 2) {
+    return `${local[0]}*@${domain}`;
+  }
+  return `${local[0]}${"*".repeat(local.length - 2)}${local[local.length - 1]}@${domain}`;
 };
 
 // ==========================================
@@ -1145,6 +1170,302 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message
+    });
+  }
+};
+
+// ==========================================
+// FORGOT PASSWORD: Send 6-digit OTP
+// ==========================================
+/**
+ * Initiates password recovery by sending a 6-digit OTP to the user's email.
+ * @route POST /api/auth/forgot-password
+ */
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const cleanEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No registered account found with this email address."
+      });
+    }
+
+    // Generate secure 6-digit OTP
+    const otp = generateOTP();
+    const otpHashed = await bcrypt.hash(otp, 10);
+
+    // Invalidate any existing password reset OTPs for this user
+    await OTP.deleteMany({ email: cleanEmail, purpose: "password_reset" });
+
+    // Store new OTP document with 10-minute expiry
+    await OTP.create({
+      email: cleanEmail,
+      otp_hash: otpHashed,
+      purpose: "password_reset",
+      expires_at: new Date(Date.now() + 10 * 60 * 1000),
+      attempts: 0
+    });
+
+    // Send email with OTP
+    await emailService.sendPasswordResetOTP(cleanEmail, user.fullName, otp);
+
+    return res.status(200).json({
+      success: true,
+      message: `Password reset verification code sent to ${maskEmail(cleanEmail)}.`,
+      maskedEmail: maskEmail(cleanEmail)
+    });
+  } catch (error) {
+    console.error("❌ FORGOT PASSWORD ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to process password reset request."
+    });
+  }
+};
+
+// ==========================================
+// RESET PASSWORD: Verify OTP and update password
+// ==========================================
+/**
+ * Verifies the 6-digit OTP and updates the user's password.
+ * @route POST /api/auth/reset-password
+ */
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    const cleanEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Account not found."
+      });
+    }
+
+    const otpDoc = await OTP.findOne({ email: cleanEmail, purpose: "password_reset" });
+    if (!otpDoc) {
+      return res.status(400).json({
+        success: false,
+        message: "Verification code has expired or was not requested. Please request a new code."
+      });
+    }
+
+    // Rate-limit failed attempts (max 5)
+    if (otpDoc.attempts >= 5) {
+      await OTP.deleteOne({ _id: otpDoc._id });
+      return res.status(429).json({
+        success: false,
+        message: "Too many failed verification attempts. Please request a new OTP."
+      });
+    }
+
+    const isMatch = await bcrypt.compare(otp.toString().trim(), otpDoc.otp_hash);
+    if (!isMatch) {
+      otpDoc.attempts += 1;
+      await otpDoc.save();
+      const remaining = 5 - otpDoc.attempts;
+      return res.status(400).json({
+        success: false,
+        message: remaining > 0
+          ? `Incorrect verification code. ${remaining} attempt(s) remaining.`
+          : "Maximum verification attempts exceeded. Please request a new OTP."
+      });
+    }
+
+    // OTP verified successfully. Update password and remove OTP document.
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    await OTP.deleteOne({ _id: otpDoc._id });
+
+    return res.status(200).json({
+      success: true,
+      message: "Password has been successfully updated. You can now log in with your new credentials."
+    });
+  } catch (error) {
+    console.error("❌ RESET PASSWORD ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to reset password."
+    });
+  }
+};
+
+// ==========================================
+// PARENT: Send Login OTP (Email or Phone Number)
+// ==========================================
+/**
+ * Sends a 6-digit login OTP to the parent's registered email address.
+ * Accepts either registered email or 10-digit mobile number as identifier.
+ * @route POST /api/auth/parent/send-otp
+ */
+exports.sendParentLoginOTP = async (req, res) => {
+  try {
+    const { identifier } = req.body;
+    const cleanId = identifier.trim();
+
+    let query = { role: "parent" };
+    if (cleanId.includes("@")) {
+      query.email = cleanId.toLowerCase();
+    } else {
+      query.phoneNumber = cleanId;
+    }
+
+    const parentUser = await User.findOne(query);
+    if (!parentUser) {
+      return res.status(404).json({
+        success: false,
+        message: cleanId.includes("@")
+          ? "No registered parent account found with this email address."
+          : `No registered parent account found with mobile number ${cleanId}.`
+      });
+    }
+
+    if (!parentUser.email) {
+      return res.status(400).json({
+        success: false,
+        message: "No email address linked to this parent account. Please contact college support."
+      });
+    }
+
+    // Generate secure 6-digit OTP
+    const otp = generateOTP();
+    const otpHashed = await bcrypt.hash(otp, 10);
+
+    // Invalidate existing parent login OTPs
+    await OTP.deleteMany({ email: parentUser.email, purpose: "parent_login" });
+
+    // Store new OTP document with 10-minute expiry
+    await OTP.create({
+      email: parentUser.email,
+      otp_hash: otpHashed,
+      purpose: "parent_login",
+      expires_at: new Date(Date.now() + 10 * 60 * 1000),
+      attempts: 0
+    });
+
+    // Send email with OTP
+    await emailService.sendParentLoginOTP(parentUser.email, parentUser.fullName, otp);
+
+    return res.status(200).json({
+      success: true,
+      message: `Login OTP sent to your registered email (${maskEmail(parentUser.email)}).`,
+      maskedEmail: maskEmail(parentUser.email)
+    });
+  } catch (error) {
+    console.error("❌ PARENT SEND OTP ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to dispatch parent login OTP."
+    });
+  }
+};
+
+// ==========================================
+// PARENT: Verify Login OTP
+// ==========================================
+/**
+ * Verifies the 6-digit login OTP for parent and issues an authorization JWT token.
+ * @route POST /api/auth/parent/verify-otp
+ */
+exports.verifyParentLoginOTP = async (req, res) => {
+  try {
+    const { identifier, otp } = req.body;
+    const cleanId = identifier.trim();
+    const cleanOtp = otp.toString().trim();
+
+    let query = { role: "parent" };
+    if (cleanId.includes("@")) {
+      query.email = cleanId.toLowerCase();
+    } else {
+      query.phoneNumber = cleanId;
+    }
+
+    const parentUser = await User.findOne(query);
+    if (!parentUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Parent account not found."
+      });
+    }
+
+    const otpDoc = await OTP.findOne({ email: parentUser.email, purpose: "parent_login" });
+    if (!otpDoc) {
+      return res.status(400).json({
+        success: false,
+        message: "Login OTP has expired or was not requested. Please request a new OTP."
+      });
+    }
+
+    // Rate-limit failed attempts
+    if (otpDoc.attempts >= 5) {
+      await OTP.deleteOne({ _id: otpDoc._id });
+      return res.status(429).json({
+        success: false,
+        message: "Too many failed attempts. This OTP has been invalidated. Please request a new code."
+      });
+    }
+
+    const isMatch = await bcrypt.compare(cleanOtp, otpDoc.otp_hash);
+    if (!isMatch) {
+      otpDoc.attempts += 1;
+      await otpDoc.save();
+      const remaining = 5 - otpDoc.attempts;
+      return res.status(400).json({
+        success: false,
+        message: remaining > 0
+          ? `Incorrect OTP. ${remaining} attempt(s) remaining.`
+          : "Maximum OTP attempts exceeded. Please request a new code."
+      });
+    }
+
+    // Verification successful: Delete OTP document
+    await OTP.deleteOne({ _id: otpDoc._id });
+
+    // Update last login
+    parentUser.lastLogin = new Date();
+    await parentUser.save();
+
+    // Generate JWT
+    const token = jwt.sign(
+      {
+        id: parentUser._id,
+        role: parentUser.role,
+        fullName: parentUser.fullName,
+        email: parentUser.email
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    const cleanUser = {
+      id: parentUser._id,
+      fullName: parentUser.fullName,
+      email: parentUser.email,
+      role: parentUser.role,
+      phoneNumber: parentUser.phoneNumber || null,
+      profilePhoto: parentUser.profilePhoto,
+      profilePhotoUrl: getProfilePhotoUrl(parentUser.profilePhoto),
+      customData: parentUser.customData || {}
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "Parent authentication successful",
+      token,
+      user: cleanUser
+    });
+  } catch (error) {
+    console.error("❌ PARENT VERIFY OTP ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to verify login OTP."
     });
   }
 };

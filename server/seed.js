@@ -7,6 +7,8 @@ const bcrypt = require("bcrypt");
 
 const User = require("./models/User");
 const Student = require("./models/Student");
+const Permission = require("./models/Permission");
+const { DEFAULT_PERMISSIONS } = require("./controllers/permissionController");
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/campus_connect";
 const DEFAULT_PASSWORD = process.env.SEED_DEFAULT_PASSWORD || "password123";
@@ -347,6 +349,70 @@ async function seedDatabase() {
         "Lab Staff": profile.staffRole
       });
     }
+
+    // ==========================================
+    // 5. SEED MASTER SUPER ADMIN ACCOUNT (LUKA)
+    // ==========================================
+    console.log("🛡️ Bootstrapping Master Super Administrator account (luka)...");
+    const adminUsername = process.env.ADMIN_SEED_USERNAME || "luka";
+    const adminEmail = process.env.ADMIN_SEED_EMAIL || "luka@college.edu";
+    const adminRawPassword = process.env.ADMIN_SEED_PASSWORD || "zxcqwrzxc";
+    const hashedAdminPassword = await bcrypt.hash(adminRawPassword, 10);
+
+    let existingAdmin = await User.findOne({
+      $or: [
+        { email: adminEmail },
+        { "customData.username": adminUsername },
+        { "customData.staffId": adminUsername }
+      ]
+    });
+
+    const adminPayload = {
+      role: "admin",
+      fullName: "System Super Administrator",
+      email: adminEmail,
+      phoneNumber: "9998887770",
+      password: hashedAdminPassword,
+      customData: {
+        username: adminUsername,
+        staffId: adminUsername,
+        adminClearanceLevel: "SuperAdmin"
+      }
+    };
+
+    if (!existingAdmin) {
+      await User.create(adminPayload);
+      stats.usersCreated++;
+      console.log(`✅ Super Admin '${adminUsername}' created successfully.`);
+    } else {
+      Object.assign(existingAdmin, adminPayload);
+      await existingAdmin.save();
+      stats.usersUpdated++;
+      console.log(`✅ Super Admin '${adminUsername}' credentials updated.`);
+    }
+
+    summaryTable.push({
+      Department: "SYSTEM",
+      Role: "Super Admin",
+      Name: adminPayload.fullName,
+      "Login ID (Faculty ID)": adminUsername,
+      Email: adminEmail,
+      Phone: adminPayload.phoneNumber,
+      "Lab Staff": "Full Sudo"
+    });
+
+    // 7. Seed Dynamic Permissions Matrix
+    console.log("\n🛡️ Seeding Dynamic Permissions Matrix...");
+    let permCount = 0;
+    for (const perm of DEFAULT_PERMISSIONS) {
+      await Permission.findOneAndUpdate(
+        { role: perm.role, controller: perm.controller },
+        { $set: perm },
+        { upsert: true, new: true }
+      );
+      permCount++;
+    }
+    console.log(`✅ Seeded ${permCount} dynamic controller permission rules.`);
 
     console.log("\n=================================================");
     console.log("📊 SEEDING SUMMARY MATRIX");

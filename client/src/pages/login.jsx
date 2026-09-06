@@ -43,11 +43,6 @@ function Login() {
       name: "Security",
       iconClass: "fas fa-shield-alt",
       desc: "Front-line gatekeeper: scan student QR codes for verified entry/exit."
-    },
-    {
-      name: "Admin",
-      iconClass: "fas fa-briefcase",
-      desc: "IT configuration, infrastructure accounts, and Faculty Add-On role tagging."
     }
   ];
 
@@ -119,10 +114,15 @@ function Login() {
         <footer
           className="portal-footer"
           style={{
-            borderLeft: "4px solid #f87171"
+            borderLeft: "4px solid #f87171",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "12px"
           }}
         >
-          <p style={{ margin: 0 }}>
+          <p style={{ margin: 0, flex: 1 }}>
             <i
               className="fas fa-exclamation-triangle"
               style={{
@@ -139,6 +139,23 @@ function Login() {
             and subject to direct executive and disciplinary
             action.
           </p>
+
+          <Link
+            to="/auth/admin"
+            title="Institutional Security Operations"
+            style={{
+              color: "#94a3b8",
+              fontSize: "0.85rem",
+              textDecoration: "none",
+              opacity: 0.4,
+              transition: "opacity 0.2s ease"
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.4")}
+            aria-label="Admin Portal"
+          >
+            <i className="fas fa-user-shield"></i>
+          </Link>
         </footer>
 
       </div>

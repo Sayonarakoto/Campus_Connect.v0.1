@@ -98,6 +98,7 @@ app.use("/api/tutor-leaves", require("./routes/tutorLeaveRoutes"));
 
 // Student
 app.use("/api/student", require("./routes/studentRoutes"));
+app.use("/api/students", require("./routes/studentRoutes"));
 
 // Audit
 app.use("/api/audit", require("./routes/auditRoutes"));
@@ -113,6 +114,9 @@ app.use("/api/disciplinary", require("./routes/disciplinaryRoutes"));
 
 // Admin
 app.use("/api/admin", require("./routes/adminRoutes"));
+
+// Permissions & Claims Matrix
+app.use("/api/permissions", require("./routes/permissionRoutes"));
 
 // Faculty duty-leave
 app.use("/api/faculty-duty-leave", require("./routes/facultyDutyLeaveRoutes"));

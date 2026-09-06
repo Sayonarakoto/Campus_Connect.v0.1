@@ -8,6 +8,9 @@ require("../middleware/authMiddleware");
 const roleMiddleware =
 require("../middleware/roleMiddleware");
 
+const authorizeClaim =
+require("../middleware/claimMiddleware");
+
 const {
   getAllAuditLogs,
   getLeaveAudit
@@ -22,6 +25,7 @@ router.get(
     "director",
     "admin"
   ),
+  authorizeClaim("AuditController", "list"),
   getLeaveAudit
 );
 
@@ -33,6 +37,7 @@ router.get(
     "director",
     "admin"
   ),
+  authorizeClaim("AuditController", "list"),
   getAllAuditLogs
 );
 

@@ -17,6 +17,9 @@ require("../controllers/attendanceCorrectionController");
 const attendancePermission =
 require("../middleware/attendancePermission");
 
+const authorizeClaim =
+require("../middleware/claimMiddleware");
+
 const ATTENDANCE_PERMISSIONS =
 require("../constants/attendancePermissions");
 
@@ -45,6 +48,8 @@ router.get(
         "admin"
     ),
 
+    authorizeClaim("AttendanceController", "list"),
+
     attendanceController.getStudents
 
 );
@@ -70,6 +75,8 @@ router.get(
         "admin"
     ),
 
+    authorizeClaim("AttendanceController", "list"),
+
     attendanceController.getAttendanceRecord
 
 );
@@ -91,6 +98,8 @@ router.post(
         "hod"
     ),
 
+    authorizeClaim("AttendanceController", "add"),
+
     attendanceController.markAttendance
 
 );
@@ -111,6 +120,8 @@ router.post(
         "tutor",
         "hod"
     ),
+
+    authorizeClaim("AttendanceController", "add"),
 
     attendanceController.saveAttendance
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import "./DashboardSidebar.css";
@@ -80,6 +80,7 @@ const ROLE_NAV_CONFIG = {
 export default function DashboardSidebar({ isOpen, onClose, onOpenProfile, user }) {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const [dynamicMenu, setDynamicMenu] = useState(null);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -91,10 +92,42 @@ export default function DashboardSidebar({ isOpen, onClose, onOpenProfile, user 
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Fetch dynamic menu driven by database claims
+  useEffect(() => {
+    const fetchMenu = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const res = await fetch(`${API_BASE}/api/auth/menu`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.menu) && data.menu.length > 0) {
+            setDynamicMenu(
+              data.menu.map((m) => ({
+                label: m.title,
+                path: m.path,
+                icon: m.icon || "fas fa-folder",
+                permissions: m.permissions
+              }))
+            );
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch dynamic menu, using fallback:", err);
+      }
+    };
+
+    if (isOpen) {
+      fetchMenu();
+    }
+  }, [isOpen, user?.role]);
+
   if (!isOpen) return null;
 
   const roleKey = user?.role?.toLowerCase() || "student";
-  const navItems = ROLE_NAV_CONFIG[roleKey] || ROLE_NAV_CONFIG.student;
+  const navItems = dynamicMenu || ROLE_NAV_CONFIG[roleKey] || ROLE_NAV_CONFIG.student;
 
   const photoSrc = user?.profilePhotoUrl
     ? `${API_BASE}${user.profilePhotoUrl}`

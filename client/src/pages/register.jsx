@@ -337,12 +337,7 @@ function Register() {
   }
 
   /* ==========================================
-      CURRENT ROLE CONFIG
-  ========================================== */
-  const config = roleRegistrationSpecs[normalizedRole] || roleRegistrationSpecs.student;
-
-  /* ==========================================
-      FORM STATE
+      FORM STATE (Unconditional Hooks)
   ========================================== */
   const [formData, setFormData] = useState({
     fullName: "",
@@ -376,6 +371,64 @@ function Register() {
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [preview, setPreview] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  /* ==========================================
+      BLOCK PUBLIC ADMIN REGISTRATION
+  ========================================== */
+  if (normalizedRole === "admin") {
+    return (
+      <div className="auth-page-wrapper" style={{ minHeight: "75vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+        <div style={{ maxWidth: "520px", width: "100%", background: "#ffffff", borderRadius: "16px", border: "1px solid #e2e8f0", padding: "2.5rem", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.08)", textAlign: "center" }}>
+          <div style={{ width: "68px", height: "68px", borderRadius: "50%", background: "#fee2e2", color: "#dc2626", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem", fontSize: "1.75rem" }}>
+            <i className="fas fa-user-lock"></i>
+          </div>
+          <span style={{ display: "inline-block", background: "#fef2f2", color: "#991b1b", border: "1px solid #fecaca", padding: "4px 12px", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>
+            Institutional Security Protocol
+          </span>
+          <h2 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#0f172a", marginBottom: "0.75rem" }}>
+            Admin Self-Registration Restricted
+          </h2>
+          <p style={{ color: "#64748b", fontSize: "0.95rem", lineHeight: "1.6", marginBottom: "1.75rem" }}>
+            Administrative accounts hold master privileges and cannot be provisioned through public enrollment. Super Administrator accounts are established exclusively via secure backend initialization.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <Link
+              to="/auth/admin"
+              style={{
+                display: "inline-block",
+                background: "#0f172a",
+                color: "#ffffff",
+                padding: "0.85rem 1.5rem",
+                borderRadius: "8px",
+                fontWeight: "600",
+                textDecoration: "none",
+                fontSize: "0.95rem"
+              }}
+            >
+              Access Administration Console
+            </Link>
+            <Link
+              to="/login"
+              style={{
+                display: "inline-block",
+                color: "#64748b",
+                fontSize: "0.875rem",
+                textDecoration: "none",
+                padding: "0.5rem"
+              }}
+            >
+              ← Return to Public Gateways
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ==========================================
+      CURRENT ROLE CONFIG
+  ========================================== */
+  const config = roleRegistrationSpecs[normalizedRole] || roleRegistrationSpecs.student;
 
   /* ==========================================
       PHOTO OPTIMIZATION FUNCTION

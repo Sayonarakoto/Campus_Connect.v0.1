@@ -10,6 +10,9 @@ const authMiddleware =
 const roleMiddleware =
   require("../middleware/roleMiddleware");
 
+const departmentIsolation =
+  require("../middleware/departmentIsolationMiddleware");
+
 const Student =
   require("../models/Student");
 
@@ -129,11 +132,8 @@ router.get(
 );
 
 router.get(
-
   "/department-students",
-
   authMiddleware,
-
   roleMiddleware(
     "faculty",
     "hod",
@@ -142,9 +142,8 @@ router.get(
     "director",
     "admin"
   ),
-
+  departmentIsolation,
   getDepartmentStudents
-
 );
 
 module.exports =

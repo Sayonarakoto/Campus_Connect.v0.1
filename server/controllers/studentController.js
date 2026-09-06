@@ -1,6 +1,9 @@
 const Student =
   require("../models/Student");
 
+const DepartmentStudentView =
+  require("../models/views/DepartmentStudentView");
+
 const AttendanceRecord =
   require("../models/AttendanceRecord");
 
@@ -260,51 +263,49 @@ async (req, res) => {
 // ==========================
 
 exports.getDepartmentStudents = async (req, res) => {
-
   try {
+    // Apply department isolation scope provided by departmentIsolationMiddleware
+    const filter = req.departmentFilter ? { ...req.departmentFilter } : {};
 
-    const filter = {};
-
-    // Principal, Director and Admin can see everyone, or filter by specific department
-    if (["admin", "principal", "director"].includes(req.user.role)) {
-      if (req.query.department) {
-        filter.department = req.query.department;
-      }
-    } else {
-      // Faculty, Tutor and HOD restricted to their own department
-      filter.department = req.user.department;
-    }
-
-    if (req.query.section) {
-      filter.section = req.query.section;
+    if (req.query.section && req.query.section.trim() !== "") {
+      filter.section = req.query.section.trim();
     }
 
     if (req.query.semester) {
-      filter.semester = Number(req.query.semester);
+      const semNum = Number(req.query.semester);
+      if (!isNaN(semNum) && semNum > 0) {
+        filter.semester = semNum;
+      }
     }
 
-    const students = await Student.find(filter)
-      .select("fullName admissionNo department semester section attendancePercentage academicYear")
+    if (req.query.search && req.query.search.trim() !== "") {
+      const searchRegex = new RegExp(req.query.search.trim(), "i");
+      filter.$or = [
+        { fullName: searchRegex },
+        { admissionNo: searchRegex },
+        { regNo: searchRegex }
+      ];
+    }
+
+    // Query directly against the Database View Table: view_department_students
+    const students = await DepartmentStudentView.find(filter)
+      .select(
+        "studentId userId fullName admissionNo regNo department programme semester batch section academicYear attendancePercentage email phoneNumber profilePhoto userStatus created_at updated_at"
+      )
       .sort({ fullName: 1 });
 
-    res.json({
-
+    return res.status(200).json({
       success: true,
-
+      totalCount: students.length,
+      departmentScope: req.targetDepartment || "ALL",
+      isIsolated: Boolean(req.isDepartmentIsolated),
       students
-
     });
-
   } catch (error) {
-
-    res.status(500).json({
-
+    console.error("getDepartmentStudents View Query Error:", error);
+    return res.status(500).json({
       success: false,
-
-      message: error.message
-
+      message: error.message || "Failed to fetch department students from view."
     });
-
   }
-
 };

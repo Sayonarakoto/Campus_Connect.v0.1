@@ -78,39 +78,23 @@ function WorkspaceDashboard() {
 
 
 
-  // Prevent wrong role access
+  // Prevent wrong role access (Super Admin has universal bypass to view any workspace)
+  const isAdmin = user.role?.toLowerCase() === "admin";
+  const targetRole = role ? role.toLowerCase() : "";
+  const effectiveRole = isAdmin && targetRole ? targetRole : user.role?.toLowerCase();
 
-  if (
-    user.role?.toLowerCase()
-    !==
-    role?.toLowerCase()
-  ) {
-
-    console.log(
-      "ROLE MISMATCH",
-      user.role,
-      role
-    );
-
-
+  if (!isAdmin && user.role?.toLowerCase() !== targetRole) {
+    console.log("ROLE MISMATCH", user.role, role);
     return (
       <Navigate
         to="/403"
         replace
       />
     );
-
   }
 
-
-
-  switch(
-    user.role.toLowerCase()
-  ) {
-
-
+  switch(effectiveRole) {
     case "student":
-
       return <StudentDashboard />;
 
 

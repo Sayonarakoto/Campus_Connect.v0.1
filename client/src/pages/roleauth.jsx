@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import { useToast } from "../context/ToastContext";
 import "./roleauth.css";
 
-function RoleAuth() {
-  const { role } = useParams();
+function RoleAuth({ roleOverride }) {
+  const { role: urlRole } = useParams();
+  const activeRole = roleOverride || urlRole;
   const navigate = useNavigate();
   const { showToast } = useToast();
 
@@ -15,9 +16,10 @@ function RoleAuth() {
 
   const [loading, setLoading] = useState(false);
 
-  const normalizedRole = role ? role.toLowerCase() : "";
+  const normalizedRole = activeRole ? activeRole.toLowerCase() : "";
   const isSecurity = normalizedRole === "security";
   const isParent = normalizedRole === "parent";
+  const isAdmin = normalizedRole === "admin";
 
   // Parent OTP login state
   const [parentStep, setParentStep] = useState(1); // 1: enter email/phone, 2: enter OTP
@@ -90,7 +92,7 @@ function RoleAuth() {
 
       showToast("Welcome back! Login successful.", "success");
 
-      navigate(`/${role}/workdashboard`);
+      navigate(`/${normalizedRole}/workdashboard`);
     } catch (error) {
       console.error("Login Error:", error);
       showToast("Unable to reach institutional server. Please try again.", "error");
@@ -223,7 +225,7 @@ function RoleAuth() {
         {/* Header */}
         <header className="auth-card-header">
           <span className="auth-role-badge">
-            {role?.toUpperCase()} Module
+            {isAdmin ? "Institutional Administration" : `${activeRole?.toUpperCase()} Module`}
           </span>
 
           <h2>Authentication Gateway</h2>
@@ -235,6 +237,8 @@ function RoleAuth() {
               ? parentStep === 1
                 ? "Enter your registered email address or 10-digit mobile number to receive a secure login passkey."
                 : `Enter the 6-digit login passkey sent to ${maskedEmail || "your registered email"}.`
+              : isAdmin
+              ? "Super Administrator Gateway. Restricted access console for system bootstrapping and cross-role administration."
               : "Provide active institutional access credentials to verify authorization routing layers."}
           </p>
         </header>
@@ -363,11 +367,13 @@ function RoleAuth() {
                       ? "Employee ID or Email"
                       : normalizedRole === "director"
                       ? "Director Signature ID or Email"
+                      : isAdmin
+                      ? "Administrator Username or Email"
                       : "Institutional Email Address"}
                   </label>
 
                   <input
-                    type={["student", "faculty", "hod", "hraccounts", "principal", "director"].includes(normalizedRole) ? "text" : "email"}
+                    type={["student", "faculty", "hod", "hraccounts", "principal", "director", "admin"].includes(normalizedRole) ? "text" : "email"}
                     name="email"
                     value={credentials.email}
                     required={!isSecurity}
@@ -383,6 +389,8 @@ function RoleAuth() {
                         ? "Enter Employee ID or Email"
                         : normalizedRole === "director"
                         ? "Enter Signature ID (e.g. DIR1001) or Email"
+                        : isAdmin
+                        ? "Enter username (e.g. luka) or email"
                         : "username@college.edu"
                     }
                   />
@@ -435,26 +443,28 @@ function RoleAuth() {
             </form>
           )}
 
-          <div
-            style={{
-              marginTop: "20px",
-              textAlign: "center",
-            }}
-          >
-            <p>
-              Don't have an account?{" "}
-              <Link
-                to={`/${role}/register`}
-                style={{
-                  color: "#2563eb",
-                  fontWeight: "600",
-                  textDecoration: "none",
-                }}
-              >
-                Register Here
-              </Link>
-            </p>
-          </div>
+          {!isAdmin && (
+            <div
+              style={{
+                marginTop: "20px",
+                textAlign: "center",
+              }}
+            >
+              <p>
+                Don't have an account?{" "}
+                <Link
+                  to={`/${activeRole}/register`}
+                  style={{
+                    color: "#2563eb",
+                    fontWeight: "600",
+                    textDecoration: "none",
+                  }}
+                >
+                  Register Here
+                </Link>
+              </p>
+            </div>
+          )}
 
           <Link
             to="/"

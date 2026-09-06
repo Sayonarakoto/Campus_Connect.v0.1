@@ -9,6 +9,11 @@ const roleMiddleware = (...allowedRoles) => {
         });
       }
 
+      // Super Admin universal bypass: allows system admin to execute any role-restricted action
+      if (req.user.role === "admin") {
+        return next();
+      }
+
       // Check if user's role is allowed
       if (!allowedRoles.includes(req.user.role)) {
         return res.status(403).json({

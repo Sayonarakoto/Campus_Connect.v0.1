@@ -119,6 +119,8 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/auth/admin" element={<RoleAuth roleOverride="admin" />} />
+          <Route path="/admin/auth" element={<RoleAuth roleOverride="admin" />} />
           <Route path="/:role/register" element={<Register />} />
           <Route path="/:role/auth" element={<RoleAuth />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

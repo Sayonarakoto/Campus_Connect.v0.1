@@ -11,6 +11,9 @@ const roleMiddleware =
 const hodMiddleware =
   require("../middleware/hodMiddleware");
 
+const authorizeClaim =
+  require("../middleware/claimMiddleware");
+
 const {
   createLeaveRequest,
   getMyLeaves,
@@ -44,6 +47,7 @@ router.post(
     "faculty",
     "labstaff"
   ),
+  authorizeClaim("StaffLeaveController", "add"),
   createLeaveRequest
 );
 
@@ -54,6 +58,7 @@ router.get(
     "faculty",
     "labstaff"
   ),
+  authorizeClaim("StaffLeaveController", "list"),
   getMyLeaves
 );
 
@@ -69,6 +74,7 @@ router.get(
     "faculty",
     "labstaff"
   ),
+  authorizeClaim("StaffLeaveController", "list"),
   getPendingCoverage
 );
 
@@ -79,6 +85,7 @@ router.put(
     "faculty",
     "labstaff"
   ),
+  authorizeClaim("StaffLeaveController", "update"),
   acceptCoverage
 );
 
@@ -89,6 +96,7 @@ router.put(
     "faculty",
     "labstaff"
   ),
+  authorizeClaim("StaffLeaveController", "update"),
   rejectCoverage
 );
 
@@ -100,6 +108,7 @@ router.get(
   "/hod/pending",
   authMiddleware,
   hodMiddleware,
+  authorizeClaim("StaffLeaveController", "list"),
   getPendingLeaves
 );
 
@@ -107,6 +116,7 @@ router.put(
   "/:id/hod-approve",
   authMiddleware,
   hodMiddleware,
+  authorizeClaim("StaffLeaveController", "update"),
   approveLeave
 );
 
@@ -114,6 +124,7 @@ router.put(
   "/:id/hod-reject",
   authMiddleware,
   hodMiddleware,
+  authorizeClaim("StaffLeaveController", "update"),
   rejectLeave
 );
 
@@ -121,6 +132,7 @@ router.get(
   "/hod/revoked",
   authMiddleware,
   hodMiddleware,
+  authorizeClaim("StaffLeaveController", "list"),
   getHODRevokedLeaves
 );
 
@@ -133,6 +145,7 @@ router.get(
   "/principal/pending",
   authMiddleware,
   roleMiddleware("principal"),
+  authorizeClaim("StaffLeaveController", "list"),
   getPrincipalPendingLeaves
 );
 
@@ -140,6 +153,7 @@ router.put(
   "/:id/principal-review",
   authMiddleware,
   roleMiddleware("principal"),
+  authorizeClaim("StaffLeaveController", "update"),
   principalReviewLeave
 );
 
@@ -152,6 +166,7 @@ router.get(
   "/director/pending",
   authMiddleware,
   roleMiddleware("director"),
+  authorizeClaim("StaffLeaveController", "list"),
   getDirectorPendingLeaves
 );
 
@@ -159,6 +174,7 @@ router.put(
   "/:id/director-approve",
   authMiddleware,
   roleMiddleware("director"),
+  authorizeClaim("StaffLeaveController", "update"),
   directorApproveLeave
 );
 
@@ -166,6 +182,7 @@ router.put(
   "/:id/director-reject",
   authMiddleware,
   roleMiddleware("director"),
+  authorizeClaim("StaffLeaveController", "update"),
   directorRejectLeave
 );
 
@@ -173,6 +190,7 @@ router.put(
   "/:id/revoke",
   authMiddleware,
   roleMiddleware("director"),
+  authorizeClaim("StaffLeaveController", ["update", "delete"]),
   revokeLeave
 );
 
@@ -188,6 +206,7 @@ router.get(
     "hraccounts",
     "admin"
   ),
+  authorizeClaim("StaffLeaveController", "list"),
   getHRAccountsDashboard
 );
 
@@ -195,6 +214,7 @@ router.get(
   "/director/history",
   authMiddleware,
   roleMiddleware("director"),
+  authorizeClaim("StaffLeaveController", "list"),
   getDirectorHistory
 );
 module.exports = router;

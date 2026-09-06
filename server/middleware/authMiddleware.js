@@ -67,9 +67,7 @@ module.exports = (req, res, next) => {
 
       tempHODUntil:
         decoded.tempHODUntil
-
     };
-
 
     next();
 

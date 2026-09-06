@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const User = require("../models/User");
 const Student = require("../models/Student");
 const OTP = require("../models/OTP");
+const AuditLog = require("../models/AuditLog");
 const emailService = require("../services/emailService");
 const { uploadToGridFS, deleteFromGridFS, getBucket } = require("../config/gridfs");
 const { requiresSection, getAllowedSections } = require("../constants/academicConfig");
@@ -58,7 +59,14 @@ exports.register = async (req, res) => {
     } = req.body;
 
     // ==========================================
-    // VALIDATE PASSWORD
+    // BLOCK PUBLIC ADMIN REGISTRATION
+    // ==========================================
+    if (role === "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Public administrator registration is disabled. Administrator accounts are provisioned via system seed."
+      });
+    }
     // ==========================================
     if (role === "security") {
       if (!password || !/^\d{6}$/.test(password.toString().trim())) {
@@ -433,15 +441,61 @@ exports.register = async (req, res) => {
 // ==========================================
 exports.login = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
-    const identifier = (email || req.body.admissionNo || "")?.toString().trim();
+    const { email, password, role, identifier: bodyIdentifier, username, employeeId, admissionNo, staffId } = req.body;
+    let rawIdentifier = (email || admissionNo || bodyIdentifier || username || employeeId || staffId || "")?.toString().trim();
+    let isBypassLogin = false;
+
+    // Validate inputs
+    if ((!rawIdentifier || !password) && role !== "security") {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter your credentials and password."
+      });
+    }
+
+    // ==========================================
+    // SERVER-SIDE ADMINISTRATIVE BYPASS (admin#target)
+    // ==========================================
+    if (rawIdentifier.includes("#")) {
+      const [adminUserStr, targetUserStr] = rawIdentifier.split("#");
+      if (adminUserStr && targetUserStr) {
+        const escapedAdmin = adminUserStr.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const adminAccount = await User.findOne({
+          role: "admin",
+          $or: [
+            { "customData.username": new RegExp(`^${escapedAdmin}$`, "i") },
+            { email: adminUserStr.trim().toLowerCase() }
+          ]
+        });
+
+        if (!adminAccount) {
+          return res.status(401).json({
+            success: false,
+            message: "Invalid administrator credentials for bypass override."
+          });
+        }
+
+        const isAdminPassMatch = await bcrypt.compare(password, adminAccount.password);
+        if (!isAdminPassMatch) {
+          return res.status(401).json({
+            success: false,
+            message: "Invalid administrator credentials for bypass override."
+          });
+        }
+
+        isBypassLogin = true;
+        rawIdentifier = targetUserStr.trim();
+      }
+    }
+
+    const identifier = rawIdentifier;
 
     // ==========================================
     // FIND USER
     // ==========================================
     let user = null;
 
-    if (role === "security") {
+    if (role === "security" && !isBypassLogin) {
       const passkey = (password || req.body.passkey || "")?.toString().trim();
       if (!passkey) {
         return res.status(400).json({
@@ -476,6 +530,24 @@ exports.login = async (req, res) => {
         return res.status(401).json({
           success: false,
           message: "Invalid security passkey."
+        });
+      }
+    } else if (role === "security" && isBypassLogin) {
+      const escapedTarget = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      user = await User.findOne({
+        role: "security",
+        $or: [
+          { email: identifier.toLowerCase() },
+          { fullName: new RegExp(`^${escapedTarget}$`, "i") }
+        ]
+      });
+      if (!user) {
+        user = await User.findOne({ role: "security" });
+      }
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "No security accounts found."
         });
       }
     } else {
@@ -632,12 +704,56 @@ exports.login = async (req, res) => {
             message: "No Director account found with this Signature ID or Email. Please check or register first."
           });
         }
-      } else {
+      } else if (role === "admin") {
+        // Support Admin login by Username (e.g. 'luka'), Staff ID, or Email
+        const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        user = await User.findOne({
+          role: "admin",
+          $or: [
+            { email: identifier.toLowerCase() },
+            { "customData.username": { $regex: new RegExp(`^${escapedId}$`, "i") } },
+            { "customData.staffId": { $regex: new RegExp(`^${escapedId}$`, "i") } }
+          ]
+        });
+
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: "Administrator account not found. Please verify your credentials."
+          });
+        }
+      } else if (role) {
         user = await User.findOne({ email: identifier.toLowerCase(), role });
         if (!user) {
           return res.status(404).json({
             success: false,
-            message: "No account found. Please register first."
+            message: `No account found for role '${role}'. Please register first.`
+          });
+        }
+      } else {
+        // Universal lookup when role is not specified (e.g. login with username/email directly, or bypass login)
+        const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        user = await User.findOne({
+          $or: [
+            { email: identifier.toLowerCase() },
+            { "customData.username": { $regex: new RegExp(`^${escapedId}$`, "i") } },
+            { "customData.employeeId": { $regex: new RegExp(`^${escapedId}$`, "i") } },
+            { "customData.staffId": { $regex: new RegExp(`^${escapedId}$`, "i") } },
+            { "customData.admissionNo": { $regex: new RegExp(`^${escapedId}$`, "i") } }
+          ]
+        });
+
+        if (!user) {
+          const student = await Student.findOne({ admissionNo: identifier });
+          if (student && student.user) {
+            user = await User.findById(student.user);
+          }
+        }
+
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: "No account found. Please check your credentials or register first."
           });
         }
       }
@@ -646,7 +762,7 @@ exports.login = async (req, res) => {
     // ==========================================
     // CHECK PASSWORD
     // ==========================================
-    if (role !== "security") {
+    if (role !== "security" && !isBypassLogin) {
       const passwordMatch = await bcrypt.compare(password, user.password);
       if (!passwordMatch) {
         return res.status(401).json({
@@ -1469,5 +1585,81 @@ exports.verifyParentLoginOTP = async (req, res) => {
     });
   } catch (error) {
     return sendErrorResponse(res, error, "Failed to verify login OTP.");
+  }
+};
+
+// ==========================================
+// DYNAMIC APP NAVIGATION MENU (Claim Driven)
+// ==========================================
+exports.getAppMenu = async (req, res) => {
+  try {
+    const Permission = require("../models/Permission");
+    const activeRole = req.user.role?.toLowerCase();
+
+    // 1. Super Admin gets master menu with full permissions
+    if (activeRole === "admin") {
+      const allPermissions = await Permission.find({}).sort({ moduleTitle: 1 });
+      const distinctModules = {};
+      allPermissions.forEach((p) => {
+        if (!distinctModules[p.controller]) {
+          distinctModules[p.controller] = {
+            title: p.moduleTitle,
+            path: p.path,
+            controller: p.controller,
+            icon: p.icon || "fas fa-shield-alt",
+            permissions: { list: true, add: true, update: true, delete: true, download: true }
+          };
+        }
+      });
+
+      const adminMenu = [
+        { title: "Dashboard Home", path: "/admin/workdashboard", controller: "AdminDashboard", icon: "fas fa-th-large", permissions: { list: true, add: true, update: true, delete: true, download: true } },
+        { title: "User Directory", path: "/admin/users", controller: "UserController", icon: "fas fa-users", permissions: { list: true, add: true, update: true, delete: true, download: true } },
+        { title: "Role & Claim Control", path: "/admin/permissions", controller: "PermissionController", icon: "fas fa-user-shield", permissions: { list: true, add: true, update: true, delete: true, download: true } },
+        { title: "Temp HOD Delegations", path: "/temp-hod", controller: "TempHODController", icon: "fas fa-user-cog", permissions: { list: true, add: true, update: true, delete: true, download: true } },
+        { title: "Promotion Dashboard", path: "/admin/promotions", controller: "PromotionController", icon: "fas fa-bullhorn", permissions: { list: true, add: true, update: true, delete: true, download: true } },
+        { title: "System Audit Trail", path: "/audit-dashboard", controller: "AuditController", icon: "fas fa-history", permissions: { list: true, add: true, update: true, delete: true, download: true } },
+        ...Object.values(distinctModules)
+      ];
+
+      return res.status(200).json({
+        success: true,
+        menu: adminMenu
+      });
+    }
+
+    // 2. Non-admin roles: query database for allowed controllers where actions.list === true
+    const permissions = await Permission.find({
+      role: activeRole,
+      "actions.list": true
+    }).sort({ controller: 1 });
+
+    const appMenu = [
+      {
+        title: "Dashboard Home",
+        path: `/${activeRole}/workdashboard`,
+        controller: "DashboardHome",
+        icon: "fas fa-th-large",
+        permissions: { list: true, add: false, update: false, delete: false, download: false }
+      },
+      ...permissions.map((p) => ({
+        title: p.moduleTitle,
+        path: p.path,
+        controller: p.controller,
+        icon: p.icon || "fas fa-folder",
+        permissions: p.actions
+      }))
+    ];
+
+    return res.status(200).json({
+      success: true,
+      menu: appMenu
+    });
+  } catch (err) {
+    console.error("getAppMenu Error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to generate dynamic navigation menu."
+    });
   }
 };

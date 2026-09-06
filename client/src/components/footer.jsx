@@ -104,6 +104,21 @@ function Footer() {
           <span>Privacy Policy</span>
           <span>Terms of Use</span>
           <span>Sitemap</span>
+          <Link
+            to="/auth/admin"
+            title="System Operations"
+            style={{
+              color: "inherit",
+              textDecoration: "none",
+              opacity: 0.35,
+              fontSize: "0.85rem",
+              transition: "opacity 0.2s"
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.35")}
+          >
+            #admin
+          </Link>
         </div>
       </div>
     </footer>

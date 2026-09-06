@@ -8,6 +8,9 @@ require("../middleware/authMiddleware");
 const roleMiddleware =
 require("../middleware/roleMiddleware");
 
+const authorizeClaim =
+require("../middleware/claimMiddleware");
+
 const dutyLeaveController =
 require("../controllers/dutyLeaveController");
 
@@ -23,6 +26,7 @@ router.post(
   "/apply",
   authMiddleware,
   roleMiddleware("student"),
+  authorizeClaim("DutyLeaveController", "add"),
   upload.single("proofFile"),
   dutyLeaveController.applyDutyLeave
 );
@@ -32,6 +36,7 @@ router.get(
   "/my-leaves",
   authMiddleware,
   roleMiddleware("student"),
+  authorizeClaim("DutyLeaveController", "list"),
   dutyLeaveController.myDutyLeaves
 );
 
@@ -45,6 +50,7 @@ router.get(
   "/hod/pending",
   authMiddleware,
   roleMiddleware("hod"),
+  authorizeClaim("DutyLeaveController", "list"),
   dutyLeaveController.getPendingDutyLeaves
 );
 
@@ -53,6 +59,7 @@ router.put(
   "/hod/approve/:id",
   authMiddleware,
   roleMiddleware("hod"),
+  authorizeClaim("DutyLeaveController", "update"),
   dutyLeaveController.approveDutyLeave
 );
 
@@ -61,6 +68,7 @@ router.put(
   "/hod/reject/:id",
   authMiddleware,
   roleMiddleware("hod"),
+  authorizeClaim("DutyLeaveController", "update"),
   dutyLeaveController.rejectDutyLeave
 );
 
@@ -73,6 +81,7 @@ router.get(
   "/tutor/all",
   authMiddleware,
   roleMiddleware("tutor", "faculty"),
+  authorizeClaim("DutyLeaveController", "list"),
   dutyLeaveController.getTutorDutyLeaves
 );
 
@@ -86,6 +95,7 @@ router.put(
   "/revoke/:id",
   authMiddleware,
   roleMiddleware("hod", "faculty"),
+  authorizeClaim("DutyLeaveController", "update"),
   dutyLeaveController.revokeDutyLeave
 );
 

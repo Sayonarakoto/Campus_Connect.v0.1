@@ -3,6 +3,7 @@ const router = express.Router();
 
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
+const authorizeClaim = require("../middleware/claimMiddleware");
 
 const {
   createGatePass,
@@ -27,6 +28,7 @@ router.get(
   "/approvers",
   authMiddleware,
   roleMiddleware("student"),
+  authorizeClaim("GatePassController", "list"),
   getAvailableApprovers
 );
 
@@ -35,6 +37,7 @@ router.post(
   "/request",
   authMiddleware,
   roleMiddleware("student"),
+  authorizeClaim("GatePassController", "add"),
   createGatePass
 );
 
@@ -43,6 +46,7 @@ router.get(
   "/my",
   authMiddleware,
   roleMiddleware("student"),
+  authorizeClaim("GatePassController", "list"),
   getMyGatePasses
 );
 
@@ -51,6 +55,7 @@ router.get(
   "/qr/:id",
   authMiddleware,
   roleMiddleware("student"),
+  authorizeClaim("GatePassController", "download"),
   getGatePassQR
 );
 
@@ -64,6 +69,7 @@ router.get(
   "/pending",
   authMiddleware,
   roleMiddleware("hod", "faculty"),
+  authorizeClaim("GatePassController", "list"),
   getPendingRequests
 );
 
@@ -72,6 +78,7 @@ router.put(
   "/:id/approve",
   authMiddleware,
   roleMiddleware("hod", "faculty"),
+  authorizeClaim("GatePassController", "update"),
   approveGatePass
 );
 
@@ -80,6 +87,7 @@ router.put(
   "/:id/reject",
   authMiddleware,
   roleMiddleware("hod", "faculty"),
+  authorizeClaim("GatePassController", "update"),
   rejectGatePass
 );
 
@@ -93,6 +101,7 @@ router.post(
   "/verify",
   authMiddleware,
   roleMiddleware("security", "admin"),
+  authorizeClaim("GatePassController", "update"),
   verifyGatePass
 );
 
@@ -100,6 +109,7 @@ router.post(
   "/verify-qr",
   authMiddleware,
   roleMiddleware("security", "admin"),
+  authorizeClaim("GatePassController", "update"),
   verifyGatePass
 );
 
@@ -107,6 +117,7 @@ router.post(
   "/verify-otp",
   authMiddleware,
   roleMiddleware("security", "admin"),
+  authorizeClaim("GatePassController", "update"),
   verifyGatePass
 );
 
@@ -115,6 +126,7 @@ router.get(
   "/logs",
   authMiddleware,
   roleMiddleware("security", "admin"),
+  authorizeClaim("GatePassController", "list"),
   getSecurityLogs
 );
 
@@ -122,6 +134,7 @@ router.get(
   "/security-logs",
   authMiddleware,
   roleMiddleware("security", "admin"),
+  authorizeClaim("GatePassController", "list"),
   getSecurityLogs
 );
 
@@ -135,6 +148,7 @@ router.get(
   "/admin/all",
   authMiddleware,
   roleMiddleware("admin"),
+  authorizeClaim("GatePassController", "list"),
   getAllGatePassesAdmin
 );
 

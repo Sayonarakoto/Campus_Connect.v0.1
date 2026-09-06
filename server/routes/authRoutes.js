@@ -20,7 +20,7 @@ const {
   getFacultyList,
   getAllUsers,
   getUserById,
-  impersonate
+  getAppMenu
 } = require("../controllers/authController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -111,8 +111,8 @@ router.get("/users", getAllUsers);
 // Get user by ID (admin only)
 router.get("/users/:id", getUserById);
 
-// Admin Sudo / Impersonation (Context Switching)
-router.post("/impersonate", roleMiddleware("admin"), impersonate);
+// Dynamic App Navigation Menu (Driven by Permission Claims)
+router.get("/menu", authMiddleware, getAppMenu);
 
 // =========================
 // LEGACY FACULTY LIST (Backward compatibility)

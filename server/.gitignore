@@ -5,10 +5,8 @@
 # Dependencies
 node_modules/
 
-# Environment variables & Secrets
-.env
-.env.*
-!.env.example
+# Environment variables & Secrets (Ignore all .env files)
+.env*
 
 # Local Uploads & Media Storage (keep directory structure via .gitkeep)
 uploads/*

@@ -263,27 +263,29 @@ exports.getDepartmentStudents = async (req, res) => {
 
   try {
 
-    let students;
+    const filter = {};
 
-    // Principal, Director and Admin can see everyone
-    if (
-      ["admin", "principal", "director"].includes(req.user.role)
-    ) {
-
-      students = await Student.find();
-
+    // Principal, Director and Admin can see everyone, or filter by specific department
+    if (["admin", "principal", "director"].includes(req.user.role)) {
+      if (req.query.department) {
+        filter.department = req.query.department;
+      }
+    } else {
+      // Faculty, Tutor and HOD restricted to their own department
+      filter.department = req.user.department;
     }
 
-    // Faculty, Tutor and HOD
-    else {
-
-      students = await Student.find({
-
-        department: req.user.department
-
-      });
-
+    if (req.query.section) {
+      filter.section = req.query.section;
     }
+
+    if (req.query.semester) {
+      filter.semester = Number(req.query.semester);
+    }
+
+    const students = await Student.find(filter)
+      .select("fullName admissionNo department semester section attendancePercentage academicYear")
+      .sort({ fullName: 1 });
 
     res.json({
 

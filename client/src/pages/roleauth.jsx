@@ -1,10 +1,12 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useToast } from "../context/ToastContext";
 import "./roleauth.css";
 
 function RoleAuth() {
   const { role } = useParams();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [credentials, setCredentials] = useState({
     email: "",
@@ -50,7 +52,7 @@ function RoleAuth() {
     e.preventDefault();
 
     if (isSecurity && (!credentials.password || !/^\d{6}$/.test(credentials.password.trim()))) {
-      alert("Please enter your 6-digit security passkey.");
+      showToast("Please enter your 6-digit security passkey.", "warning");
       return;
     }
 
@@ -74,53 +76,24 @@ function RoleAuth() {
 
       const data = await response.json();
 
-      console.log(
-  "LOGIN RESPONSE FROM SERVER:",
-  data
-);
-
-console.log(
-  "LOGIN STATUS:",
-  response.status
-);
-
       if (!response.ok) {
-        alert(data.message || "Login failed");
+        showToast(data.message || "Authentication failed. Please check your credentials.", "error");
         return;
       }
 
       // Save login information
-localStorage.setItem(
-  "token",
-  data.token
-);
-
-localStorage.setItem(
-  "user",
-  JSON.stringify(data.user)
-);
-
-
-console.log(
-  "TOKEN SAVED:",
-  localStorage.getItem("token")
-);
-
-
-console.log(
-  "USER SAVED:",
-  localStorage.getItem("user")
-);
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       // Reset promotion view tracking for this new login session
       sessionStorage.removeItem("promotionViewsRecorded");
 
-      alert("Login Successful");
+      showToast("Welcome back! Login successful.", "success");
 
       navigate(`/${role}/workdashboard`);
     } catch (error) {
       console.error("Login Error:", error);
-      alert("Server Error");
+      showToast("Unable to reach institutional server. Please try again.", "error");
     } finally {
       setLoading(false);
     }
@@ -157,10 +130,12 @@ console.log(
         type: "success",
         text: `Login code dispatched to ${data.maskedEmail || "your email"}. Check your inbox.`
       });
+      showToast(`Verification code sent to ${data.maskedEmail || "your email"}.`, "success");
       setParentStep(2);
       setParentCooldown(60);
     } catch (err) {
       setParentMessage({ type: "error", text: err.message || "Could not dispatch login OTP." });
+      showToast(err.message || "Could not dispatch login OTP.", "error");
     } finally {
       setLoading(false);
     }
@@ -176,6 +151,7 @@ console.log(
     const cleanOtp = parentOtp.trim();
     if (!cleanOtp || !/^\d{6}$/.test(cleanOtp)) {
       setParentMessage({ type: "error", text: "Please enter the 6-digit login verification code." });
+      showToast("Please enter the 6-digit login verification code.", "warning");
       return;
     }
 
@@ -199,10 +175,11 @@ console.log(
       localStorage.setItem("user", JSON.stringify(data.user));
       sessionStorage.removeItem("promotionViewsRecorded");
 
-      alert("Login Successful");
+      showToast("Parent authentication successful. Welcome!", "success");
       navigate("/parent/workdashboard");
     } catch (err) {
       setParentMessage({ type: "error", text: err.message || "Failed to verify login OTP." });
+      showToast(err.message || "Failed to verify login OTP.", "error");
     } finally {
       setLoading(false);
     }
@@ -229,9 +206,11 @@ console.log(
       }
 
       setParentMessage({ type: "success", text: "A fresh login code has been sent to your email." });
+      showToast("A fresh verification code has been dispatched to your email.", "info");
       setParentCooldown(60);
     } catch (err) {
       setParentMessage({ type: "error", text: err.message || "Failed to resend code." });
+      showToast(err.message || "Failed to resend code.", "error");
     } finally {
       setLoading(false);
     }

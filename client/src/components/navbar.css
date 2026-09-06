@@ -1,8 +1,8 @@
 /* --- Brand Standard Theme Variables --- */
 :root {
-  --primary-color: #0c2340;    /* Deep Academic Navy */
-  --secondary-color: #d4af37;  /* Academy Muted Gold */
-  --text-dark: #222222;
+  --primary-color: #1e3a8a; /* Deep Navy Blue */
+  --secondary-color: #d97706; /* Warm Amber / Gold */
+  --text-dark: #0f172a;
   --white: #ffffff;
   --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -12,16 +12,16 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  background-color: rgba(12, 35, 64, 0.96); /* Embedded dark background opacity */
+  background-color: rgba(30, 58, 138, 0.97); /* Deep Navy opacity */
   backdrop-filter: blur(8px); /* Modern frosted look */
   -webkit-backdrop-filter: blur(8px);
-  padding: 15px 5%;
+  padding: 14px 5%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 3px solid var(--secondary-color);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15);
+  font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
 }
 
 /* --- Brand Typography Grid --- */
@@ -192,13 +192,13 @@
 
   .nav-portal-highlight a.portal-cta-link {
     border-radius: 0;
-    background-color: rgba(214, 175, 55, 0.1);
+    background-color: rgba(217, 119, 6, 0.12);
     color: var(--secondary-color) !important;
   }
 }
 .navbar-logo-icon {
-  font-size: 1.8rem;             /* Balances beautifully with "ABC COLLEGE" typography size */
-  color: #d4af37;                /* Matches the Gold accent used in the home page feature icons */
+  font-size: 1.8rem;
+  color: var(--secondary-color, #d97706);
   display: flex;
   align-items: center;
   justify-content: center;

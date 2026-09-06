@@ -1,5 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useToast } from "../context/ToastContext";
 import "../pages/Dashboard/WorkDashboard.css";
 
 /* ===========================================================
@@ -325,6 +326,7 @@ const roleRegistrationSpecs = {
 function Register() {
   const { role } = useParams();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   /* ==========================================
       NORMALIZE ROLE
@@ -483,7 +485,7 @@ function Register() {
     try {
       // Validate file size (max 10MB before optimization)
       if (file.size > 10 * 1024 * 1024) {
-        alert("Profile photo should be less than 10MB before optimization");
+        showToast("Profile photo should be less than 10MB before optimization.", "warning");
         event.target.value = "";
         setUploadProgress(0);
         return;
@@ -492,7 +494,7 @@ function Register() {
       // Validate file type
       const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
       if (!validTypes.includes(file.type)) {
-        alert("Please select a valid image file (JPG, PNG, GIF, WEBP)");
+        showToast("Please select a valid image file (JPG, PNG, GIF, WEBP).", "warning");
         event.target.value = "";
         setUploadProgress(0);
         return;
@@ -516,7 +518,7 @@ function Register() {
       
     } catch (error) {
       console.error('Photo optimization error:', error);
-      alert(error.message || "Failed to process image. Please try another photo.");
+      showToast(error.message || "Failed to process image. Please try another photo.", "error");
       event.target.value = "";
       setUploadProgress(0);
     }
@@ -566,7 +568,7 @@ function Register() {
     try {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!formData.email || !emailRegex.test(formData.email.trim())) {
-        alert("Please enter a valid email address.");
+        showToast("Please enter a valid email address.", "warning");
         setLoading(false);
         return;
       }
@@ -574,7 +576,7 @@ function Register() {
       if (normalizedRole !== "admin") {
         const phoneRegex = /^[6-9]\d{9}$/;
         if (!formData.phoneNumber || !phoneRegex.test(formData.phoneNumber.trim())) {
-          alert("Please enter a valid 10-digit mobile number (starting with 6, 7, 8, or 9).");
+          showToast("Please enter a valid 10-digit mobile number (starting with 6, 7, 8, or 9).", "warning");
           setLoading(false);
           return;
         }
@@ -582,13 +584,13 @@ function Register() {
 
       if (normalizedRole === "security") {
         if (!formData.password || !/^\d{6}$/.test(formData.password.trim())) {
-          alert("Security passkey must be exactly 6 numeric digits.");
+          showToast("Security passkey must be exactly 6 numeric digits.", "warning");
           setLoading(false);
           return;
         }
       } else {
         if (!formData.password || formData.password.length < 6) {
-          alert("Password must be at least 6 characters long.");
+          showToast("Password must be at least 6 characters long.", "warning");
           setLoading(false);
           return;
         }
@@ -596,26 +598,26 @@ function Register() {
 
       if (normalizedRole === "student") {
         if (!formData.admissionNo || !/^\d{1,4}$/.test(formData.admissionNo)) {
-          alert("Admission Number is required and must be a number with up to 4 digits (e.g. 1001).");
+          showToast("Admission Number is required and must be a number with up to 4 digits (e.g. 1001).", "warning");
           setLoading(false);
           return;
         }
 
         if (!formData.regNo || !/^\d{1,10}$/.test(formData.regNo)) {
-          alert("Register Number is required and must be a number with up to 10 digits (e.g. 2101234567).");
+          showToast("Register Number is required and must be a number with up to 10 digits (e.g. 2101234567).", "warning");
           setLoading(false);
           return;
         }
 
         if (formData.parentEmail && !emailRegex.test(formData.parentEmail.trim())) {
-          alert("Please enter a valid parent email address.");
+          showToast("Please enter a valid parent email address.", "warning");
           setLoading(false);
           return;
         }
 
         if (formData.department === "Mechanical Engineering") {
           if (!formData.section || !["Mech-A", "Mech-B"].includes(formData.section)) {
-            alert("Section is mandatory for Mechanical Engineering. Please select Mech-A or Mech-B.");
+            showToast("Section is mandatory for Mechanical Engineering. Please select Mech-A or Mech-B.", "warning");
             setLoading(false);
             return;
           }
@@ -650,7 +652,7 @@ function Register() {
       if (profilePhoto) {
         // Check final size
         if (profilePhoto.size > 5 * 1024 * 1024) {
-          alert("Profile photo is still too large. Please choose a smaller image.");
+          showToast("Profile photo is still too large. Please choose a smaller image.", "warning");
           setLoading(false);
           return;
         }
@@ -668,15 +670,15 @@ function Register() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.message || "Registration Failed");
+        showToast(data.message || "Registration failed. Please review your details.", "error");
         return;
       }
 
-      alert("Registration Successful!");
+      showToast("Registration successful! Redirecting to login...", "success");
       navigate(`/${normalizedRole}/auth`);
     } catch (error) {
       console.error(error);
-      alert("Server Error. Please try again.");
+      showToast("Unable to connect to college server. Please try again.", "error");
     } finally {
       setLoading(false);
     }

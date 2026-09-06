@@ -35,9 +35,9 @@
 
 /* Header Top Accent Panel */
 .auth-card-header {
-  background-color: var(--primary-color, #0c2340);
+  background-color: var(--primary-color, #1e3a8a);
   padding: 35px 40px 30px 40px;
-  border-bottom: 4px solid var(--secondary-color, #d4af37);
+  border-bottom: 4px solid var(--secondary-color, #d97706);
 }
 
 .auth-role-badge {
@@ -46,12 +46,12 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 2px;
-  color: var(--secondary-color, #d4af37);
-  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--secondary-color, #d97706);
+  background-color: rgba(255, 255, 255, 0.08);
   padding: 4px 10px;
   border-radius: 4px;
   margin-bottom: 12px;
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  border: 1px solid rgba(217, 119, 6, 0.3);
 }
 
 .auth-card-header h2 {
@@ -90,7 +90,7 @@
 .auth-form-group label {
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--primary-color, #0c2340);
+  color: var(--primary-color, #1e3a8a);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -101,7 +101,7 @@
   border: 2px solid var(--border-color, #e2e8f0);
   border-radius: 6px;
   font-size: 1rem;
-  color: var(--text-dark, #222222);
+  color: var(--text-dark, #0f172a);
   background-color: #fafbfd;
   transition: all 0.2s ease;
   outline: none;
@@ -109,18 +109,18 @@
 }
 
 .auth-form-group input:focus {
-  border-color: var(--primary-color, #0c2340);
+  border-color: var(--primary-color, #1e3a8a);
   background-color: var(--white, #ffffff);
-  box-shadow: 0 0 0 3px rgba(12, 35, 64, 0.06);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
 }
 
 .auth-form-group input::placeholder {
-  color: #cbd5e0;
+  color: #94a3b8;
 }
 
 /* --- Primary Access Action Button --- */
 .auth-btn-execute {
-  background-color: var(--primary-color, #0c2340);
+  background-color: var(--primary-color, #1e3a8a);
   color: var(--white, #ffffff);
   border: none;
   padding: 14px 20px;
@@ -135,9 +135,9 @@
 }
 
 .auth-btn-execute:hover {
-  background-color: #123054;
+  background-color: var(--primary-hover, #1e40af);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(12, 35, 64, 0.15);
+  box-shadow: 0 6px 16px rgba(30, 58, 138, 0.25);
 }
 
 .auth-btn-execute:active {
@@ -151,14 +151,14 @@
   text-align: center;
   margin-top: 24px;
   font-size: 0.88rem;
-  color: var(--text-light, #555555);
+  color: var(--text-muted, #64748b);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s ease;
 }
 
 .auth-back-link:hover {
-  color: var(--primary-color, #0c2340);
+  color: var(--primary-color, #1e3a8a);
 }
 
 /* ==========================================================================

@@ -11,6 +11,7 @@ import Contact from "./pages/contact";
 import Register from "./pages/register";
 import RoleAuth from "./pages/roleauth";
 import ForgotPassword from "./pages/ForgotPassword";
+import { ToastProvider } from "./context/ToastContext";
 
 import GatePassRequest from "./pages/GatePass/GatePassRequest";
 import GatePassApproval from "./pages/GatePass/GatePassapproval";
@@ -104,11 +105,12 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Navbar />
+      <ToastProvider>
+        <Navbar />
 
-      {token && <PromotionEngine />}
+        {token && <PromotionEngine />}
 
-      <main className="container">
+        <main className="container">
         <Routes>
 
           {/* ================= PUBLIC ROUTES ================= */}
@@ -318,6 +320,7 @@ function App() {
       </main>
 
       <Footer />
+      </ToastProvider>
     </BrowserRouter>
   );
 }

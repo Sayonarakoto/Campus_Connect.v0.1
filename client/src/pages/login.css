@@ -1,14 +1,14 @@
 /* --- Brand Standard Theme Variables --- */
 :root {
-  --primary-color: #0c2340;    /* Deep Academic Navy */
-  --secondary-color: #d4af37;  /* Academy Muted Gold */
-  --text-dark: #222222;
-  --text-light: #666666;
-  --bg-canvas: #f4f6f9;        /* Soft Gray-Blue Canvas */
+  --primary-color: #1e3a8a; /* Deep Academic Navy */
+  --secondary-color: #d97706; /* Warm Amber / Gold */
+  --text-dark: #0f172a;
+  --text-light: #64748b;
+  --bg-canvas: #f8fafc; /* Editorial Slate Canvas */
   --white: #ffffff;
   --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  --shadow-sm: 0 4px 6px rgba(12, 35, 64, 0.05);
-  --shadow-lg: 0 15px 30px rgba(12, 35, 64, 0.12);
+  --shadow-sm: 0 4px 6px rgba(15, 23, 42, 0.05);
+  --shadow-lg: 0 15px 30px rgba(15, 23, 42, 0.12);
 }
 
 /* --- Canvas Wrapper --- */
@@ -153,18 +153,18 @@
 }
 
 .btn-login:hover {
-  background-color: #16365c;
-  border-color: #16365c;
+  background-color: #1e40af;
+  border-color: #1e40af;
 }
 
 .btn-register {
   background-color: transparent;
   color: var(--primary-color);
-  border: 1px solid rgba(12, 35, 64, 0.2);
+  border: 1px solid rgba(30, 58, 138, 0.25);
 }
 
 .btn-register:hover {
-  background-color: #f0f4f8;
+  background-color: #f1f5f9;
   border-color: var(--primary-color);
 }
 
@@ -215,5 +215,5 @@
 
 /* Subtle transition polish when hovering over gateway options */
 .portal-card:hover .portal-icon i {
-  color: #d4af37; /* Clean shift to institutional gold accent focus */
+  color: var(--secondary-color, #d97706); /* Clean shift to institutional amber/gold focus */
 }

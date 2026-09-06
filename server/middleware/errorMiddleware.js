@@ -1,23 +1,10 @@
-module.exports = (
-    err,
-    req,
-    res,
-    next
-) => {
+const { sendErrorResponse } = require("../utils/errorHandler");
 
-    console.error(err);
-
-    res.status(
-        err.statusCode || 500
-    ).json({
-
-        success: false,
-
-        message:
-            err.message ||
-
-            "Internal Server Error"
-
-    });
-
-};
+/**
+ * Global Express error handling middleware.
+ * Intercepts all unhandled errors passed via next(err) and guarantees
+ * zero internal database, schema, or transaction leaks to the client.
+ */
+module.exports = (err, req, res, next) => {
+  return sendErrorResponse(res, err);
+};

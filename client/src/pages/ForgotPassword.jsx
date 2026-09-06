@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useToast } from "../context/ToastContext";
 import "./roleauth.css";
 
 /**
@@ -8,6 +9,7 @@ import "./roleauth.css";
  */
 function ForgotPassword() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [step, setStep] = useState(1); // 1: Request OTP, 2: Verify & Reset
   const [email, setEmail] = useState("");
@@ -42,6 +44,7 @@ function ForgotPassword() {
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
       setMessage({ type: "error", text: "Please enter a valid institutional email address." });
+      showToast("Please enter a valid institutional email address.", "warning");
       return;
     }
 
@@ -63,10 +66,12 @@ function ForgotPassword() {
         type: "success",
         text: `Verification code sent to ${data.maskedEmail || cleanEmail}. Check your inbox.`
       });
+      showToast(`Verification code sent to ${data.maskedEmail || cleanEmail}.`, "success");
       setStep(2);
       setResendCooldown(60); // 60-second cooldown
     } catch (err) {
       setMessage({ type: "error", text: err.message || "Network error. Could not send code." });
+      showToast(err.message || "Could not dispatch reset code.", "error");
     } finally {
       setLoading(false);
     }
@@ -93,9 +98,11 @@ function ForgotPassword() {
       }
 
       setMessage({ type: "success", text: "A fresh verification code has been dispatched to your email." });
+      showToast("A fresh verification code has been dispatched to your email.", "info");
       setResendCooldown(60);
     } catch (err) {
       setMessage({ type: "error", text: err.message || "Failed to resend code." });
+      showToast(err.message || "Failed to resend code.", "error");
     } finally {
       setLoading(false);
     }
@@ -111,16 +118,19 @@ function ForgotPassword() {
     const cleanOtp = otp.trim();
     if (!cleanOtp || !/^\d{6}$/.test(cleanOtp)) {
       setMessage({ type: "error", text: "Please enter the 6-digit verification code." });
+      showToast("Please enter the 6-digit verification code.", "warning");
       return;
     }
 
     if (!newPassword || newPassword.length < 6) {
       setMessage({ type: "error", text: "Password must be at least 6 characters long." });
+      showToast("Password must be at least 6 characters long.", "warning");
       return;
     }
 
     if (newPassword !== confirmPassword) {
       setMessage({ type: "error", text: "Passwords do not match. Please re-enter." });
+      showToast("Passwords do not match. Please re-enter.", "warning");
       return;
     }
 
@@ -145,12 +155,14 @@ function ForgotPassword() {
         type: "success",
         text: "Password updated successfully! Redirecting you to institutional gateways..."
       });
+      showToast("Password updated successfully! Redirecting to login...", "success");
 
       setTimeout(() => {
         navigate("/login");
       }, 2000);
     } catch (err) {
       setMessage({ type: "error", text: err.message || "Password reset failed." });
+      showToast(err.message || "Password reset failed.", "error");
     } finally {
       setLoading(false);
     }

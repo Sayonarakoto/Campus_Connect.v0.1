@@ -1,13 +1,75 @@
+/* ==========================================================================
+   ST. MARY'S POLYTECHNIC COLLEGE, VALIYODE - DESIGN SYSTEM
+   Editorial Slate & Deep Navy Theme
+   ========================================================================== */
+
+:root {
+  /* Institutional Authority & Engineering: Deep Navy Blue (#1E3A8A) */
+  --primary-color: #1e3a8a;
+  --primary-dark: #172554;
+  --primary-hover: #1e40af;
+  --primary-light: #dbeafe;
+  --primary-rgb: 30, 58, 138;
+  --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+
+  /* Secondary Accent: Energy & Distinction - Warm Amber/Gold (#D97706) */
+  --secondary-color: #d97706;
+  --secondary-hover: #b45309;
+  --secondary-light: #fef3c7;
+  --secondary-rgb: 217, 119, 6;
+
+  /* Editorial Slate Canvas & Surfaces */
+  --bg-canvas: #f8fafc;
+  --bg-light: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f1f5f9;
+  --white: #ffffff;
+
+  /* Borders & Dividers */
+  --border-color: #e2e8f0;
+  --border-focus: #3b82f6;
+
+  /* Typography & Hierarchy */
+  --text-dark: #0f172a;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-light: #64748b;
+  --text-inverse: #ffffff;
+
+  /* Status Colors */
+  --status-success: #16a34a;
+  --status-warning: #d97706;
+  --status-danger: #dc2626;
+  --status-info: #1e3a8a;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
+

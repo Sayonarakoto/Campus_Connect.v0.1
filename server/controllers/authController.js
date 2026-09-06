@@ -9,6 +9,7 @@ const OTP = require("../models/OTP");
 const emailService = require("../services/emailService");
 const { uploadToGridFS, deleteFromGridFS, getBucket } = require("../config/gridfs");
 const { requiresSection, getAllowedSections } = require("../constants/academicConfig");
+const { sendErrorResponse } = require("../utils/errorHandler");
 
 // ==========================================
 // HELPERS
@@ -423,11 +424,7 @@ exports.register = async (req, res) => {
       profilePhotoUrl: getProfilePhotoUrl(profilePhotoData)
     });
   } catch (error) {
-    console.error("❌ REGISTER ERROR:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return sendErrorResponse(res, error, "Failed to complete registration.");
   }
 };
 
@@ -715,11 +712,7 @@ exports.login = async (req, res) => {
       user: cleanUser
     });
   } catch (error) {
-    console.error("❌ LOGIN ERROR:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return sendErrorResponse(res, error, "Failed to process login.");
   }
 };
 
@@ -751,11 +744,7 @@ exports.profile = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("❌ PROFILE ERROR:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return sendErrorResponse(res, error, "Failed to retrieve user profile.");
   }
 };
 
@@ -800,23 +789,15 @@ exports.getProfilePhoto = async (req, res) => {
     const downloadStream = bucket.openDownloadStream(objectId);
     
     downloadStream.on('error', (error) => {
-      console.error('❌ Download stream error:', error);
       if (!res.headersSent) {
-        res.status(500).json({
-          success: false,
-          message: 'Error streaming file'
-        });
+        return sendErrorResponse(res, error, "Unable to stream profile photo.");
       }
     });
 
     downloadStream.pipe(res);
   } catch (error) {
-    console.error("❌ GET PROFILE PHOTO ERROR:", error);
     if (!res.headersSent) {
-      res.status(500).json({
-        success: false,
-        message: error.message
-      });
+      return sendErrorResponse(res, error, "Failed to retrieve profile photo.");
     }
   }
 };
@@ -904,11 +885,7 @@ exports.updateProfilePhoto = async (req, res) => {
       profilePhotoUrl: getProfilePhotoUrl(profilePhotoData)
     });
   } catch (error) {
-    console.error("❌ UPDATE PROFILE PHOTO ERROR:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return sendErrorResponse(res, error, "Failed to update profile photo.");
   }
 };
 
@@ -954,11 +931,7 @@ exports.deleteProfilePhoto = async (req, res) => {
       message: "Profile photo deleted successfully"
     });
   } catch (error) {
-    console.error("❌ DELETE PROFILE PHOTO ERROR:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return sendErrorResponse(res, error, "Failed to delete profile photo.");
   }
 };
 
@@ -984,11 +957,7 @@ exports.getFacultyList = async (req, res) => {
       users: usersWithPhotoUrls
     });
   } catch (err) {
-    console.error("❌ GET FACULTY LIST ERROR:", err);
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
+    return sendErrorResponse(res, err, "Failed to retrieve faculty list.");
   }
 };
 
@@ -1012,11 +981,7 @@ exports.getLeaveBalance = async (req, res) => {
       remaining: (user.annualLeavePool || 0) - (user.usedLeaveDays || 0)
     });
   } catch (error) {
-    console.error("❌ GET LEAVE BALANCE ERROR:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return sendErrorResponse(res, error, "Failed to retrieve leave balance.");
   }
 };
 
@@ -1039,11 +1004,7 @@ exports.getAllUsers = async (req, res) => {
       users: usersWithPhotoUrls
     });
   } catch (error) {
-    console.error("❌ GET ALL USERS ERROR:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return sendErrorResponse(res, error, "Failed to retrieve user directory.");
   }
 };
 
@@ -1077,11 +1038,7 @@ exports.getUserById = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("❌ GET USER BY ID ERROR:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return sendErrorResponse(res, error, "Failed to retrieve user details.");
   }
 };
 
@@ -1120,11 +1077,7 @@ exports.updateUser = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("❌ UPDATE USER ERROR:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return sendErrorResponse(res, error, "Failed to update user profile.");
   }
 };
 
@@ -1166,11 +1119,7 @@ exports.deleteUser = async (req, res) => {
       message: "User deleted successfully"
     });
   } catch (error) {
-    console.error("❌ DELETE USER ERROR:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    return sendErrorResponse(res, error, "Failed to delete user account.");
   }
 };
 
@@ -1219,11 +1168,7 @@ exports.forgotPassword = async (req, res) => {
       maskedEmail: maskEmail(cleanEmail)
     });
   } catch (error) {
-    console.error("❌ FORGOT PASSWORD ERROR:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to process password reset request."
-    });
+    return sendErrorResponse(res, error, "Failed to process password reset request.");
   }
 };
 
@@ -1289,11 +1234,7 @@ exports.resetPassword = async (req, res) => {
       message: "Password has been successfully updated. You can now log in with your new credentials."
     });
   } catch (error) {
-    console.error("❌ RESET PASSWORD ERROR:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to reset password."
-    });
+    return sendErrorResponse(res, error, "Failed to reset password.");
   }
 };
 
@@ -1359,11 +1300,7 @@ exports.sendParentLoginOTP = async (req, res) => {
       maskedEmail: maskEmail(parentUser.email)
     });
   } catch (error) {
-    console.error("❌ PARENT SEND OTP ERROR:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to dispatch parent login OTP."
-    });
+    return sendErrorResponse(res, error, "Failed to dispatch parent login OTP.");
   }
 };
 
@@ -1462,10 +1399,6 @@ exports.verifyParentLoginOTP = async (req, res) => {
       user: cleanUser
     });
   } catch (error) {
-    console.error("❌ PARENT VERIFY OTP ERROR:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to verify login OTP."
-    });
+    return sendErrorResponse(res, error, "Failed to verify login OTP.");
   }
 };

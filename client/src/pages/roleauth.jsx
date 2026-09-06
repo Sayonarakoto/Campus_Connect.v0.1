@@ -142,11 +142,17 @@ console.log(
                     ? "Admission Number or Email"
                     : (normalizedRole === "faculty" || normalizedRole === "hod")
                     ? "Faculty ID or Email"
+                    : normalizedRole === "hraccounts"
+                    ? "Staff ID or Email"
+                    : normalizedRole === "principal"
+                    ? "Employee ID or Email"
+                    : normalizedRole === "director"
+                    ? "Director Signature ID or Email"
                     : "Institutional Email Address"}
                 </label>
 
                 <input
-                  type={["student", "faculty", "hod"].includes(normalizedRole) ? "text" : "email"}
+                  type={["student", "faculty", "hod", "hraccounts", "principal", "director"].includes(normalizedRole) ? "text" : "email"}
                   name="email"
                   value={credentials.email}
                   required={!isSecurity}
@@ -156,6 +162,12 @@ console.log(
                       ? "Enter 4-digit Admission No or Email"
                       : (normalizedRole === "faculty" || normalizedRole === "hod")
                       ? "Enter Faculty ID or Email"
+                      : normalizedRole === "hraccounts"
+                      ? "Enter Staff ID (e.g. HR1001) or Email"
+                      : normalizedRole === "principal"
+                      ? "Enter Employee ID or Email"
+                      : normalizedRole === "director"
+                      ? "Enter Signature ID (e.g. DIR1001) or Email"
                       : "username@college.edu"
                   }
                 />

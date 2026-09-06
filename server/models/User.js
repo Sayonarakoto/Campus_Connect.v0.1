@@ -54,12 +54,12 @@ const UserSchema = new mongoose.Schema(
           "hod"
         ].includes(this.role);
       },
-      default: ""
+      default: undefined
     },
 
     section: {
       type: String,
-      default: null,
+      default: undefined,
       trim: true
     },
 
@@ -83,29 +83,41 @@ const UserSchema = new mongoose.Schema(
     },
 
     // =========================
-    // LAB STAFF FLAG
+    // DATE OF JOINING (Staff)
     // =========================
-    isLabStaff: {
-      type: Boolean,
-      default: false
+    dateOfJoining: {
+      type: Date,
+      default: undefined
     },
 
     // =========================
-    // TEMP HOD SUPPORT
+    // LAB STAFF FLAG (Faculty only)
+    // =========================
+    isLabStaff: {
+      type: Boolean,
+      default: function() {
+        return this.role === "faculty" ? false : undefined;
+      }
+    },
+
+    // =========================
+    // TEMP HOD SUPPORT (Faculty & HOD only)
     // =========================
     isTempHOD: {
       type: Boolean,
-      default: false
+      default: function() {
+        return ["faculty", "hod"].includes(this.role) ? false : undefined;
+      }
     },
 
     tempHODDepartment: {
       type: String,
-      default: null
+      default: undefined
     },
 
     tempHODUntil: {
       type: Date,
-      default: null
+      default: undefined
     },
 
     // =========================
@@ -117,24 +129,30 @@ const UserSchema = new mongoose.Schema(
     },
 
     // =========================
-    // LEAVE MANAGEMENT
+    // LEAVE MANAGEMENT (Staff only)
     // =========================
     annualLeavePool: {
       type: Number,
-      default: 12
+      default: function() {
+        return ["faculty", "tutor", "hod", "principal", "director", "hraccounts"].includes(this.role) ? 12 : undefined;
+      }
     },
 
     usedLeaveDays: {
       type: Number,
-      default: 0
+      default: function() {
+        return ["faculty", "tutor", "hod", "principal", "director", "hraccounts"].includes(this.role) ? 0 : undefined;
+      }
     },
 
     // =========================
-    // PAYROLL
+    // PAYROLL (Staff only)
     // =========================
     monthlySalary: {
       type: Number,
-      default: 30000
+      default: function() {
+        return ["faculty", "tutor", "hod", "principal", "director", "hraccounts"].includes(this.role) ? 30000 : undefined;
+      }
     },
 
     // =========================

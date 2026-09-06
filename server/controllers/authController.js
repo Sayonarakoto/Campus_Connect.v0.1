@@ -238,25 +238,107 @@ exports.register = async (req, res) => {
     }
 
     // ==========================================
+    // VALIDATE DATE OF JOINING (STAFF ROLES)
+    // ==========================================
+    const staffRoles = ["faculty", "hod", "principal", "director", "hraccounts"];
+    const rawDateOfJoining = req.body.dateOfJoining || customData.dateOfJoining;
+    let parsedDateOfJoining = undefined;
+
+    if (rawDateOfJoining) {
+      const parsed = new Date(rawDateOfJoining);
+      if (!isNaN(parsed.getTime())) {
+        parsedDateOfJoining = parsed;
+      }
+    }
+
+    if (staffRoles.includes(role)) {
+      if (!parsedDateOfJoining) {
+        return res.status(400).json({
+          success: false,
+          message: "Date of Joining is required for staff members."
+        });
+      }
+    }
+
+    // ==========================================
+    // VALIDATE HR & ACCOUNTS (STAFF ID & ROLE)
+    // ==========================================
+    if (role === "hraccounts") {
+      const staffId = (req.body.staffId || customData.staffId || "").toString().trim();
+      if (!staffId) {
+        return res.status(400).json({
+          success: false,
+          message: "Staff ID is required for HR & Accounts registration."
+        });
+      }
+
+      const escapedSid = staffId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const existingStaff = await User.findOne({
+        role: "hraccounts",
+        "customData.staffId": { $regex: new RegExp(`^${escapedSid}$`, "i") }
+      });
+      if (existingStaff) {
+        return res.status(400).json({
+          success: false,
+          message: `An account with Staff ID '${staffId}' already exists.`
+        });
+      }
+
+      const staffRole = req.body.staffRole || customData.staffRole;
+      if (!staffRole || !["HR", "Accounts"].includes(staffRole)) {
+        return res.status(400).json({
+          success: false,
+          message: "Please select a valid Role ('HR' or 'Accounts')."
+        });
+      }
+    }
+
+    // ==========================================
+    // CLEAN ROLE-SPECIFIC CUSTOM DATA
+    // ==========================================
+    const cleanCustomData = {};
+
+    if (role === "student") {
+      if (studentAdmissionNo) cleanCustomData.admissionNo = studentAdmissionNo;
+      if (studentRegNo) cleanCustomData.regNo = studentRegNo;
+      if (customData.semester) cleanCustomData.semester = customData.semester;
+      if (customData.batchYear) cleanCustomData.batchYear = customData.batchYear;
+      if (studentSection) cleanCustomData.section = studentSection;
+      if (customData.parentEmail) cleanCustomData.parentEmail = customData.parentEmail;
+    } else if (role === "faculty" || role === "hod") {
+      if (customData.employeeId) cleanCustomData.employeeId = customData.employeeId.toString().trim();
+      if (role === "hod" && customData.clearanceToken) cleanCustomData.clearanceToken = customData.clearanceToken;
+    } else if (role === "principal") {
+      if (customData.employeeId) cleanCustomData.employeeId = customData.employeeId.toString().trim();
+      if (customData.institutionCode) cleanCustomData.institutionCode = customData.institutionCode;
+    } else if (role === "director") {
+      if (customData.directorSignatureId) cleanCustomData.directorSignatureId = customData.directorSignatureId;
+    } else if (role === "hraccounts") {
+      if (customData.staffId) cleanCustomData.staffId = customData.staffId.toString().trim();
+      const staffRole = req.body.staffRole || customData.staffRole;
+      if (staffRole) cleanCustomData.staffRole = staffRole;
+    } else if (role === "parent") {
+      if (customData.studentRollNumber) cleanCustomData.studentRollNumber = customData.studentRollNumber;
+      if (customData.governmentId) cleanCustomData.governmentId = customData.governmentId;
+    } else if (role === "admin") {
+      if (customData.adminClearanceLevel) cleanCustomData.adminClearanceLevel = customData.adminClearanceLevel;
+    }
+
+    // ==========================================
     // CREATE USER
     // ==========================================
     const userData = {
       role,
       fullName,
-      department: department || '',
-      section: studentSection,
       email: email.toLowerCase().trim(),
-      phoneNumber: userPhone,
       password: hashedPassword,
+      ...(userPhone ? { phoneNumber: userPhone } : {}),
+      ...(parsedDateOfJoining ? { dateOfJoining: parsedDateOfJoining } : {}),
+      ...(department && ["student", "faculty", "tutor", "hod"].includes(role) ? { department } : {}),
+      ...(studentSection ? { section: studentSection } : {}),
+      ...(role === "faculty" ? { isLabStaff: isLabStaffBool } : {}),
       profilePhoto: profilePhotoData, // null or GridFS object
-      isLabStaff: isLabStaffBool,
-      customData: {
-        ...customData,
-        ...(customData.employeeId ? { employeeId: customData.employeeId.toString().trim() } : {}),
-        ...(userPhone ? { phoneNumber: userPhone } : {}),
-        admissionNo: studentAdmissionNo,
-        regNo: studentRegNo
-      }
+      customData: cleanCustomData
     };
 
     console.log('👤 Creating user with profilePhoto:', userData.profilePhoto ? 'Has photo' : 'No photo');
@@ -440,6 +522,94 @@ exports.login = async (req, res) => {
             message: `No ${role === "hod" ? "HOD" : "Faculty"} account found with this Faculty ID or Email. Please check or register first.`
           });
         }
+      } else if (role === "hraccounts") {
+        // Support HR & Accounts login by Staff ID OR Email
+        if (identifier.includes("@")) {
+          user = await User.findOne({ email: identifier.toLowerCase(), role: "hraccounts" });
+        } else {
+          const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          user = await User.findOne({
+            role: "hraccounts",
+            "customData.staffId": { $regex: new RegExp(`^${escapedId}$`, "i") }
+          });
+        }
+
+        if (!user) {
+          // Fallback check: check both email and staffId
+          const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          user = await User.findOne({
+            role: "hraccounts",
+            $or: [
+              { email: identifier.toLowerCase() },
+              { "customData.staffId": { $regex: new RegExp(`^${escapedId}$`, "i") } }
+            ]
+          });
+        }
+
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: "No HR / Accounts account found with this Staff ID or Email. Please check or register first."
+          });
+        }
+      } else if (role === "principal") {
+        // Support Principal login by Employee ID OR Email
+        if (identifier.includes("@")) {
+          user = await User.findOne({ email: identifier.toLowerCase(), role: "principal" });
+        } else {
+          const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          user = await User.findOne({
+            role: "principal",
+            "customData.employeeId": { $regex: new RegExp(`^${escapedId}$`, "i") }
+          });
+        }
+
+        if (!user) {
+          const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          user = await User.findOne({
+            role: "principal",
+            $or: [
+              { email: identifier.toLowerCase() },
+              { "customData.employeeId": { $regex: new RegExp(`^${escapedId}$`, "i") } }
+            ]
+          });
+        }
+
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: "No Principal account found with this Employee ID or Email. Please check or register first."
+          });
+        }
+      } else if (role === "director") {
+        // Support Director login by Signature ID OR Email
+        if (identifier.includes("@")) {
+          user = await User.findOne({ email: identifier.toLowerCase(), role: "director" });
+        } else {
+          const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          user = await User.findOne({
+            role: "director",
+            "customData.directorSignatureId": { $regex: new RegExp(`^${escapedId}$`, "i") }
+          });
+        }
+
+        if (!user) {
+          const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          user = await User.findOne({
+            role: "director",
+            $or: [
+              { email: identifier.toLowerCase() },
+              { "customData.directorSignatureId": { $regex: new RegExp(`^${escapedId}$`, "i") } }
+            ]
+          });
+        }
+
+        if (!user) {
+          return res.status(404).json({
+            success: false,
+            message: "No Director account found with this Signature ID or Email. Please check or register first."
+          });
+        }
       } else {
         user = await User.findOne({ email: identifier.toLowerCase(), role });
         if (!user) {
@@ -490,25 +660,34 @@ exports.login = async (req, res) => {
     // ==========================================
     // SUCCESS
     // ==========================================
+    const cleanUser = {
+      id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+      phoneNumber: user.phoneNumber || null,
+      profilePhoto: user.profilePhoto,
+      profilePhotoUrl: getProfilePhotoUrl(user.profilePhoto),
+      customData: user.customData || {}
+    };
+
+    if (user.dateOfJoining) cleanUser.dateOfJoining = user.dateOfJoining;
+    if (user.department) cleanUser.department = user.department;
+    if (user.section) cleanUser.section = user.section;
+    if (user.role === "faculty") cleanUser.isLabStaff = !!user.isLabStaff;
+    if (user.role === "faculty" || user.role === "hod") {
+      cleanUser.isTempHOD = !!user.isTempHOD;
+      if (user.isTempHOD) {
+        cleanUser.tempHODDepartment = user.tempHODDepartment;
+        cleanUser.tempHODUntil = user.tempHODUntil;
+      }
+    }
+
     res.json({
       success: true,
       message: "Login successful",
       token,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        department: user.department,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        role: user.role,
-        profilePhoto: user.profilePhoto,
-        profilePhotoUrl: getProfilePhotoUrl(user.profilePhoto),
-        isLabStaff: user.isLabStaff,
-        isTempHOD: user.isTempHOD,
-        tempHODDepartment: user.tempHODDepartment,
-        tempHODUntil: user.tempHODUntil,
-        customData: user.customData || {}
-      }
+      user: cleanUser
     });
   } catch (error) {
     console.error("❌ LOGIN ERROR:", error);

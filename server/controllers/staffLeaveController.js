@@ -750,17 +750,19 @@ exports.getHRAccountsDashboard = async (req, res) => {
       status: "FINAL_APPROVED"
     })
       .populate(
-  "applicantId",
-  `
-  fullName
-  email
-  role
-  annualLeavePool
-  usedLeaveDays
-  monthlySalary
-  profilePhoto
-  `
-)
+        "applicantId",
+        `
+        fullName
+        email
+        role
+        department
+        dateOfJoining
+        annualLeavePool
+        usedLeaveDays
+        monthlySalary
+        profilePhoto
+        `
+      )
       .populate(
         "coverageFaculty",
         "fullName email"
@@ -772,7 +774,7 @@ exports.getHRAccountsDashboard = async (req, res) => {
     })
       .populate(
         "applicantId",
-        "fullName email role annualLeavePool usedLeaveDays"
+        "fullName email role department dateOfJoining annualLeavePool usedLeaveDays monthlySalary"
       )
       .populate(
         "coverageFaculty",
@@ -794,7 +796,7 @@ exports.getHRAccountsDashboard = async (req, res) => {
     })
       .populate(
         "applicantId",
-        "fullName email role annualLeavePool usedLeaveDays profilePhoto"
+        "fullName email role department dateOfJoining annualLeavePool usedLeaveDays monthlySalary profilePhoto"
       )
       .populate(
         "coverageFaculty",
@@ -812,7 +814,7 @@ exports.getHRAccountsDashboard = async (req, res) => {
     })
       .populate(
         "applicantId",
-        "fullName email role annualLeavePool usedLeaveDays profilePhoto"
+        "fullName email role department dateOfJoining annualLeavePool usedLeaveDays monthlySalary profilePhoto"
       )
       .populate(
         "coverageFaculty",

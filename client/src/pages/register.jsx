@@ -138,6 +138,12 @@ const roleRegistrationSpecs = {
         required: true
       },
       {
+        name: "dateOfJoining",
+        label: "Date of Joining",
+        type: "date",
+        required: true
+      },
+      {
         name: "isLabStaff",
         label: "Lab Staff",
         type: "checkbox",
@@ -166,6 +172,12 @@ const roleRegistrationSpecs = {
         label: "Department",
         type: "select",
         options: DEPARTMENTS,
+        required: true
+      },
+      {
+        name: "dateOfJoining",
+        label: "Date of Joining",
+        type: "date",
         required: true
       },
       {
@@ -199,6 +211,12 @@ const roleRegistrationSpecs = {
         type: "text",
         placeholder: "College Code",
         required: true
+      },
+      {
+        name: "dateOfJoining",
+        label: "Date of Joining",
+        type: "date",
+        required: true
       }
     ]
   },
@@ -219,6 +237,12 @@ const roleRegistrationSpecs = {
         required: true
       },
       {
+        name: "dateOfJoining",
+        label: "Date of Joining",
+        type: "date",
+        required: true
+      },
+      {
         name: "rootPassphrase",
         label: "Root Passphrase",
         type: "password",
@@ -233,8 +257,8 @@ const roleRegistrationSpecs = {
   ========================== */
   hraccounts: {
     title: "HR & Accounts Registration",
-    badge: "HR",
-    instructions: "Register HR & Accounts account.",
+    badge: "HR & Accounts",
+    instructions: "Register HR & Accounts staff account.",
     customFields: [
       {
         name: "staffId",
@@ -244,14 +268,19 @@ const roleRegistrationSpecs = {
         required: true
       },
       {
-        name: "ledgerAccessGroup",
-        label: "Access Group",
+        name: "staffRole",
+        label: "Role",
         type: "select",
         options: [
-          "Global Faculty Ledgers",
-          "Contract Staff",
-          "Executive Ledgers"
+          "HR",
+          "Accounts"
         ],
+        required: true
+      },
+      {
+        name: "dateOfJoining",
+        label: "Date of Joining",
+        type: "date",
         required: true
       }
     ]
@@ -316,6 +345,7 @@ function Register() {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
+    phoneNumber: "",
     password: "",
     department: "",
     programme: "",
@@ -324,22 +354,19 @@ function Register() {
     section: "",
     admissionNo: "",
     regNo: "",
-    rollNumber: "",
     parentEmail: "",
     studentRollNumber: "",
     governmentId: "",
     employeeId: "",
+    dateOfJoining: "",
     institutionCode: "",
     directorSignatureId: "",
     rootPassphrase: "",
     staffId: "",
-    ledgerAccessGroup: "",
-    gateIdentifier: "",
-    deviceId: "",
+    staffRole: "",
     adminClearanceLevel: "",
     systemPasskey: "",
     clearanceToken: "",
-    phoneNumber: "",
     isLabStaff: false
   });
 
@@ -597,13 +624,25 @@ function Register() {
 
       const form = new FormData();
       
-      // Role
+      // Standard fields
       form.append("role", normalizedRole);
+      form.append("fullName", formData.fullName.trim());
+      form.append("email", formData.email.trim());
+      form.append("password", formData.password);
+      if (normalizedRole !== "admin" && formData.phoneNumber) {
+        form.append("phoneNumber", formData.phoneNumber.trim());
+      }
       
-      // All form fields
-      Object.keys(formData).forEach(key => {
-        if (formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
-          form.append(key, formData[key]);
+      // Append only custom fields declared for this specific role
+      const declaredFields = config.customFields || [];
+      declaredFields.forEach(field => {
+        const val = formData[field.name];
+        if (field.type === "checkbox") {
+          if (val === true) {
+            form.append(field.name, "true");
+          }
+        } else if (val !== null && val !== undefined && val !== '') {
+          form.append(field.name, typeof val === "string" ? val.trim() : val);
         }
       });
       

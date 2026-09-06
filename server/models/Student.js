@@ -77,22 +77,11 @@ gender: {
   default: "Male"
 },
 
-house: {
-  type: String,
-  enum: [
-    "",
-    "Green House",
-    "Blue House",
-    "Red House",
-    "Yellow House"
-  ],
-  default: ""
-},
-house: {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: "House",
-  default: null
-},
+    house: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "House",
+      default: null
+    },
 
 sportsAbstractSubmitted: {
   type: Boolean,

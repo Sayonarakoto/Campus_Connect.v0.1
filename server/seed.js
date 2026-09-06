@@ -95,15 +95,12 @@ async function seedDatabase() {
         role: "hod",
         fullName: `Dr. ${dept.code} HOD`,
         department: dept.name,
-        section: null,
         email: hodEmail,
         phoneNumber: hodPhone,
+        dateOfJoining: new Date("2020-06-01"),
         password: hashedPassword,
-        isLabStaff: false,
         customData: {
-          employeeId: hodId,
-          phoneNumber: hodPhone,
-          department: dept.name
+          employeeId: hodId
         }
       };
 
@@ -139,15 +136,13 @@ async function seedDatabase() {
           role: "faculty",
           fullName: `Prof. ${dept.code} Faculty ${f}`,
           department: dept.name,
-          section: null,
           email: facultyEmail,
           phoneNumber: facultyPhone,
+          dateOfJoining: new Date("2021-08-15"),
           password: hashedPassword,
           isLabStaff: false,
           customData: {
-            employeeId: facultyId,
-            phoneNumber: facultyPhone,
-            department: dept.name
+            employeeId: facultyId
           }
         };
 
@@ -184,15 +179,13 @@ async function seedDatabase() {
           role: "faculty",
           fullName: `Lab Instructor ${dept.code} ${l}`,
           department: dept.name,
-          section: null,
           email: labEmail,
           phoneNumber: labPhone,
+          dateOfJoining: new Date("2022-01-10"),
           password: hashedPassword,
           isLabStaff: true,
           customData: {
-            employeeId: labId,
-            phoneNumber: labPhone,
-            department: dept.name
+            employeeId: labId
           }
         };
 
@@ -240,12 +233,9 @@ async function seedDatabase() {
           email: studentEmail,
           phoneNumber: studentPhone,
           password: hashedPassword,
-          isLabStaff: false,
           customData: {
             admissionNo,
             regNo,
-            phoneNumber: studentPhone,
-            department: dept.name,
             semester: 1,
             batchYear: "2024-2027",
             section: studentSection,
@@ -298,6 +288,64 @@ async function seedDatabase() {
           "Lab Staff": studentSection || "N/A"
         });
       }
+    }
+
+    // ==========================================
+    // 4. SEED HR & ACCOUNTS CELL
+    // ==========================================
+    console.log("🏢 Seeding HR & Accounts administrative cell...");
+    const hrAccountsProfiles = [
+      {
+        fullName: "Institutional HR Officer",
+        email: "hr@college.edu",
+        phoneNumber: "9876543210",
+        staffId: "HR1001",
+        staffRole: "HR",
+        dateOfJoining: new Date("2019-04-01")
+      },
+      {
+        fullName: "Institutional Accounts Officer",
+        email: "accounts@college.edu",
+        phoneNumber: "9876543211",
+        staffId: "ACC1001",
+        staffRole: "Accounts",
+        dateOfJoining: new Date("2019-06-15")
+      }
+    ];
+
+    for (const profile of hrAccountsProfiles) {
+      let existingUser = await User.findOne({ email: profile.email });
+      const userPayload = {
+        role: "hraccounts",
+        fullName: profile.fullName,
+        email: profile.email,
+        phoneNumber: profile.phoneNumber,
+        dateOfJoining: profile.dateOfJoining,
+        password: hashedPassword,
+        customData: {
+          staffId: profile.staffId,
+          staffRole: profile.staffRole
+        }
+      };
+
+      if (!existingUser) {
+        await User.create(userPayload);
+        stats.usersCreated++;
+      } else {
+        Object.assign(existingUser, userPayload);
+        await existingUser.save();
+        stats.usersUpdated++;
+      }
+
+      summaryTable.push({
+        Department: "ADMIN",
+        Role: `HR/Accounts (${profile.staffRole})`,
+        Name: profile.fullName,
+        "Login ID (Faculty ID)": profile.staffId,
+        Email: profile.email,
+        Phone: profile.phoneNumber,
+        "Lab Staff": profile.staffRole
+      });
     }
 
     console.log("\n=================================================");

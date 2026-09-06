@@ -8,22 +8,22 @@ export default function ProfileCard({ user }) {
 
   if (!user) return null;
 
+  const photoSrc = user.profilePhotoUrl
+    ? `${API}${user.profilePhotoUrl}`
+    : (user.profilePhoto?.url
+        ? `${API}${user.profilePhoto.url}`
+        : (typeof user.profilePhoto === "string"
+            ? `${API}${user.profilePhoto}`
+            : "/default-avatar.png"));
+
   return (
 
     <div className="profile-card">
 
       <img
-
         className="profile-card-image"
-
-        src={
-          user.profilePhoto
-            ? `${API}${user.profilePhoto}`
-            : "/default-avatar.png"
-        }
-
+        src={photoSrc}
         alt={user.fullName}
-
       />
 
       <div className="profile-card-details">
@@ -40,10 +40,18 @@ export default function ProfileCard({ user }) {
 
         )}
 
-        {user.customData?.rollNumber && (
+        {(user.customData?.admissionNo || user.customData?.rollNumber) && (
 
           <p>
-            Roll No : {user.customData.rollNumber}
+            Admission No : {user.customData.admissionNo || user.customData.rollNumber}
+          </p>
+
+        )}
+
+        {user.customData?.regNo && (
+
+          <p>
+            Register No : {user.customData.regNo}
           </p>
 
         )}

@@ -100,17 +100,10 @@ const roleRegistrationSpecs = {
     instructions: "Link your account with your child's admission number.",
     customFields: [
       {
-        name: "studentRollNumber",
-        label: "Student Roll Number",
+        name: "studentAdmissionNo",
+        label: "Student Admission Number",
         type: "text",
-        placeholder: "STU2026001",
-        required: true
-      },
-      {
-        name: "governmentId",
-        label: "Government ID",
-        type: "text",
-        placeholder: "National ID / Passport",
+        placeholder: "e.g. 1001",
         required: true
       }
     ]
@@ -352,8 +345,7 @@ function Register() {
     admissionNo: "",
     regNo: "",
     parentEmail: "",
-    studentRollNumber: "",
-    governmentId: "",
+    studentAdmissionNo: "",
     employeeId: "",
     dateOfJoining: "",
     institutionCode: "",
@@ -923,27 +915,29 @@ function Register() {
               </div>
             )}
 
-            {/* PASSWORD */}
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                {normalizedRole === "security" ? "6-Digit Passkey *" : "Password *"}
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                style={styles.input}
-                placeholder={
-                  normalizedRole === "security"
-                    ? "Enter 6-digit numeric passkey"
-                    : "Create Password (min 6 characters)"
-                }
-                required
-                minLength="6"
-                maxLength={normalizedRole === "security" ? 6 : undefined}
-              />
-            </div>
+            {/* PASSWORD (Hidden for Parent role) */}
+            {normalizedRole !== "parent" && (
+              <div style={styles.formGroup}>
+                <label style={styles.label}>
+                  {normalizedRole === "security" ? "6-Digit Passkey *" : "Password *"}
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                  placeholder={
+                    normalizedRole === "security"
+                      ? "Enter 6-digit numeric passkey"
+                      : "Create Password (min 6 characters)"
+                  }
+                  required
+                  minLength="6"
+                  maxLength={normalizedRole === "security" ? 6 : undefined}
+                />
+              </div>
+            )}
 
             {/* ===========================
                 PROFILE PHOTO (Student/Faculty only)

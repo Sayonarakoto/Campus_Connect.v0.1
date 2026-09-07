@@ -7,7 +7,7 @@ function ParentDashboard() {
   return (
     <div className="workspace-container">
 
-      <h1>Parent Workspace</h1>
+      <h1>Parent Dashboard</h1>
 
       <p style={{ marginBottom: "20px", color: "#555" }}>
         Verify and monitor your child’s leave requests in real time.
@@ -59,7 +59,7 @@ function ParentDashboard() {
     navigate("/discpline/parent")
   }
 >
-  <h4>Discplinary Actions </h4>
+  <h4>Disciplinary Actions </h4>
 
   <p>
     View Disciplinary Actions 
@@ -68,26 +68,7 @@ function ParentDashboard() {
 
       </div>
 
-      {/* Back to portal */}
-      <div style={{ marginTop: "25px" }}>
-        <button
-          onClick={() => navigate("/")}
-          style={{
-            padding: "10px 16px",
-            border: "none",
-            borderRadius: "6px",
-            background: "#333",
-            color: "white",
-            cursor: "pointer"
-          }}
-        >
-          Switch Portal
-        </button>
-
-
       </div>
-
-    </div>
   );
 }
 

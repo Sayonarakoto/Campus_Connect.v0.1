@@ -92,7 +92,7 @@ function RoleAuth({ roleOverride }) {
 
       showToast("Welcome back! Login successful.", "success");
 
-      navigate(`/${normalizedRole}/workdashboard`);
+      navigate(`/${data.user.role}/workdashboard`);
     } catch (error) {
       console.error("Login Error:", error);
       showToast("Unable to reach institutional server. Please try again.", "error");

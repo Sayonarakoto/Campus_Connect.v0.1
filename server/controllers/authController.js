@@ -347,9 +347,6 @@ exports.register = async (req, res) => {
       if (role === "hod" && customData.clearanceToken) cleanCustomData.clearanceToken = customData.clearanceToken;
     } else if (role === "principal") {
       if (customData.employeeId) cleanCustomData.employeeId = customData.employeeId.toString().trim();
-      if (customData.institutionCode) cleanCustomData.institutionCode = customData.institutionCode;
-    } else if (role === "director") {
-      if (customData.directorSignatureId) cleanCustomData.directorSignatureId = customData.directorSignatureId;
     } else if (role === "hraccounts") {
       if (customData.staffId) cleanCustomData.staffId = customData.staffId.toString().trim();
       const staffRole = req.body.staffRole || customData.staffRole;
@@ -682,32 +679,11 @@ exports.login = async (req, res) => {
           });
         }
       } else if (role === "director") {
-        // Support Director login by Signature ID OR Email
-        if (identifier.includes("@")) {
-          user = await User.findOne({ email: identifier.toLowerCase(), role: "director" });
-        } else {
-          const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          user = await User.findOne({
-            role: "director",
-            "customData.directorSignatureId": { $regex: new RegExp(`^${escapedId}$`, "i") }
-          });
-        }
-
-        if (!user) {
-          const escapedId = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          user = await User.findOne({
-            role: "director",
-            $or: [
-              { email: identifier.toLowerCase() },
-              { "customData.directorSignatureId": { $regex: new RegExp(`^${escapedId}$`, "i") } }
-            ]
-          });
-        }
-
+        user = await User.findOne({ email: identifier.toLowerCase(), role: "director" });
         if (!user) {
           return res.status(404).json({
             success: false,
-            message: "No Director account found with this Signature ID or Email. Please check or register first."
+            message: "No Director account found with this Email. Please check or register first."
           });
         }
       } else if (role === "admin") {

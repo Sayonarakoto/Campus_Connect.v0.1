@@ -359,21 +359,19 @@ function RoleAuth({ roleOverride }) {
                   <label>
                     {normalizedRole === "student"
                       ? "Admission Number or Email"
-                      : (normalizedRole === "faculty" || normalizedRole === "hod")
+                      : (normalizedRole === "faculty" || normalizedRole === "hod" || normalizedRole === "principal")
                       ? "Faculty ID or Email"
                       : normalizedRole === "hraccounts"
                       ? "Staff ID or Email"
-                      : normalizedRole === "principal"
-                      ? "Employee ID or Email"
                       : normalizedRole === "director"
-                      ? "Director Signature ID or Email"
+                      ? "Director Email Address"
                       : isAdmin
                       ? "Administrator Username or Email"
                       : "Institutional Email Address"}
                   </label>
 
                   <input
-                    type={["student", "faculty", "hod", "hraccounts", "principal", "director", "admin"].includes(normalizedRole) ? "text" : "email"}
+                    type={["student", "faculty", "hod", "hraccounts", "principal", "admin"].includes(normalizedRole) ? "text" : "email"}
                     name="email"
                     value={credentials.email}
                     required={!isSecurity}
@@ -381,14 +379,12 @@ function RoleAuth({ roleOverride }) {
                     placeholder={
                       normalizedRole === "student"
                         ? "Enter 4-digit Admission No or Email"
-                        : (normalizedRole === "faculty" || normalizedRole === "hod")
+                        : (normalizedRole === "faculty" || normalizedRole === "hod" || normalizedRole === "principal")
                         ? "Enter Faculty ID or Email"
                         : normalizedRole === "hraccounts"
                         ? "Enter Staff ID (e.g. HR1001) or Email"
-                        : normalizedRole === "principal"
-                        ? "Enter Employee ID or Email"
                         : normalizedRole === "director"
-                        ? "Enter Signature ID (e.g. DIR1001) or Email"
+                        ? "Enter Email Address"
                         : isAdmin
                         ? "Enter username (e.g. luka) or email"
                         : "username@college.edu"

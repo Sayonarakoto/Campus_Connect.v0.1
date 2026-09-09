@@ -200,13 +200,6 @@ const roleRegistrationSpecs = {
         required: true
       },
       {
-        name: "institutionCode",
-        label: "Institution Code",
-        type: "text",
-        placeholder: "College Code",
-        required: true
-      },
-      {
         name: "dateOfJoining",
         label: "Date of Joining",
         type: "date",
@@ -224,23 +217,9 @@ const roleRegistrationSpecs = {
     instructions: "Register the Director account.",
     customFields: [
       {
-        name: "directorSignatureId",
-        label: "Director Signature ID",
-        type: "text",
-        placeholder: "DIR1001",
-        required: true
-      },
-      {
         name: "dateOfJoining",
         label: "Date of Joining",
         type: "date",
-        required: true
-      },
-      {
-        name: "rootPassphrase",
-        label: "Root Passphrase",
-        type: "password",
-        placeholder: "********",
         required: true
       }
     ]
@@ -348,9 +327,6 @@ function Register() {
     studentAdmissionNo: "",
     employeeId: "",
     dateOfJoining: "",
-    institutionCode: "",
-    directorSignatureId: "",
-    rootPassphrase: "",
     staffId: "",
     staffRole: "",
     adminClearanceLevel: "",

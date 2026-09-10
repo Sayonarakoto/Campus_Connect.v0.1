@@ -1,0 +1,4 @@
+/* Specific styles for InstallPWA component if needed */
+.pwa-install-btn:hover {
+  opacity: 0.9;
+}

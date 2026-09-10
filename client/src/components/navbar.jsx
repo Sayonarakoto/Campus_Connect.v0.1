@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import DashboardSidebar from "./Sidebar/DashboardSidebar";
 import ProfileCard from "./ProfileCard";
+import InstallPWA from "./InstallPWA";
 import "./navbar.css";
 
 const API_BASE = "http://localhost:5000";
@@ -114,6 +115,7 @@ function Navbar() {
 
           {/* Right: Notifications Bell + Profile Avatar */}
           <div className="dashboard-header-right">
+            <InstallPWA />
             {/* Notifications Bell */}
             <div className="header-notifications-wrapper" ref={notifRef}>
               <button
@@ -252,6 +254,9 @@ function Navbar() {
           <NavLink to="/login" onClick={() => setMenuOpen(false)} className="portal-cta-link">
             Campus Portal
           </NavLink>
+        </li>
+        <li className="nav-item">
+          <InstallPWA />
         </li>
       </ul>
     </nav>

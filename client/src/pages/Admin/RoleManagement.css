@@ -1,0 +1,193 @@
+.role-management-page {
+  display: flex;
+  height: calc(100vh - 80px);
+  background: #f8fafc;
+  gap: 20px;
+  padding: 20px;
+}
+.role-sidebar {
+  width: 300px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.role-sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.role-sidebar-header h2 {
+  margin: 0 0 15px 0;
+  font-size: 1.2rem;
+  color: #1e293b;
+}
+.search-box {
+  display: flex;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+.search-box i {
+  color: #94a3b8;
+  margin-right: 10px;
+}
+.search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+}
+.role-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+.role-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  margin-bottom: 5px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s;
+}
+.role-item:hover {
+  background: #f1f5f9;
+}
+.role-item.active {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 600;
+}
+.role-item i {
+  width: 25px;
+}
+.role-sidebar-footer {
+  padding: 15px;
+  border-top: 1px solid #e2e8f0;
+}
+.btn-add-role {
+  width: 100%;
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-add-role:hover {
+  background: #059669;
+}
+.claim-content {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.claim-header {
+  padding: 20px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.claim-header h2 {
+  margin: 0 0 5px 0;
+  font-size: 1.5rem;
+}
+.highlight-role {
+  color: #2563eb;
+}
+.claim-header p {
+  margin: 0;
+  color: #64748b;
+}
+.claim-actions {
+  display: flex;
+  gap: 15px;
+}
+.btn-save {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-save:hover {
+  background: #1d4ed8;
+}
+.btn-save:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.claim-matrix {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+.claim-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.claim-table th {
+  background: #f8fafc;
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 2px solid #e2e8f0;
+  color: #475569;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.claim-table td {
+  padding: 15px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.controller-name {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 5px;
+}
+.controller-name i {
+  color: #94a3b8;
+  margin-right: 10px;
+  width: 20px;
+}
+.claim-table small {
+  color: #64748b;
+  margin-left: 30px;
+}
+.claim-table input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #2563eb;
+}
+.empty-state {
+  text-align: center;
+  padding: 40px !important;
+  color: #94a3b8;
+}
+.loading-state {
+  text-align: center;
+  padding: 50px;
+  color: #64748b;
+  font-size: 1.1rem;
+}

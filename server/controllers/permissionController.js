@@ -124,3 +124,57 @@ exports.resetPermissions = async (req, res) => {
 };
 
 exports.DEFAULT_PERMISSIONS = DEFAULT_PERMISSIONS;
+
+/**
+ * Provision an empty claims matrix for a brand new role
+ * POST /api/permissions/role
+ * Body: { newRole: string }
+ */
+exports.createRole = async (req, res) => {
+  try {
+    const { newRole } = req.body;
+    if (!newRole) {
+      return res.status(400).json({ success: false, message: "Role name is required." });
+    }
+
+    const cleanRole = newRole.toLowerCase().trim();
+
+    // Check if role already exists in permissions
+    const exists = await Permission.findOne({ role: cleanRole });
+    if (exists) {
+      return res.status(400).json({ success: false, message: `Role '${cleanRole}' already exists in the claims matrix.` });
+    }
+
+    // Get all distinct controllers to provision
+    const allControllers = await Permission.distinct("controller");
+    if (!allControllers || allControllers.length === 0) {
+      return res.status(400).json({ success: false, message: "No controllers found to map against." });
+    }
+
+    // Scaffold empty entries for the new role
+    const newClaims = allControllers.map(controller => ({
+      role: cleanRole,
+      controller: controller,
+      moduleTitle: controller, // fallback
+      path: "/", // fallback
+      actions: {
+        list: false,
+        add: false,
+        update: false,
+        delete: false,
+        download: false
+      }
+    }));
+
+    await Permission.insertMany(newClaims);
+
+    return res.status(201).json({
+      success: true,
+      message: `Role '${cleanRole}' successfully provisioned.`,
+      role: cleanRole
+    });
+  } catch (err) {
+    console.error("createRole Error:", err);
+    return res.status(500).json({ success: false, message: "Failed to create new role." });
+  }
+};

@@ -1588,7 +1588,7 @@ exports.getAppMenu = async (req, res) => {
       const adminMenu = [
         { title: "Dashboard Home", path: "/admin/workdashboard", controller: "AdminDashboard", icon: "fas fa-th-large", permissions: { list: true, add: true, update: true, delete: true, download: true } },
         { title: "User Directory", path: "/admin/users", controller: "UserController", icon: "fas fa-users", permissions: { list: true, add: true, update: true, delete: true, download: true } },
-        { title: "Role & Claim Control", path: "/admin/permissions", controller: "PermissionController", icon: "fas fa-user-shield", permissions: { list: true, add: true, update: true, delete: true, download: true } },
+        { title: "Role Management", path: "/admin/permissions", controller: "PermissionController", icon: "fas fa-user-shield", permissions: { list: true, add: true, update: true, delete: true, download: true } },
         { title: "Temp HOD Delegations", path: "/temp-hod", controller: "TempHODController", icon: "fas fa-user-cog", permissions: { list: true, add: true, update: true, delete: true, download: true } },
         { title: "Promotion Dashboard", path: "/admin/promotions", controller: "PromotionController", icon: "fas fa-bullhorn", permissions: { list: true, add: true, update: true, delete: true, download: true } },
         { title: "System Audit Trail", path: "/audit-dashboard", controller: "AuditController", icon: "fas fa-history", permissions: { list: true, add: true, update: true, delete: true, download: true } },

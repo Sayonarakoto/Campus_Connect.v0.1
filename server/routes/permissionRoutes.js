@@ -4,7 +4,8 @@ const router = express.Router();
 const {
   getPermissions,
   updatePermissions,
-  resetPermissions
+  resetPermissions,
+  createRole
 } = require("../controllers/permissionController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -17,5 +18,6 @@ router.use(roleMiddleware("admin"));
 router.get("/", getPermissions);
 router.put("/", updatePermissions);
 router.post("/reset", resetPermissions);
+router.post("/role", createRole);
 
 module.exports = router;

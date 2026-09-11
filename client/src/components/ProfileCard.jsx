@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import "./ProfileCard.css";
+import RoleSwitcher from "./RoleSwitcher";
 
 const API_BASE = "http://localhost:5000";
 
@@ -268,6 +269,10 @@ export default function ProfileCard({ user: propUser, isOpen = true, onClose, on
 
           <h4 className="profile-user-name">{currentUser.fullName}</h4>
           <span className="profile-role-pill">{currentUser.role}</span>
+          
+          <div style={{ marginTop: '12px' }}>
+            <RoleSwitcher user={currentUser} />
+          </div>
         </div>
 
         {/* Body Details */}

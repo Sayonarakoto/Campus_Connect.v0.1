@@ -3,6 +3,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import DashboardSidebar from "./Sidebar/DashboardSidebar";
 import ProfileCard from "./ProfileCard";
 import InstallPWA from "./InstallPWA";
+import CommandPalette from "./CommandPalette";
 import "./navbar.css";
 
 const API_BASE = "http://localhost:5000";
@@ -107,10 +108,14 @@ function Navbar() {
             </div>
           </div>
 
-          {/* Center: Dynamic Role Name Title */}
-          <div className="dashboard-header-center">
-            <span className="dashboard-title-prefix">Dashboard for:</span>
-            <span className="dashboard-role-badge">{roleDisplay}</span>
+          {/* Center: Dynamic Role Name Title & Search */}
+          <div className="dashboard-header-center" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div>
+              <span className="dashboard-title-prefix">Dashboard for:</span>
+              <span className="dashboard-role-badge">{roleDisplay}</span>
+            </div>
+            
+            <CommandPalette menuData={[]} /> {/* menuData needs to be passed down if possible, or CommandPalette fetches it */}
           </div>
 
           {/* Right: Notifications Bell + Profile Avatar */}

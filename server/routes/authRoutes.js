@@ -20,7 +20,10 @@ const {
   getFacultyList,
   getAllUsers,
   getUserById,
-  getAppMenu
+  getAppMenu,
+  switchRole,
+  delegateRole,
+  revokeRole
 } = require("../controllers/authController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -66,11 +69,12 @@ router.get("/photo/:fileId", getProfilePhoto);
 router.use(authMiddleware);
 
 // =========================
-// PROFILE
+// PROFILE & ROLE SWITCHING
 // =========================
 
 router.get("/profile", profile);
 router.put("/profile", updateProfile);
+router.post("/switch-role", switchRole);
 
 // =========================
 // PROFILE PHOTO MANAGEMENT
@@ -110,6 +114,19 @@ router.get("/users", getAllUsers);
 
 // Get user by ID (admin only)
 router.get("/users/:id", getUserById);
+
+// Delegate role
+router.post("/users/:id/delegate-role", delegateRole);
+
+// Revoke role
+router.delete("/users/:id/revoke-role", revokeRole);
+
+// =========================
+// SEARCH & COMMAND PALETTE
+// =========================
+const { searchUsers, getUserStats } = require("../controllers/searchController");
+router.get("/search/users", searchUsers);
+router.get("/search/users/:id/stats", getUserStats);
 
 // Dynamic App Navigation Menu (Driven by Permission Claims)
 router.get("/menu", authMiddleware, getAppMenu);

@@ -1,0 +1,88 @@
+.command-trigger {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 8px 15px;
+  border-radius: 20px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 250px;
+}
+.command-trigger:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+.command-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  padding-top: 100px;
+}
+.command-palette {
+  background: white;
+  width: 600px;
+  max-width: 90%;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 70vh;
+}
+.command-input-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.command-input-wrapper i {
+  color: #94a3b8;
+  font-size: 1.2rem;
+  margin-right: 15px;
+}
+.command-input-wrapper input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 1.1rem;
+}
+.command-results {
+  overflow-y: auto;
+  padding: 10px;
+}
+.command-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.command-item:hover {
+  background: #f1f5f9;
+}
+.command-item i {
+  width: 30px;
+  color: #64748b;
+}
+.command-badge {
+  margin-left: auto;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.menu-badge { background: #dbeafe; color: #1e40af; }
+.user-badge { background: #fef3c7; color: #92400e; }
+.command-loading, .command-empty {
+  padding: 20px;
+  text-align: center;
+  color: #64748b;
+}

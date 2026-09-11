@@ -785,6 +785,7 @@ exports.login = async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       role: user.role,
+      roles: user.roles || [],
       phoneNumber: user.phoneNumber || null,
       profilePhoto: user.profilePhoto,
       profilePhotoUrl: getProfilePhotoUrl(user.profilePhoto),
@@ -1632,6 +1633,188 @@ exports.getAppMenu = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to generate dynamic navigation menu."
+    });
+  }
+};
+
+// ==========================================
+// ROLE SWITCHING
+// ==========================================
+exports.switchRole = async (req, res) => {
+  try {
+    const { targetRole } = req.body;
+    
+    if (!targetRole) {
+      return res.status(400).json({ success: false, message: "Target role is required." });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    // Check if the user has the target role
+    const hasRole = user.role === targetRole || (user.roles && user.roles.includes(targetRole));
+    if (!hasRole) {
+      return res.status(403).json({ success: false, message: `Access Denied: You do not have the '${targetRole}' role.` });
+    }
+
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: targetRole,
+        department: user.department,
+        isLabStaff: user.isLabStaff,
+        isTempHOD: user.isTempHOD,
+        tempHODDepartment: user.tempHODDepartment,
+        tempHODUntil: user.tempHODUntil
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    const cleanUser = {
+      id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      role: targetRole,
+      roles: user.roles || [],
+      phoneNumber: user.phoneNumber || null,
+      profilePhoto: user.profilePhoto,
+      profilePhotoUrl: getProfilePhotoUrl(user.profilePhoto),
+      customData: user.customData || {}
+    };
+
+    if (user.dateOfJoining) cleanUser.dateOfJoining = user.dateOfJoining;
+    if (user.department) cleanUser.department = user.department;
+    if (user.section) cleanUser.section = user.section;
+    if (targetRole === "faculty") cleanUser.isLabStaff = !!user.isLabStaff;
+
+    return res.status(200).json({
+      success: true,
+      message: `Successfully switched to role: ${targetRole}`,
+      token,
+      user: cleanUser
+    });
+  } catch (error) {
+    console.error("switchRole Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while switching roles."
+    });
+  }
+};
+
+
+// ==========================================
+// DELEGATE ROLE (Admin & HOD)
+// ==========================================
+exports.delegateRole = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newRole } = req.body;
+    
+    if (!newRole) {
+      return res.status(400).json({ success: false, message: "New role is required." });
+    }
+
+    const activeRole = req.user.role;
+    
+    // Check if user has permission to delegate
+    if (activeRole !== "admin" && activeRole !== "hod") {
+      return res.status(403).json({ success: false, message: "Unauthorized to delegate roles." });
+    }
+
+    const targetUser = await User.findById(id);
+    if (!targetUser) {
+      return res.status(404).json({ success: false, message: "Target user not found." });
+    }
+
+    // HODs can only delegate within their department
+    if (activeRole === "hod" && targetUser.department !== req.user.department) {
+      return res.status(403).json({ success: false, message: "HODs can only delegate roles to users within their department." });
+    }
+
+    // HODs can only delegate specific roles (like tutor, sports committee, lab staff, etc.)
+    const allowedHODDelegations = ["tutor", "sports committee"];
+    if (activeRole === "hod" && !allowedHODDelegations.includes(newRole.toLowerCase())) {
+      return res.status(403).json({ success: false, message: `HODs cannot delegate the '${newRole}' role.` });
+    }
+
+    if (!targetUser.roles) {
+      targetUser.roles = [];
+    }
+
+    if (targetUser.roles.includes(newRole) || targetUser.role === newRole) {
+      return res.status(400).json({ success: false, message: "User already has this role." });
+    }
+
+    targetUser.roles.push(newRole);
+    await targetUser.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Successfully delegated role '${newRole}' to ${targetUser.fullName}.`,
+      user: targetUser
+    });
+  } catch (error) {
+    console.error("delegateRole Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while delegating the role."
+    });
+  }
+};
+
+// ==========================================
+// REVOKE ROLE (Admin & HOD)
+// ==========================================
+exports.revokeRole = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { roleToRemove } = req.body;
+    
+    if (!roleToRemove) {
+      return res.status(400).json({ success: false, message: "Role to remove is required." });
+    }
+
+    const activeRole = req.user.role;
+    
+    if (activeRole !== "admin" && activeRole !== "hod") {
+      return res.status(403).json({ success: false, message: "Unauthorized to revoke roles." });
+    }
+
+    const targetUser = await User.findById(id);
+    if (!targetUser) {
+      return res.status(404).json({ success: false, message: "Target user not found." });
+    }
+
+    if (activeRole === "hod" && targetUser.department !== req.user.department) {
+      return res.status(403).json({ success: false, message: "HODs can only revoke roles from users within their department." });
+    }
+
+    const allowedHODDelegations = ["tutor", "sports committee"];
+    if (activeRole === "hod" && !allowedHODDelegations.includes(roleToRemove.toLowerCase())) {
+      return res.status(403).json({ success: false, message: `HODs cannot revoke the '${roleToRemove}' role.` });
+    }
+
+    if (!targetUser.roles || !targetUser.roles.includes(roleToRemove)) {
+      return res.status(400).json({ success: false, message: "User does not have this role in their secondary roles." });
+    }
+
+    targetUser.roles = targetUser.roles.filter(r => r !== roleToRemove);
+    await targetUser.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Successfully revoked role '${roleToRemove}' from ${targetUser.fullName}.`,
+      user: targetUser
+    });
+  } catch (error) {
+    console.error("revokeRole Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while revoking the role."
     });
   }
 };

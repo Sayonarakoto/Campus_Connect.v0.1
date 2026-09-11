@@ -289,15 +289,7 @@ function AdminDashboard() {
   return (
     <div className="admin-dashboard">
       <header className="dashboard-header">
-        <h1>Admin Gate Pass Dashboard</h1>
-        <div className="header-actions">
-          <button onClick={fetchAll} className="refresh-btn">
-            🔄 Refresh
-          </button>
-          <button onClick={() => navigate('/')} className="home-btn">
-            🏠 Home
-          </button>
-        </div>
+        <h1>Admin Dashboard</h1>
       </header>
 
       {/* Statistics Cards */}
@@ -388,7 +380,7 @@ function AdminDashboard() {
             onClick={() => setPermModalOpen(true)}
             style={{ border: "2px solid #2563eb", background: "#f8fafc" }}
           >
-            <h4 style={{ color: "#2563eb" }}>🛡️ Role & Claim Control</h4>
+            <h4 style={{ color: "#2563eb" }}><i className="fas fa-shield-alt"></i> Role & Claim Control</h4>
             <p>Dynamic controller permissions & CRUD claims authorization matrix</p>
           </div>
 
@@ -396,7 +388,7 @@ function AdminDashboard() {
             className="module-card"
             onClick={() => navigate("/audit-dashboard")}
           >
-            <h4> Audit Trail</h4>
+            <h4><i className="fas fa-history"></i> Audit Trail</h4>
             <p>View complete leave history and audit logs</p>
           </div>
 
@@ -404,7 +396,7 @@ function AdminDashboard() {
             className="module-card"
             onClick={() => navigate("/temp-hod")}
           >
-            <h4> Temporary HOD</h4>
+            <h4><i className="fas fa-user-clock"></i> Temporary HOD</h4>
             <p>Assign faculty as acting HOD during leave periods</p>
           </div>
 
@@ -412,7 +404,7 @@ function AdminDashboard() {
             className="module-card"
             onClick={() => navigate("/admin/promotions")}
           >
-            <h4> Promotions & Ads</h4>
+            <h4><i className="fas fa-bullhorn"></i> Promotions & Ads</h4>
             <p>Manage ad campaigns and promotions</p>
           </div>
 
@@ -420,7 +412,7 @@ function AdminDashboard() {
             className="module-card"
             onClick={() => navigate("/faculty/sports")}
           >
-            <h4>Create Sports Events</h4>
+            <h4><i className="fas fa-medal"></i> Create Sports Events</h4>
             <p>Create and manage new sports events</p>
           </div>
         </div>
@@ -435,7 +427,7 @@ function AdminDashboard() {
           >
             <div className="matrix-header">
               <div>
-                <h3>🛡️ Dynamic Role & Claim Authorization Matrix</h3>
+                <h3><i className="fas fa-shield-alt"></i> Dynamic Role & Claim Authorization Matrix</h3>
                 <p>
                   Database-driven claim architecture (.NET style). Toggle controller CRUD privileges per role dynamically.
                 </p>

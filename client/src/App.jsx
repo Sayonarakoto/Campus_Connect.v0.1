@@ -65,6 +65,7 @@ import MyFacultyDutyLeaves from "./pages/DutyLeaves/MyFacultyDutyLeaves";
 import FacultyLeaveBalance from "./pages/DutyLeaves/FacultyLeaveBalance";
 
 import AdminPromotionDashboard from "./pages/Admin/AdminPromotionDashboard";
+import UserManagement from "./pages/Admin/UserManagement";
 
 import StudentLateEntryForm from "./pages/LateEntry/StudentLateEntry";
 import StudentLateHistory from "./pages/LateEntry/StudentLateHistory";
@@ -198,6 +199,7 @@ function App() {
           <Route path="/faculty/leave-balance" element={<ProtectedRoute><FacultyLeaveBalance /></ProtectedRoute>} />
 
           <Route path="/admin/promotions" element={<ProtectedRoute><AdminPromotionDashboard /></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
 
           <Route path="/student/late-entry" element={<ProtectedRoute><StudentLateEntryForm /></ProtectedRoute>} />
           <Route path="/student/late-history" element={<ProtectedRoute><StudentLateHistory /></ProtectedRoute>} />

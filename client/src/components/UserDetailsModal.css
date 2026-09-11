@@ -1,0 +1,35 @@
+.user-details-modal {
+  max-width: 600px;
+  width: 100%;
+}
+.user-profile-header {
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+.stat-card h5 {
+  margin: 0 0 10px 0;
+  color: #475569;
+}
+.stat-card p {
+  margin: 5px 0;
+  font-weight: 600;
+}
+.tutor-info {
+  background: #eff6ff;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #bfdbfe;
+}

@@ -30,6 +30,9 @@ const UserSchema = new mongoose.Schema(
         "sports committee"
       ]
     },
+    roles: [{
+      type: String
+    }],
     
     // =========================
     // PROFILE PHOTO - GridFS

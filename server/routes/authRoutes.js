@@ -125,8 +125,8 @@ router.delete("/users/:id/revoke-role", revokeRole);
 // SEARCH & COMMAND PALETTE
 // =========================
 const { searchUsers, getUserStats } = require("../controllers/searchController");
-router.get("/search/users", searchUsers);
-router.get("/search/users/:id/stats", getUserStats);
+router.get("/search/users", roleMiddleware("admin", "hod", "principal", "director", "hraccounts", "faculty"), searchUsers);
+router.get("/search/users/:id/stats", roleMiddleware("admin", "hod", "principal", "director", "hraccounts", "faculty"), getUserStats);
 
 // Dynamic App Navigation Menu (Driven by Permission Claims)
 router.get("/menu", authMiddleware, getAppMenu);

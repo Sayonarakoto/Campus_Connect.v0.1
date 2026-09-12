@@ -130,7 +130,7 @@ module.exports = new FluentMigration("20260907_001_init_all_existing_controllers
 
   // 13. Role & Permission Management
   .forController("PermissionController")
-    .title("Role & Claim Matrix")
+    .title("Role Management")
     .path("/admin/permissions")
     .icon("fas fa-user-shield")
     .grant("admin", ["list", "add", "update", "delete", "download"]);

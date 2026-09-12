@@ -24,21 +24,60 @@ export default function RoleManagement() {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
+      
+      // Fetch ALL permissions to get a master list of all distinct controllers/modules
+      const allRes = await axios.get(`${API_BASE}/api/permissions`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      let masterModules = [];
+      let uniqueRoles = [];
+
+      if (allRes.data.success) {
+        uniqueRoles = [...new Set(allRes.data.permissions.map(p => p.role))];
+        
+        // Extract distinct modules (fallback map)
+        const moduleMap = new Map();
+        allRes.data.permissions.forEach(p => {
+          if (!moduleMap.has(p.controller)) {
+            moduleMap.set(p.controller, {
+              controller: p.controller,
+              moduleTitle: p.moduleTitle,
+              icon: p.icon,
+              path: p.path,
+              actions: { list: false, add: false, update: false, delete: false, download: false }
+            });
+          }
+        });
+        masterModules = Array.from(moduleMap.values());
+        setRoles(uniqueRoles);
+      }
+
+      // Fetch specific permissions for the clicked role
       const res = await axios.get(`${API_BASE}/api/permissions?role=${role}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
       if (res.data.success) {
-        setPermissions(res.data.permissions);
-        setSelectedRole(role);
+        const rolePerms = res.data.permissions;
         
-        // Also extract distinct roles if not already set or if we want to refresh
-        const allRes = await axios.get(`${API_BASE}/api/permissions`, {
-          headers: { Authorization: `Bearer ${token}` }
+        // Merge role permissions onto the master list of modules
+        const mergedPermissions = masterModules.map(master => {
+          const existing = rolePerms.find(p => p.controller === master.controller);
+          if (existing) {
+            return {
+              ...master,
+              actions: { ...master.actions, ...existing.actions }
+            };
+          }
+          return master;
         });
-        if (allRes.data.success) {
-          const uniqueRoles = [...new Set(allRes.data.permissions.map(p => p.role))];
-          setRoles(uniqueRoles);
-        }
+
+        // Sort them alphabetically by moduleTitle for a cleaner UI
+        mergedPermissions.sort((a, b) => a.moduleTitle.localeCompare(b.moduleTitle));
+
+        setPermissions(mergedPermissions);
+        setSelectedRole(role);
       }
     } catch (err) {
       showToast("Failed to fetch permissions", "error");
@@ -171,11 +210,11 @@ export default function RoleManagement() {
               <thead>
                 <tr>
                   <th>Controller / Module</th>
-                  <th>List (GET)</th>
-                  <th>Add (POST)</th>
-                  <th>Update (PUT)</th>
-                  <th>Delete (DEL)</th>
-                  <th>Download (GET)</th>
+                  <th>List</th>
+                  <th>Add</th>
+                  <th>Update</th>
+                  <th>Delete</th>
+                  <th>Download</th>
                 </tr>
               </thead>
               <tbody>

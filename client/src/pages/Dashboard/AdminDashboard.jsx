@@ -16,25 +16,9 @@ function AdminDashboard() {
     expired: 0
   });
 
-  // Dynamic Claim & Permission Matrix State
-  const [permModalOpen, setPermModalOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState("faculty");
-  const [rolePermissions, setRolePermissions] = useState([]);
-  const [permLoading, setPermLoading] = useState(false);
-  const [permSaving, setPermSaving] = useState(false);
-  const [permMessage, setPermMessage] = useState(null);
-  const [permError, setPermError] = useState(null);
 
-  const INSTITUTION_ROLES = [
-    { key: "faculty", label: "Faculty" },
-    { key: "student", label: "Student" },
-    { key: "hod", label: "HOD (Department Head)" },
-    { key: "principal", label: "Principal" },
-    { key: "director", label: "Director" },
-    { key: "hraccounts", label: "HR & Accounts" },
-    { key: "security", label: "Security Guard" },
-    { key: "parent", label: "Parent" },
-  ];
+
+
   
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
@@ -126,106 +110,7 @@ function AdminDashboard() {
     fetchAll();
   }, [fetchAll]);
 
-  // Fetch dynamic permissions for selected role
-  const fetchPermissions = useCallback(async (roleToFetch = selectedRole) => {
-    try {
-      setPermLoading(true);
-      setPermError(null);
-      const res = await axios.get(
-        `http://localhost:5000/api/permissions?role=${roleToFetch}`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-      setRolePermissions(res.data?.permissions || []);
-    } catch (err) {
-      console.error("Failed to fetch permissions:", err);
-      setPermError(err.response?.data?.message || "Failed to load permissions.");
-    } finally {
-      setPermLoading(false);
-    }
-  }, [selectedRole, token]);
 
-  useEffect(() => {
-    if (permModalOpen) {
-      fetchPermissions(selectedRole);
-    }
-  }, [permModalOpen, selectedRole, fetchPermissions]);
-
-  // Toggle individual action checkbox for a controller
-  const handleToggleAction = (controller, actionKey) => {
-    setRolePermissions(prev =>
-      prev.map(item => {
-        if (item.controller === controller) {
-          return {
-            ...item,
-            actions: {
-              ...item.actions,
-              [actionKey]: !item.actions[actionKey]
-            }
-          };
-        }
-        return item;
-      })
-    );
-  };
-
-  // Save changes to database
-  const handleSavePermissions = async () => {
-    try {
-      setPermSaving(true);
-      setPermMessage(null);
-      setPermError(null);
-      const payload = {
-        role: selectedRole,
-        permissions: rolePermissions.map(p => ({
-          controller: p.controller,
-          actions: p.actions
-        }))
-      };
-      const res = await axios.put(
-        "http://localhost:5000/api/permissions",
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-      setPermMessage(res.data?.message || `Permissions saved for role '${selectedRole}'.`);
-      setTimeout(() => setPermMessage(null), 4000);
-    } catch (err) {
-      console.error("Failed to save permissions:", err);
-      setPermError(err.response?.data?.message || "Failed to save permissions.");
-    } finally {
-      setPermSaving(false);
-    }
-  };
-
-  // Reset entire matrix to institutional defaults
-  const handleResetPermissions = async () => {
-    if (!window.confirm("Are you sure you want to reset all permissions across all roles to institutional defaults?")) {
-      return;
-    }
-    try {
-      setPermSaving(true);
-      setPermMessage(null);
-      setPermError(null);
-      const res = await axios.post(
-        "http://localhost:5000/api/permissions/reset",
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-      setPermMessage(res.data?.message || "Permissions reset to defaults successfully.");
-      fetchPermissions(selectedRole);
-      setTimeout(() => setPermMessage(null), 4000);
-    } catch (err) {
-      console.error("Failed to reset permissions:", err);
-      setPermError(err.response?.data?.message || "Failed to reset permissions.");
-    } finally {
-      setPermSaving(false);
-    }
-  };
 
   const getColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -375,14 +260,6 @@ function AdminDashboard() {
       <div className="quick-actions">
         <h2>Quick Actions</h2>
         <div className="modules-grid">
-          <div
-            className="module-card"
-            onClick={() => setPermModalOpen(true)}
-            style={{ border: "2px solid #2563eb", background: "#f8fafc" }}
-          >
-            <h4 style={{ color: "#2563eb" }}><i className="fas fa-shield-alt"></i> Role & Claim Control</h4>
-            <p>Dynamic controller permissions & CRUD claims authorization matrix</p>
-          </div>
 
           <div
             className="module-card"
@@ -418,179 +295,7 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* Dynamic Role & Claim Authorization Modal */}
-      {permModalOpen && (
-        <div className="modal-overlay" onClick={() => setPermModalOpen(false)}>
-          <div
-            className="modal-box claim-matrix-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="matrix-header">
-              <div>
-                <h3><i className="fas fa-shield-alt"></i> Dynamic Role & Claim Authorization Matrix</h3>
-                <p>
-                  Database-driven claim architecture (.NET style). Toggle controller CRUD privileges per role dynamically.
-                </p>
-              </div>
-              <button
-                className="matrix-close-btn"
-                onClick={() => setPermModalOpen(false)}
-                title="Close"
-              >
-                &times;
-              </button>
-            </div>
 
-            {permMessage && (
-              <div className="matrix-badge-alert success">
-                ✅ {permMessage}
-              </div>
-            )}
-
-            {permError && (
-              <div className="matrix-badge-alert error">
-                ⚠️ {permError}
-              </div>
-            )}
-
-            <div className="matrix-role-selector">
-              <label htmlFor="role-select">Select Target Role:</label>
-              <select
-                id="role-select"
-                className="matrix-role-select"
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
-              >
-                {INSTITUTION_ROLES.map((r) => (
-                  <option key={r.key} value={r.key}>
-                    {r.label} ({r.key})
-                  </option>
-                ))}
-              </select>
-              <span style={{ fontSize: "0.82rem", color: "#64748b", marginLeft: "auto" }}>
-                Super Admin bypasses all claims globally.
-              </span>
-            </div>
-
-            <div className="matrix-body">
-              {permLoading ? (
-                <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
-                  <div className="spinner" style={{ margin: "0 auto 12px" }}></div>
-                  <p>Loading claims for role '{selectedRole}'...</p>
-                </div>
-              ) : rolePermissions.length === 0 ? (
-                <div style={{ padding: "40px", textAlign: "center", color: "#94a3b8" }}>
-                  <p>No permission claims configured for this role.</p>
-                </div>
-              ) : (
-                <table className="matrix-table">
-                  <thead>
-                    <tr>
-                      <th>Module Title</th>
-                      <th>Controller Key</th>
-                      <th>Route Path</th>
-                      <th className="matrix-checkbox-col">List</th>
-                      <th className="matrix-checkbox-col">Add</th>
-                      <th className="matrix-checkbox-col">Update</th>
-                      <th className="matrix-checkbox-col">Delete</th>
-                      <th className="matrix-checkbox-col">Download</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rolePermissions.map((perm) => (
-                      <tr key={perm.controller}>
-                        <td>
-                          <strong>{perm.moduleTitle || perm.controller}</strong>
-                        </td>
-                        <td>
-                          <span className="matrix-controller-code">
-                            {perm.controller}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="matrix-path-code">
-                            {perm.path || "—"}
-                          </span>
-                        </td>
-                        <td className="matrix-checkbox-col">
-                          <input
-                            type="checkbox"
-                            checked={Boolean(perm.actions?.list)}
-                            onChange={() => handleToggleAction(perm.controller, "list")}
-                            title="Toggle List (Read) claim"
-                          />
-                        </td>
-                        <td className="matrix-checkbox-col">
-                          <input
-                            type="checkbox"
-                            checked={Boolean(perm.actions?.add)}
-                            onChange={() => handleToggleAction(perm.controller, "add")}
-                            title="Toggle Add (Create) claim"
-                          />
-                        </td>
-                        <td className="matrix-checkbox-col">
-                          <input
-                            type="checkbox"
-                            checked={Boolean(perm.actions?.update)}
-                            onChange={() => handleToggleAction(perm.controller, "update")}
-                            title="Toggle Update (Edit) claim"
-                          />
-                        </td>
-                        <td className="matrix-checkbox-col">
-                          <input
-                            type="checkbox"
-                            checked={Boolean(perm.actions?.delete)}
-                            onChange={() => handleToggleAction(perm.controller, "delete")}
-                            title="Toggle Delete claim"
-                          />
-                        </td>
-                        <td className="matrix-checkbox-col">
-                          <input
-                            type="checkbox"
-                            checked={Boolean(perm.actions?.download)}
-                            onChange={() => handleToggleAction(perm.controller, "download")}
-                            title="Toggle Download / Export claim"
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-
-            <div className="matrix-footer">
-              <button
-                type="button"
-                className="matrix-btn-reset"
-                onClick={handleResetPermissions}
-                disabled={permSaving}
-              >
-                🔄 Reset Institutional Defaults
-              </button>
-
-              <div style={{ display: "flex", gap: "10px" }}>
-                <button
-                  type="button"
-                  className="btn cancel"
-                  onClick={() => setPermModalOpen(false)}
-                  style={{ padding: "8px 16px", borderRadius: "6px", border: "1px solid #cbd5e1" }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="matrix-btn-save"
-                  onClick={handleSavePermissions}
-                  disabled={permSaving || permLoading}
-                >
-                  {permSaving ? "Saving Matrix..." : `Save Claims for ${selectedRole}`}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

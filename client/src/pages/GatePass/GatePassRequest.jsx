@@ -18,6 +18,8 @@ function GatePassRequest() {
   
   const [loading, setLoading] = useState(false);
   const [fetchingApprovers, setFetchingApprovers] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(true);
+  const [authMessage, setAuthMessage] = useState("");
 
   // Fetch available approvers when component mounts
   useEffect(() => {
@@ -42,8 +44,13 @@ function GatePassRequest() {
         hod: response.data.hod || [],
         faculty: response.data.faculty || []
       });
+      setIsAuthorized(true);
     } catch (error) {
       console.error("Error fetching approvers:", error);
+      if (error.response && error.response.status === 403) {
+        setIsAuthorized(false);
+        setAuthMessage(error.response.data.message || "You do not have permission to access this module.");
+      }
       // If error, set empty arrays
       setApprovers({ hod: [], faculty: [] });
     } finally {
@@ -102,6 +109,18 @@ function GatePassRequest() {
       setLoading(false);
     }
   };
+
+  if (!isAuthorized) {
+    return (
+      <div className="gate-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <div style={{ textAlign: 'center', padding: '40px', background: '#fee2e2', borderRadius: '12px', color: '#991b1b', border: '1px solid #fecaca', maxWidth: '500px' }}>
+          <i className="fas fa-lock" style={{ fontSize: '3rem', marginBottom: '15px' }}></i>
+          <h2 style={{ fontSize: '1.5rem', marginBottom: '10px' }}>Access Restricted</h2>
+          <p>{authMessage}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="gate-container">

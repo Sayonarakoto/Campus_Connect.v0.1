@@ -86,3 +86,14 @@
   text-align: center;
   color: #64748b;
 }
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .command-trigger-text {
+    display: none;
+  }
+  .command-trigger {
+    padding: 8px 12px;
+    border-radius: 50%;
+  }
+}

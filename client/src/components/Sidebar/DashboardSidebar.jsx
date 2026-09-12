@@ -69,6 +69,7 @@ const ROLE_NAV_CONFIG = {
   admin: [
     { label: "Dashboard Home", path: "/admin/workdashboard", icon: "fas fa-th-large" },
     { label: "User Directory", path: "/admin/users", icon: "fas fa-users" },
+    { label: "Role Management", path: "/admin/permissions", icon: "fas fa-user-shield" },
     { label: "Temp HOD Delegations", path: "/admin/temp-hod", icon: "fas fa-user-cog" },
     { label: "Promotion Dashboard", path: "/admin/promotions", icon: "fas fa-bullhorn" }
   ]

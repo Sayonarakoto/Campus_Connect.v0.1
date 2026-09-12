@@ -3,7 +3,7 @@ import axios from "axios";
 import "./UserManagement.css";
 
 const UserManagement = () => {
-  const [users, setUsers] = delegatedUsers => [];
+  const [users, setUsers] = useState([]);
   // Mock UI for the walkthrough
   return (
     <div className="user-management-container">

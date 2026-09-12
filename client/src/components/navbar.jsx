@@ -114,12 +114,13 @@ function Navbar() {
               <span className="dashboard-title-prefix">Dashboard for:</span>
               <span className="dashboard-role-badge">{roleDisplay}</span>
             </div>
-            
-            <CommandPalette menuData={[]} /> {/* menuData needs to be passed down if possible, or CommandPalette fetches it */}
           </div>
 
           {/* Right: Notifications Bell + Profile Avatar */}
-          <div className="dashboard-header-right">
+          <div className="dashboard-header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {currentUser.role !== 'security' && (
+              <CommandPalette currentUser={currentUser} />
+            )}
             <InstallPWA />
             {/* Notifications Bell */}
             <div className="header-notifications-wrapper" ref={notifRef}>

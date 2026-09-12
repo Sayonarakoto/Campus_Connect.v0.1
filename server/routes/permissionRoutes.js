@@ -9,15 +9,15 @@ const {
 } = require("../controllers/permissionController");
 
 const authMiddleware = require("../middleware/authMiddleware");
-const roleMiddleware = require("../middleware/roleMiddleware");
+const authorizeClaim = require("../middleware/claimMiddleware");
 
-// All permission management endpoints are restricted to Administrator
 router.use(authMiddleware);
-router.use(roleMiddleware("admin"));
 
-router.get("/", getPermissions);
-router.put("/", updatePermissions);
-router.post("/reset", resetPermissions);
-router.post("/role", createRole);
+const CONTROLLER_NAME = "PermissionController";
+
+router.get("/", authorizeClaim(CONTROLLER_NAME, "list"), getPermissions);
+router.put("/", authorizeClaim(CONTROLLER_NAME, "update"), updatePermissions);
+router.post("/reset", authorizeClaim(CONTROLLER_NAME, "update"), resetPermissions); // Usually resetting requires update or delete permissions
+router.post("/role", authorizeClaim(CONTROLLER_NAME, "add"), createRole);
 
 module.exports = router;

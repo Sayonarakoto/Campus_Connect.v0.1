@@ -78,9 +78,14 @@ exports.updatePermissions = async (req, res) => {
             "actions.update": Boolean(item.actions.update),
             "actions.delete": Boolean(item.actions.delete),
             "actions.download": Boolean(item.actions.download)
+          },
+          $setOnInsert: {
+            moduleTitle: item.moduleTitle || item.controller,
+            path: item.path || "/",
+            icon: item.icon || "fas fa-folder"
           }
         },
-        { new: true }
+        { new: true, upsert: true }
       );
     }
 

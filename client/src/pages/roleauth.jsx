@@ -4,6 +4,11 @@ import { useToast } from "../context/ToastContext";
 import "./roleauth.css";
 
 const API_BASE = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(/\/$/, "");
+
+function RoleAuth({ roleOverride }) {
+  const { role: urlRole } = useParams();
+  const activeRole = roleOverride || urlRole;
+  const navigate = useNavigate();
   const { showToast } = useToast();
 
   const [credentials, setCredentials] = useState({

@@ -20,9 +20,28 @@ const app = express();
 // MIDDLEWARE
 // =======================
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, "") : null
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || "*",
-  credentials: true
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    const isAllowed =
+      allowedOrigins.includes(origin) ||
+      origin.endsWith(".vercel.app") ||
+      origin.includes("localhost");
+
+    if (isAllowed || process.env.NODE_ENV !== "production") {
+      return callback(null, origin);
+    }
+    return callback(null, origin);
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

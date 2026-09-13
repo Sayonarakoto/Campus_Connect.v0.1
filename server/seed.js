@@ -9,66 +9,32 @@ const User = require("./models/User");
 const Student = require("./models/Student");
 const Permission = require("./models/Permission");
 const { DEFAULT_PERMISSIONS } = require("./controllers/permissionController");
+const { getCurrentAcademicYear } = require("./constants/academicConfig");
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/campus_connect";
 const DEFAULT_PASSWORD = process.env.SEED_DEFAULT_PASSWORD || "password123";
 
 /**
- * College Department Definitions
- */
-const DEPARTMENTS = [
-  {
-    name: "Mechanical Engineering",
-    code: "MECH",
-    prefix: 10,
-    hasSections: true
-  },
-  {
-    name: "Computer Engineering",
-    code: "COMP",
-    prefix: 20,
-    hasSections: false
-  },
-  {
-    name: "Automobile Engineering",
-    code: "AUTO",
-    prefix: 30,
-    hasSections: false
-  },
-  {
-    name: "Electrical and Electronics Engineering",
-    code: "EEE",
-    prefix: 40,
-    hasSections: false
-  },
-  {
-    name: "Civil Engineering",
-    code: "CIVIL",
-    prefix: 50,
-    hasSections: false
-  },
-  {
-    name: "Fire Technology and Safety",
-    code: "FTS",
-    prefix: 60,
-    hasSections: false
-  }
-];
-
-/**
- * Main Seeding Function
+ * Minimal Production/Testing Seed Configuration
+ * Exactly:
+ *  - 1 Super Admin ('luka')
+ *  - 2 Principals
+ *  - 1 HOD
+ *  - 2 Faculty
+ *  - 1 HR & Accounts
+ *  - 2 Parents
+ *  - 2 Students (linked to parents)
  */
 async function seedDatabase() {
   console.log("=================================================");
-  console.log("🚀 CAMPUS CONNECT - DATABASE SEED INITIALIZATION");
+  console.log("🚀 CAMPUS CONNECT - PRODUCTION/TEST SEED INITIALIZATION");
   console.log("=================================================");
-  console.log(`Connecting to MongoDB: ${MONGO_URI}`);
+  console.log(`Connecting to MongoDB: ${MONGO_URI.replace(/:([^@]+)@/, ":****@")}`);
 
   try {
     await mongoose.connect(MONGO_URI);
     console.log("✅ MongoDB Connected Successfully.");
 
-    // Pre-hash default password
     console.log(`🔑 Hashing default password ('${DEFAULT_PASSWORD}') with bcrypt...`);
     const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 10);
     console.log("✅ Password hashed successfully.");
@@ -82,286 +48,18 @@ async function seedDatabase() {
 
     const summaryTable = [];
 
-    for (const dept of DEPARTMENTS) {
-      console.log(`\n📚 Processing Department: ${dept.name} (${dept.code})`);
-
-      // -------------------------------------------------------------
-      // 1. CREATE 1 HOD
-      // -------------------------------------------------------------
-      const hodEmail = `hod.${dept.code.toLowerCase()}@college.edu`;
-      const hodId = `HOD${dept.prefix * 100 + 1}`;
-      const hodPhone = `98765${dept.prefix}001`;
-      let hodUser = await User.findOne({ email: hodEmail });
-
-      const hodPayload = {
-        role: "hod",
-        fullName: `Dr. ${dept.code} HOD`,
-        department: dept.name,
-        email: hodEmail,
-        phoneNumber: hodPhone,
-        dateOfJoining: new Date("2020-06-01"),
-        password: hashedPassword,
-        customData: {
-          employeeId: hodId
-        }
-      };
-
-      if (!hodUser) {
-        hodUser = await User.create(hodPayload);
-        stats.usersCreated++;
-      } else {
-        Object.assign(hodUser, hodPayload);
-        await hodUser.save();
-        stats.usersUpdated++;
-      }
-
-      summaryTable.push({
-        Department: dept.code,
-        Role: "HOD",
-        Name: hodPayload.fullName,
-        "Login ID (Faculty ID)": hodId,
-        Email: hodEmail,
-        Phone: hodPhone,
-        "Lab Staff": "No"
-      });
-
-      // -------------------------------------------------------------
-      // 2. CREATE 2 FACULTY MEMBERS (isLabStaff = false)
-      // -------------------------------------------------------------
-      for (let f = 1; f <= 2; f++) {
-        const facultyEmail = `faculty.${dept.code.toLowerCase()}${f}@college.edu`;
-        const facultyId = `FAC${dept.prefix * 100 + f}`;
-        const facultyPhone = `98765${dept.prefix}01${f}`;
-        let facUser = await User.findOne({ email: facultyEmail });
-
-        const facPayload = {
-          role: "faculty",
-          fullName: `Prof. ${dept.code} Faculty ${f}`,
-          department: dept.name,
-          email: facultyEmail,
-          phoneNumber: facultyPhone,
-          dateOfJoining: new Date("2021-08-15"),
-          password: hashedPassword,
-          isLabStaff: false,
-          customData: {
-            employeeId: facultyId
-          }
-        };
-
-        if (!facUser) {
-          facUser = await User.create(facPayload);
-          stats.usersCreated++;
-        } else {
-          Object.assign(facUser, facPayload);
-          await facUser.save();
-          stats.usersUpdated++;
-        }
-
-        summaryTable.push({
-          Department: dept.code,
-          Role: "Faculty",
-          Name: facPayload.fullName,
-          "Login ID (Faculty ID)": facultyId,
-          Email: facultyEmail,
-          Phone: facultyPhone,
-          "Lab Staff": "No"
-        });
-      }
-
-      // -------------------------------------------------------------
-      // 3. CREATE 2 LAB STAFF (isLabStaff = true)
-      // -------------------------------------------------------------
-      for (let l = 1; l <= 2; l++) {
-        const labEmail = `lab.${dept.code.toLowerCase()}${l}@college.edu`;
-        const labId = `LAB${dept.prefix * 100 + l}`;
-        const labPhone = `98765${dept.prefix}02${l}`;
-        let labUser = await User.findOne({ email: labEmail });
-
-        const labPayload = {
-          role: "faculty",
-          fullName: `Lab Instructor ${dept.code} ${l}`,
-          department: dept.name,
-          email: labEmail,
-          phoneNumber: labPhone,
-          dateOfJoining: new Date("2022-01-10"),
-          password: hashedPassword,
-          isLabStaff: true,
-          customData: {
-            employeeId: labId
-          }
-        };
-
-        if (!labUser) {
-          labUser = await User.create(labPayload);
-          stats.usersCreated++;
-        } else {
-          Object.assign(labUser, labPayload);
-          await labUser.save();
-          stats.usersUpdated++;
-        }
-
-        summaryTable.push({
-          Department: dept.code,
-          Role: "Faculty (Lab)",
-          Name: labPayload.fullName,
-          "Login ID (Faculty ID)": labId,
-          Email: labEmail,
-          Phone: labPhone,
-          "Lab Staff": "Yes"
-        });
-      }
-
-      // -------------------------------------------------------------
-      // 4. CREATE 5 STUDENTS
-      // -------------------------------------------------------------
-      for (let s = 1; s <= 5; s++) {
-        const studentEmail = `student.${dept.code.toLowerCase()}${s}@college.edu`;
-        const admissionNo = `${dept.prefix * 100 + s}`; // 4-digit unique string (e.g. 1001..1005)
-        const regNo = `210100${dept.prefix * 100 + s}`; // 10-digit unique string (e.g. 2101001001)
-        const studentPhone = `98765${dept.prefix}10${s}`;
-
-        // For Mechanical Engineering, assign Mech-A (1..3) or Mech-B (4..5)
-        let studentSection = null;
-        if (dept.hasSections) {
-          studentSection = s <= 3 ? "Mech-A" : "Mech-B";
-        }
-
-        let studentUser = await User.findOne({ email: studentEmail });
-        const userPayload = {
-          role: "student",
-          fullName: `Student ${dept.code} ${s}`,
-          department: dept.name,
-          section: studentSection,
-          email: studentEmail,
-          phoneNumber: studentPhone,
-          password: hashedPassword,
-          customData: {
-            admissionNo,
-            regNo,
-            semester: 1,
-            batchYear: "2024-2027",
-            section: studentSection,
-            parentEmail: `parent.${dept.code.toLowerCase()}${s}@example.com`
-          }
-        };
-
-        if (!studentUser) {
-          studentUser = await User.create(userPayload);
-          stats.usersCreated++;
-        } else {
-          Object.assign(studentUser, userPayload);
-          await studentUser.save();
-          stats.usersUpdated++;
-        }
-
-        // Link Student record
-        let studentProfile = await Student.findOne({
-          $or: [{ user: studentUser._id }, { admissionNo }]
-        });
-
-        const studentData = {
-          user: studentUser._id,
-          fullName: userPayload.fullName,
-          admissionNo,
-          regNo,
-          department: dept.name,
-          semester: 1,
-          batch: "2024-2027",
-          section: studentSection,
-          parentEmail: userPayload.customData.parentEmail
-        };
-
-        if (!studentProfile) {
-          await Student.create(studentData);
-          stats.studentsCreated++;
-        } else {
-          Object.assign(studentProfile, studentData);
-          await studentProfile.save();
-          stats.studentsUpdated++;
-        }
-
-        summaryTable.push({
-          Department: dept.code,
-          Role: "Student",
-          Name: userPayload.fullName,
-          "Login ID (Faculty ID)": admissionNo,
-          Email: studentEmail,
-          Phone: studentPhone,
-          "Lab Staff": studentSection || "N/A"
-        });
-      }
-    }
-
-    // ==========================================
-    // 4. SEED HR & ACCOUNTS CELL
-    // ==========================================
-    console.log("🏢 Seeding HR & Accounts administrative cell...");
-    const hrAccountsProfiles = [
-      {
-        fullName: "Institutional HR Officer",
-        email: "hr@college.edu",
-        phoneNumber: "9876543210",
-        staffId: "HR1001",
-        staffRole: "HR",
-        dateOfJoining: new Date("2019-04-01")
-      },
-      {
-        fullName: "Institutional Accounts Officer",
-        email: "accounts@college.edu",
-        phoneNumber: "9876543211",
-        staffId: "ACC1001",
-        staffRole: "Accounts",
-        dateOfJoining: new Date("2019-06-15")
-      }
-    ];
-
-    for (const profile of hrAccountsProfiles) {
-      let existingUser = await User.findOne({ email: profile.email });
-      const userPayload = {
-        role: "hraccounts",
-        fullName: profile.fullName,
-        email: profile.email,
-        phoneNumber: profile.phoneNumber,
-        dateOfJoining: profile.dateOfJoining,
-        password: hashedPassword,
-        customData: {
-          staffId: profile.staffId,
-          staffRole: profile.staffRole
-        }
-      };
-
-      if (!existingUser) {
-        await User.create(userPayload);
-        stats.usersCreated++;
-      } else {
-        Object.assign(existingUser, userPayload);
-        await existingUser.save();
-        stats.usersUpdated++;
-      }
-
-      summaryTable.push({
-        Department: "ADMIN",
-        Role: `HR/Accounts (${profile.staffRole})`,
-        Name: profile.fullName,
-        "Login ID (Faculty ID)": profile.staffId,
-        Email: profile.email,
-        Phone: profile.phoneNumber,
-        "Lab Staff": profile.staffRole
-      });
-    }
-
-    // ==========================================
-    // 5. SEED MASTER SUPER ADMIN ACCOUNT (LUKA)
-    // ==========================================
-    console.log("🛡️ Bootstrapping Master Super Administrator account (luka)...");
+    // =============================================================
+    // 1. SEED MASTER SUPER ADMIN ACCOUNT (LUKA)
+    // =============================================================
+    console.log("\n🛡️ Bootstrapping Master Super Administrator account...");
     const adminUsername = process.env.ADMIN_SEED_USERNAME || "luka";
     const adminEmail = process.env.ADMIN_SEED_EMAIL || "luka@college.edu";
     const adminRawPassword = process.env.ADMIN_SEED_PASSWORD || "zxcqwrzxc";
     const hashedAdminPassword = await bcrypt.hash(adminRawPassword, 10);
 
-    let existingAdmin = await User.findOne({
+    let adminUser = await User.findOne({
       $or: [
-        { email: adminEmail },
+        { email: adminEmail.toLowerCase() },
         { "customData.username": adminUsername },
         { "customData.staffId": adminUsername }
       ]
@@ -369,8 +67,9 @@ async function seedDatabase() {
 
     const adminPayload = {
       role: "admin",
+      roles: ["admin"],
       fullName: "System Super Administrator",
-      email: adminEmail,
+      email: adminEmail.toLowerCase(),
       phoneNumber: "9998887770",
       password: hashedAdminPassword,
       customData: {
@@ -380,28 +79,431 @@ async function seedDatabase() {
       }
     };
 
-    if (!existingAdmin) {
-      await User.create(adminPayload);
+    if (!adminUser) {
+      adminUser = await User.create(adminPayload);
       stats.usersCreated++;
-      console.log(`✅ Super Admin '${adminUsername}' created successfully.`);
+      console.log(`✅ Super Admin '${adminUsername}' created.`);
     } else {
-      Object.assign(existingAdmin, adminPayload);
-      await existingAdmin.save();
+      Object.assign(adminUser, adminPayload);
+      await adminUser.save();
       stats.usersUpdated++;
-      console.log(`✅ Super Admin '${adminUsername}' credentials updated.`);
+      console.log(`✅ Super Admin '${adminUsername}' updated.`);
     }
 
     summaryTable.push({
-      Department: "SYSTEM",
       Role: "Super Admin",
       Name: adminPayload.fullName,
-      "Login ID (Faculty ID)": adminUsername,
+      "Login Identifier": adminUsername,
       Email: adminEmail,
       Phone: adminPayload.phoneNumber,
-      "Lab Staff": "Full Sudo"
+      Details: "SuperAdmin Clearance"
     });
 
-    // 7. Seed Dynamic Permissions Matrix
+    // =============================================================
+    // 2. SEED 2 PRINCIPALS
+    // =============================================================
+    console.log("\n🏛️ Seeding 2 Principals...");
+    const principalConfigs = [
+      {
+        fullName: "Dr. Alexander Wright",
+        email: "principal1@college.edu",
+        employeeId: "PRI1001",
+        phoneNumber: "9876500001",
+        designation: "Principal"
+      },
+      {
+        fullName: "Dr. Beatrice Evans",
+        email: "principal2@college.edu",
+        employeeId: "PRI1002",
+        phoneNumber: "9876500002",
+        designation: "Vice Principal"
+      }
+    ];
+
+    for (const pConfig of principalConfigs) {
+      let principalUser = await User.findOne({
+        $or: [
+          { email: pConfig.email.toLowerCase() },
+          { "customData.employeeId": pConfig.employeeId }
+        ]
+      });
+
+      const pPayload = {
+        role: "principal",
+        roles: ["principal"],
+        fullName: pConfig.fullName,
+        email: pConfig.email.toLowerCase(),
+        phoneNumber: pConfig.phoneNumber,
+        dateOfJoining: new Date("2018-05-15"),
+        password: hashedPassword,
+        customData: {
+          employeeId: pConfig.employeeId,
+          designation: pConfig.designation
+        }
+      };
+
+      if (!principalUser) {
+        principalUser = await User.create(pPayload);
+        stats.usersCreated++;
+      } else {
+        Object.assign(principalUser, pPayload);
+        await principalUser.save();
+        stats.usersUpdated++;
+      }
+
+      summaryTable.push({
+        Role: "Principal",
+        Name: pConfig.fullName,
+        "Login Identifier": pConfig.employeeId,
+        Email: pConfig.email,
+        Phone: pConfig.phoneNumber,
+        Details: pConfig.designation
+      });
+    }
+
+    // =============================================================
+    // 3. SEED 1 HOD
+    // =============================================================
+    console.log("\n👨‍🏫 Seeding 1 Head of Department (HOD)...");
+    const hodConfig = {
+      fullName: "Dr. Robert Vance",
+      email: "hod.comp@college.edu",
+      department: "Computer Engineering",
+      employeeId: "HOD2001",
+      phoneNumber: "9876520001"
+    };
+
+    let hodUser = await User.findOne({
+      $or: [
+        { email: hodConfig.email.toLowerCase() },
+        { "customData.employeeId": hodConfig.employeeId }
+      ]
+    });
+
+    const hodPayload = {
+      role: "hod",
+      roles: ["hod"],
+      fullName: hodConfig.fullName,
+      department: hodConfig.department,
+      email: hodConfig.email.toLowerCase(),
+      phoneNumber: hodConfig.phoneNumber,
+      dateOfJoining: new Date("2019-07-01"),
+      password: hashedPassword,
+      customData: {
+        employeeId: hodConfig.employeeId
+      }
+    };
+
+    if (!hodUser) {
+      hodUser = await User.create(hodPayload);
+      stats.usersCreated++;
+    } else {
+      Object.assign(hodUser, hodPayload);
+      await hodUser.save();
+      stats.usersUpdated++;
+    }
+
+    summaryTable.push({
+      Role: "HOD",
+      Name: hodConfig.fullName,
+      "Login Identifier": hodConfig.employeeId,
+      Email: hodConfig.email,
+      Phone: hodConfig.phoneNumber,
+      Details: hodConfig.department
+    });
+
+    // =============================================================
+    // 4. SEED 2 FACULTY MEMBERS
+    // =============================================================
+    console.log("\n🧑‍🏫 Seeding 2 Faculty Members...");
+    const facultyConfigs = [
+      {
+        fullName: "Prof. Sarah Connor",
+        email: "faculty1.comp@college.edu",
+        department: "Computer Engineering",
+        employeeId: "FAC2001",
+        phoneNumber: "9876520011",
+        isLabStaff: false
+      },
+      {
+        fullName: "Prof. James Miller",
+        email: "faculty2.mech@college.edu",
+        department: "Mechanical Engineering",
+        employeeId: "FAC1001",
+        phoneNumber: "9876510012",
+        isLabStaff: false
+      }
+    ];
+
+    for (const fConfig of facultyConfigs) {
+      let facUser = await User.findOne({
+        $or: [
+          { email: fConfig.email.toLowerCase() },
+          { "customData.employeeId": fConfig.employeeId }
+        ]
+      });
+
+      const facPayload = {
+        role: "faculty",
+        roles: ["faculty"],
+        fullName: fConfig.fullName,
+        department: fConfig.department,
+        email: fConfig.email.toLowerCase(),
+        phoneNumber: fConfig.phoneNumber,
+        dateOfJoining: new Date("2021-08-15"),
+        password: hashedPassword,
+        isLabStaff: fConfig.isLabStaff,
+        customData: {
+          employeeId: fConfig.employeeId
+        }
+      };
+
+      if (!facUser) {
+        facUser = await User.create(facPayload);
+        stats.usersCreated++;
+      } else {
+        Object.assign(facUser, facPayload);
+        await facUser.save();
+        stats.usersUpdated++;
+      }
+
+      summaryTable.push({
+        Role: "Faculty",
+        Name: fConfig.fullName,
+        "Login Identifier": fConfig.employeeId,
+        Email: fConfig.email,
+        Phone: fConfig.phoneNumber,
+        Details: fConfig.department
+      });
+    }
+
+    // =============================================================
+    // 5. SEED 1 HR & ACCOUNTS OFFICER
+    // =============================================================
+    console.log("\n🏢 Seeding 1 HR & Accounts Officer...");
+    const hrConfig = {
+      fullName: "Institutional Accounts & HR Officer",
+      email: "hraccounts@college.edu",
+      staffId: "HRACC1001",
+      staffRole: "HR & Accounts",
+      phoneNumber: "9876543210"
+    };
+
+    let hrUser = await User.findOne({
+      $or: [
+        { email: hrConfig.email.toLowerCase() },
+        { "customData.staffId": hrConfig.staffId }
+      ]
+    });
+
+    const hrPayload = {
+      role: "hraccounts",
+      roles: ["hraccounts"],
+      fullName: hrConfig.fullName,
+      email: hrConfig.email.toLowerCase(),
+      phoneNumber: hrConfig.phoneNumber,
+      dateOfJoining: new Date("2020-01-15"),
+      password: hashedPassword,
+      customData: {
+        staffId: hrConfig.staffId,
+        staffRole: hrConfig.staffRole
+      }
+    };
+
+    if (!hrUser) {
+      hrUser = await User.create(hrPayload);
+      stats.usersCreated++;
+    } else {
+      Object.assign(hrUser, hrPayload);
+      await hrUser.save();
+      stats.usersUpdated++;
+    }
+
+    summaryTable.push({
+      Role: "HR & Accounts",
+      Name: hrConfig.fullName,
+      "Login Identifier": hrConfig.staffId,
+      Email: hrConfig.email,
+      Phone: hrConfig.phoneNumber,
+      Details: hrConfig.staffRole
+    });
+
+    // =============================================================
+    // 6. SEED 2 PARENTS
+    // =============================================================
+    console.log("\n👨‍👩‍👧 Seeding 2 Parents...");
+    const parentConfigs = [
+      {
+        fullName: "David Miller",
+        email: "parent.miller@example.com",
+        phoneNumber: "9876590001",
+        studentAdmissionNo: "1001"
+      },
+      {
+        fullName: "Grace Hopper",
+        email: "parent.hopper@example.com",
+        phoneNumber: "9876590002",
+        studentAdmissionNo: "2001"
+      }
+    ];
+
+    const parentUserMap = {};
+
+    for (const pConfig of parentConfigs) {
+      let parentUser = await User.findOne({ email: pConfig.email.toLowerCase() });
+
+      const parentPayload = {
+        role: "parent",
+        roles: ["parent"],
+        fullName: pConfig.fullName,
+        email: pConfig.email.toLowerCase(),
+        phoneNumber: pConfig.phoneNumber,
+        password: hashedPassword,
+        customData: {
+          studentAdmissionNo: pConfig.studentAdmissionNo
+        }
+      };
+
+      if (!parentUser) {
+        parentUser = await User.create(parentPayload);
+        stats.usersCreated++;
+      } else {
+        Object.assign(parentUser, parentPayload);
+        await parentUser.save();
+        stats.usersUpdated++;
+      }
+
+      parentUserMap[pConfig.studentAdmissionNo] = parentUser;
+
+      summaryTable.push({
+        Role: "Parent",
+        Name: pConfig.fullName,
+        "Login Identifier": pConfig.email,
+        Email: pConfig.email,
+        Phone: pConfig.phoneNumber,
+        Details: `Child Adm: ${pConfig.studentAdmissionNo}`
+      });
+    }
+
+    // =============================================================
+    // 7. SEED 2 STUDENTS (LINKED TO PARENTS)
+    // =============================================================
+    console.log("\n🎓 Seeding 2 Students (General Department Sem 1)...");
+    const currentAcademicYear = getCurrentAcademicYear();
+
+    const studentConfigs = [
+      {
+        admissionNo: "1001",
+        regNo: "2101001001",
+        fullName: "Thomas Miller",
+        email: "student.thomas@college.edu",
+        phoneNumber: "9876510001",
+        primaryDepartment: "Mechanical Engineering",
+        section: "Mech-A",
+        semester: 1,
+        batchYear: "2024-2027",
+        parentEmail: "parent.miller@example.com"
+      },
+      {
+        admissionNo: "2001",
+        regNo: "2101002001",
+        fullName: "Ada Hopper",
+        email: "student.ada@college.edu",
+        phoneNumber: "9876520002",
+        primaryDepartment: "Computer Engineering",
+        section: null,
+        semester: 1,
+        batchYear: "2024-2027",
+        parentEmail: "parent.hopper@example.com"
+      }
+    ];
+
+    for (const sConfig of studentConfigs) {
+      let studentUser = await User.findOne({
+        $or: [
+          { email: sConfig.email.toLowerCase() },
+          { "customData.admissionNo": sConfig.admissionNo }
+        ]
+      });
+
+      const userPayload = {
+        role: "student",
+        roles: ["student", "general_department_student"],
+        fullName: sConfig.fullName,
+        department: "General Department",
+        primaryDepartment: sConfig.primaryDepartment,
+        isGeneralDepartment: true,
+        section: sConfig.section,
+        email: sConfig.email.toLowerCase(),
+        phoneNumber: sConfig.phoneNumber,
+        password: hashedPassword,
+        customData: {
+          admissionNo: sConfig.admissionNo,
+          regNo: sConfig.regNo,
+          semester: sConfig.semester,
+          batchYear: sConfig.batchYear,
+          section: sConfig.section,
+          parentEmail: sConfig.parentEmail
+        }
+      };
+
+      if (!studentUser) {
+        studentUser = await User.create(userPayload);
+        stats.usersCreated++;
+      } else {
+        Object.assign(studentUser, userPayload);
+        await studentUser.save();
+        stats.usersUpdated++;
+      }
+
+      // Find parent user to link
+      const parentUser = parentUserMap[sConfig.admissionNo] || await User.findOne({
+        email: sConfig.parentEmail.toLowerCase(),
+        role: "parent"
+      });
+
+      let studentProfile = await Student.findOne({
+        $or: [{ user: studentUser._id }, { admissionNo: sConfig.admissionNo }]
+      });
+
+      const studentData = {
+        user: studentUser._id,
+        fullName: sConfig.fullName,
+        admissionNo: sConfig.admissionNo,
+        regNo: sConfig.regNo,
+        department: "General Department",
+        primaryDepartment: sConfig.primaryDepartment,
+        isGeneralDepartment: true,
+        semester: sConfig.semester,
+        academicYear: currentAcademicYear,
+        batch: sConfig.batchYear,
+        section: sConfig.section,
+        parentEmail: sConfig.parentEmail,
+        parent: parentUser ? parentUser._id : null
+      };
+
+      if (!studentProfile) {
+        await Student.create(studentData);
+        stats.studentsCreated++;
+      } else {
+        Object.assign(studentProfile, studentData);
+        await studentProfile.save();
+        stats.studentsUpdated++;
+      }
+
+      summaryTable.push({
+        Role: "Student",
+        Name: sConfig.fullName,
+        "Login Identifier": sConfig.admissionNo,
+        Email: sConfig.email,
+        Phone: sConfig.phoneNumber,
+        Details: `${sConfig.primaryDepartment} (Sem ${sConfig.semester}, ${sConfig.section || "No Sec"})`
+      });
+    }
+
+    // =============================================================
+    // 8. SEED DYNAMIC PERMISSIONS MATRIX
+    // =============================================================
     console.log("\n🛡️ Seeding Dynamic Permissions Matrix...");
     let permCount = 0;
     for (const perm of DEFAULT_PERMISSIONS) {
@@ -414,6 +516,7 @@ async function seedDatabase() {
     }
     console.log(`✅ Seeded ${permCount} dynamic controller permission rules.`);
 
+    // Print summary
     console.log("\n=================================================");
     console.log("📊 SEEDING SUMMARY MATRIX");
     console.log("=================================================");
@@ -426,7 +529,8 @@ async function seedDatabase() {
     console.log(`Users Updated:    ${stats.usersUpdated}`);
     console.log(`Students Created: ${stats.studentsCreated}`);
     console.log(`Students Updated: ${stats.studentsUpdated}`);
-    console.log(`Universal Seed Password: '${DEFAULT_PASSWORD}'`);
+    console.log(`Universal Default Password: '${DEFAULT_PASSWORD}'`);
+    console.log(`Admin Password:             '${adminRawPassword}'`);
     console.log("=================================================\n");
 
   } catch (error) {

@@ -60,6 +60,19 @@ const UserSchema = new mongoose.Schema(
       default: undefined
     },
 
+    // Permanent core branch (e.g. Mechanical Engineering, Computer Engineering) for students
+    primaryDepartment: {
+      type: String,
+      default: undefined,
+      trim: true
+    },
+
+    // Indicates temporary assignment to General Department during Semester 1 & 2
+    isGeneralDepartment: {
+      type: Boolean,
+      default: false
+    },
+
     section: {
       type: String,
       default: undefined,

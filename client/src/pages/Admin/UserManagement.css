@@ -1,5 +1,173 @@
 .user-management-container {
-  padding: 20px;
+  padding: 1rem;
+}
+
+.um-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.um-header h2 {
+  margin: 0 0 0.5rem 0;
+  color: #1e293b;
+}
+
+.um-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.um-table-container {
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow-x: auto;
+}
+
+.um-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.um-table th,
+.um-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.um-table th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: #475569;
+}
+
+.um-user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.um-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 1.5rem;
+}
+
+.um-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.um-role-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.um-role-badge.role-admin { background: #fee2e2; color: #ef4444; }
+.um-role-badge.role-hod { background: #fef3c7; color: #d97706; }
+.um-role-badge.role-faculty { background: #e0e7ff; color: #4f46e5; }
+.um-role-badge.role-student { background: #dcfce7; color: #16a34a; }
+
+.um-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-icon.edit { color: #3b82f6; }
+.btn-icon.edit:hover { background: #eff6ff; }
+.btn-icon.delete { color: #ef4444; }
+.btn-icon.delete:hover { background: #fee2e2; }
+
+/* Modal */
+.um-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.um-modal {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.um-modal h3 {
+  margin: 0 0 1.5rem 0;
+  color: #1e293b;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #475569;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.checkbox-group input {
+  width: auto;
+}
+
+.um-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
 }

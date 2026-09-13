@@ -7,6 +7,7 @@ const { FluentMigration } = require("../utils/fluentMigration");
 module.exports = new FluentMigration("20260907_001_init_all_existing_controllers")
   // 1. Gate Pass System
   .forController("GatePassController")
+    .masterMenu("Leaves & Passes")
     .title("Gate Pass Management")
     .path("/gatepass/approval")
     .icon("fas fa-id-card")
@@ -18,6 +19,7 @@ module.exports = new FluentMigration("20260907_001_init_all_existing_controllers
 
   // 2. Staff Leave Portal
   .forController("StaffLeaveController")
+    .masterMenu("Leaves & Passes")
     .title("Staff Leave Management")
     .path("/leave/request")
     .icon("fas fa-calendar-alt")
@@ -30,6 +32,7 @@ module.exports = new FluentMigration("20260907_001_init_all_existing_controllers
 
   // 3. Student Leave Applications
   .forController("StudentLeaveController")
+    .masterMenu("Leaves & Passes")
     .title("Student Leave Review")
     .path("/tutor/review")
     .icon("fas fa-user-clock")
@@ -41,6 +44,7 @@ module.exports = new FluentMigration("20260907_001_init_all_existing_controllers
 
   // 4. Duty Leave Management
   .forController("DutyLeaveController")
+    .masterMenu("Leaves & Passes")
     .title("Duty Leave Management")
     .path("/faculty/duty-leaves")
     .icon("fas fa-briefcase")
@@ -51,6 +55,7 @@ module.exports = new FluentMigration("20260907_001_init_all_existing_controllers
 
   // 5. Attendance Management
   .forController("AttendanceController")
+    .masterMenu("Academics & Conduct")
     .title("Attendance Management")
     .path("/attendance/entry")
     .icon("fas fa-calendar-check")
@@ -62,6 +67,7 @@ module.exports = new FluentMigration("20260907_001_init_all_existing_controllers
 
   // 6. Disciplinary Log
   .forController("DisciplinaryController")
+    .masterMenu("Academics & Conduct")
     .title("Disciplinary Profile & Log")
     .path("/faculty/discipline")
     .icon("fas fa-exclamation-triangle")
@@ -73,6 +79,7 @@ module.exports = new FluentMigration("20260907_001_init_all_existing_controllers
 
   // 7. Institutional Events
   .forController("EventController")
+    .masterMenu("Campus Activities")
     .title("Institutional Events & Notices")
     .path("/faculty/events")
     .icon("fas fa-bullhorn")
@@ -84,6 +91,7 @@ module.exports = new FluentMigration("20260907_001_init_all_existing_controllers
 
   // 8. Sports & Tournaments
   .forController("SportsController")
+    .masterMenu("Campus Activities")
     .title("Sports & Tournaments")
     .path("/faculty/sports")
     .icon("fas fa-medal")
@@ -94,6 +102,7 @@ module.exports = new FluentMigration("20260907_001_init_all_existing_controllers
 
   // 9. Audit Trail
   .forController("AuditController")
+    .masterMenu("System Administration")
     .title("System Audit Trail")
     .path("/audit-dashboard")
     .icon("fas fa-shield-alt")
@@ -105,6 +114,7 @@ module.exports = new FluentMigration("20260907_001_init_all_existing_controllers
 
   // 10. Promotion Management
   .forController("PromotionController")
+    .masterMenu("System Administration")
     .title("Promotions & Ad Campaigns")
     .path("/admin/promotions")
     .icon("fas fa-ad")
@@ -112,6 +122,7 @@ module.exports = new FluentMigration("20260907_001_init_all_existing_controllers
 
   // 11. Late Entry Tracker
   .forController("LateEntryController")
+    .masterMenu("Security & Access")
     .title("Late Entry Verification")
     .path("/security/late-entries")
     .icon("fas fa-user-check")
@@ -121,6 +132,7 @@ module.exports = new FluentMigration("20260907_001_init_all_existing_controllers
 
   // 12. Attendance Correction Requests
   .forController("AttendanceCorrectionController")
+    .masterMenu("Academics & Conduct")
     .title("Attendance Corrections")
     .path("/attendance/corrections")
     .icon("fas fa-edit")
@@ -130,7 +142,40 @@ module.exports = new FluentMigration("20260907_001_init_all_existing_controllers
 
   // 13. Role & Permission Management
   .forController("PermissionController")
+    .masterMenu("System Administration")
     .title("Role Management")
     .path("/admin/permissions")
     .icon("fas fa-user-shield")
-    .grant("admin", ["list", "add", "update", "delete", "download"]);
+    .grant("admin", ["list", "add", "update", "delete", "download"])
+
+  // 14. User Management
+  .forController("UserController")
+    .masterMenu("System Administration")
+    .title("User Management")
+    .path("/admin/users")
+    .icon("fas fa-users-cog")
+    .grant("admin", ["list", "add", "update", "delete"])
+    .grant("hod", ["list", "add", "update"])
+
+  // 15. Workflow Engine Master Builder
+  .forController("WorkflowController")
+    .masterMenu("System Administration")
+    .title("Workflow Engine")
+    .path("/admin/workflows")
+    .icon("fas fa-project-diagram")
+    .grant("admin", ["list", "add", "update", "delete"])
+    .grant("director", ["list", "update"])
+    .grant("principal", ["list", "update"])
+
+  // 16. Unified Approval Queue
+  .forController("ApprovalQueueController")
+    .masterMenu("Administration & Governance")
+    .title("Approval Queue")
+    .path("/approvals/queue")
+    .icon("fas fa-tasks")
+    .grant("admin", ["list", "update"])
+    .grant("director", ["list", "update"])
+    .grant("principal", ["list", "update"])
+    .grant("hod", ["list", "update"])
+    .grant("faculty", ["list", "update"])
+    .grant("hraccounts", ["list", "update"]);

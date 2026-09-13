@@ -1,7 +1,35 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFileAlt,
+  faCalendarAlt,
+  faUsers,
+  faClock,
+  faCheckSquare,
+  faBan,
+  faTasks,
+  faShieldAlt,
+  faUserGraduate,
+  faUserClock,
+  faUserEdit,
+  faClipboardList,
+  faCalendarDay,
+  faCalendar,
+  faQrcode,
+  faPhoneAlt,
+  faGavel,
+  faTrophy,
+  faRunning,
+  faCalendarCheck,
+  faArrowRight
+} from "@fortawesome/free-solid-svg-icons";
 import "./WorkDashboard.css";
+import DashboardCard from "./DashboardCard";
 
-function FacultyDashboard() {
+/* Reusable Clean Card Component with Editorial Slate Styling */
+
+export default function FacultyDashboard() {
   const navigate = useNavigate();
 
   const user = JSON.parse(
@@ -11,387 +39,219 @@ function FacultyDashboard() {
   const isTempHOD =
     user?.isTempHOD &&
     user?.tempHODUntil &&
-    new Date(user.tempHODUntil) >
-      new Date();
+    new Date(user.tempHODUntil) > new Date();
 
   return (
-    <div className="workspace-container">
+    <div className="bento-dashboard-wrapper">
+      {/* Main Container Wrapper with Fluid Padding */}
+      <div className="bento-container">
+        
+        {/* ==========================================
+            SECTION 1: Faculty Operations 
+           ========================================== */}
+        <section className="bento-section">
+          <div className="bento-section-header">
+            <h2>Faculty Workflow</h2>
+            <span>Primary Actions</span>
+          </div>
+          
+          <div className="bento-grid">
+            <DashboardCard 
+              title="Apply Leave" 
+              description="Submit a new casual or medical leave request."
+              icon={faFileAlt}
+              onClick={() => navigate("/leave/request")}
+            />
+            <DashboardCard 
+              title="My Leaves" 
+              description="View status and history of past leave applications."
+              icon={faCalendarAlt}
+              onClick={() => navigate("/leave/my")}
+            />
+            <DashboardCard 
+              title="Leave Balance" 
+              description="Check available annual leave pool and LOP status."
+              icon={faClock}
+              onClick={() => navigate("/faculty/leave-balance")}
+            />
+            <DashboardCard 
+              title="Coverage Requests" 
+              description="Manage and accept class substitution requests."
+              icon={faUsers}
+              onClick={() => navigate("/faculty/coverage")}
+            />
+            <DashboardCard 
+              title="Apply Duty Leave" 
+              description="Submit a request for official duty leave."
+              icon={faFileAlt}
+              onClick={() => navigate("/faculty/duty-leaves")}
+            />
+            <DashboardCard 
+              title="My Duty Leaves" 
+              description="View status of your duty leave applications."
+              icon={faCalendarCheck}
+              onClick={() => navigate("/faculty/my-duty-leaves")}
+            />
+          </div>
+        </section>
 
-      <div className="dashboard-grid">
-
-        {/* =========================
-            FACULTY WORKFLOW
-        ========================= */}
-
-        <h2>Faculty Workflow</h2>
-
-        <div
-          className="module-card"
-          onClick={() =>
-            navigate("/leave/request")
-          }
-        >
-          <h4>Apply Leave</h4>
-
-          <p>
-            Submit a new leave request.
-          </p>
-        </div>
-
-        <div
-          className="module-card"
-          onClick={() =>
-            navigate("/leave/my")
-          }
-        >
-          <h4>My Leaves</h4>
-
-          <p>
-            View your leave history.
-          </p>
-        </div>
-
-        <div
-          className="module-card"
-          onClick={() =>
-            navigate("/faculty/coverage")
-          }
-        >
-          <h4>Coverage Requests</h4>
-
-          <p>
-            Manage leave coverage requests.
-          </p>
-        </div>
-
-        <div
-          className="module-card"
-          onClick={() =>
-            navigate("/faculty/balance")
-          }
-        >
-          <h4>Leave Balance</h4>
-
-          <p>
-            Check available leave balance.
-          </p>
-        </div>
-
-        {/* =========================
-            TEMP HOD WORKFLOW
-        ========================= */}
-
+        {/* ==========================================
+            SECTION 2: Temp HOD Operations (Conditional)
+           ========================================== */}
         {isTempHOD && (
-          <>
-            <h2>
-              Temporary HOD Workflow
-            </h2>
-
-            <p
-              style={{
-                gridColumn: "1 / -1",
-                color: "#666",
-                marginBottom: "15px"
-              }}
-            >
-              Acting HOD for{" "}
-              <strong>
-                {user.tempHODDepartment}
-              </strong>
-            </p>
-
-            <div
-              className="module-card"
-              onClick={() =>
-                navigate("/hod/pending")
-              }
-            >
-              <h4>
-                Leave Approval Queue
-              </h4>
-
-              <p>
-                Review and approve
-                faculty leave requests.
-              </p>
+          <section className="bento-section">
+            <div className="bento-section-header">
+              <h2>Temporary HOD Workflow</h2>
+              <span>Acting HOD for {user.tempHODDepartment}</span>
             </div>
-
-            <div
-              className="module-card"
-              onClick={() =>
-                navigate("/hod/revoked")
-              }
-            >
-              <h4>
-                Revoked Leaves
-              </h4>
-
-              <p>
-                View leaves revoked
-                by the Director.
-              </p>
+            
+            <div className="bento-grid">
+              <DashboardCard 
+                title="Leave Approval Queue" 
+                description="Review and approve faculty leave requests."
+                icon={faCheckSquare}
+                onClick={() => navigate("/hod/pending")}
+              />
+              <DashboardCard 
+                title="Revoked Leaves" 
+                description="View leaves revoked by the Director."
+                icon={faBan}
+                onClick={() => navigate("/hod/revoked")}
+              />
             </div>
-          </>
+          </section>
         )}
 
-        {/* =========================
-            TUTOR WORKFLOW
-        ========================= */}
+        {/* ==========================================
+            SECTION 3: Tutor & Batch Oversight
+           ========================================== */}
+        <section className="bento-section">
+          <div className="bento-section-header">
+            <h2>Tutor Workflow</h2>
+            <span>Batch Monitoring</span>
+          </div>
+          
+          <div className="bento-grid">
+            <DashboardCard 
+              title="Leave Review Queue" 
+              description="Review and clear student leave requests."
+              icon={faTasks}
+              onClick={() => navigate("/tutor/review")}
+            />
+            <DashboardCard 
+              title="Student Duty Leave" 
+              description="Review and process student duty leaves."
+              icon={faUserGraduate}
+              onClick={() => navigate("/tutor/duty-leaves")}
+            />
+            <DashboardCard 
+              title="Late Entry Requests" 
+              description="Review pending student late entry requests."
+              icon={faUserClock}
+              onClick={() => navigate("/faculty/late-entries")}
+            />
+            <DashboardCard 
+              title="Special Attendance Request" 
+              description="Select attendance record and request correction."
+              icon={faUserEdit}
+              onClick={() => navigate("/attendance/special")}
+            />
+            <DashboardCard 
+              title="Manual Overrides" 
+              description="Execute emergency workflow overrides."
+              icon={faShieldAlt}
+              onClick={() => navigate("/tutor/manual")}
+            />
+          </div>
+        </section>
 
-        <h2>Tutor Workflow</h2>
+        {/* ==========================================
+            SECTION 4: Attendance Operations
+           ========================================== */}
+        <section className="bento-section">
+          <div className="bento-section-header">
+            <h2>Attendance</h2>
+            <span>Registers</span>
+          </div>
+          
+          <div className="bento-grid">
+            <DashboardCard 
+              title="Attendance Snapshot" 
+              description="View high-level attendance information."
+              icon={faClipboardList}
+              onClick={() => navigate("/tutor/attendance")}
+            />
+            <DashboardCard 
+              title="Daily Attendance" 
+              description="Record and view daily attendance entries."
+              icon={faCalendarDay}
+              onClick={() => navigate("/attendance/entry")}
+            />
+            <DashboardCard 
+              title="Monthly Attendance" 
+              description="Review attendance aggregated by month."
+              icon={faCalendarAlt}
+              onClick={() => navigate("/attendance/monthly")}
+            />
+            <DashboardCard 
+              title="Semester Attendance" 
+              description="Comprehensive semester attendance reports."
+              icon={faCalendar}
+              onClick={() => navigate("/attendance/semester")}
+            />
+          </div>
+        </section>
 
-        <div
-          className="module-card"
-          onClick={() =>
-            navigate("/tutor/review")
-          }
-        >
-          <h4>
-            Leave Review Queue
-          </h4>
-
-          <p>
-            Review student leave requests.
-          </p>
-        </div>
-
-        <div
-          className="module-card"
-          onClick={() =>
-            navigate("/tutor/manual")
-          }
-        >
-          <h4>
-            Manual Overrides
-          </h4>
-
-          <p>
-            Override leave workflows.
-          </p>
-        </div>
-
-        <div
-          className="module-card"
-          onClick={() =>
-            navigate("/tutor/attendance")
-          }
-        >
-          <h4>
-            Attendance Snapshot
-          </h4>
-
-          <p>
-            View attendance information.
-          </p>
-        </div>
-
-<div
-  className="module-card"
-  onClick={() =>
-    navigate("/attendance/special")
-  }
->
-  <h4>
-    Special Attendance Request
-  </h4>
-
-  <p>
-    Select attendance record and request correction.
-  </p>
-</div>
-
-
-        {/* =========================
-            GENERAL
-        ========================= */}
-
-        <h2>General</h2>
-
-        <div
-          className="module-card"
-          onClick={() =>
-            navigate("/gatepass/approval")
-          }
-        >
-          <h4>
-            Gate Pass Requests
-          </h4>
-
-          <p>
-            Review gate pass requests.
-          </p>
-        </div>
-
-        <div
-          className="module-card"
-          onClick={() =>
-            navigate("/tutor/manual-override")
-          }
-        >
-          <h4>
-            Manual Parent Verification
-          </h4>
-
-          <p>
-            Verify parents by phone
-            and override digitally.
-          </p>
-        </div>
-
-
-
-        <div
-          className="module-card"
-          onClick={() =>
-            navigate("/discipline/faculty")
-          }
-        >
-          <h4>
-            Disciplinary Action
-          </h4>
-
-          <p>
-            File disciplinary reports.
-          </p>
-        </div>
-
-        <div
-  className="module-card"
-  onClick={() =>
-    navigate("/attendance/entry")
-  }
->
-  <h4>Daily Attendance</h4>
-</div>
-
-<div
-  className="module-card"
-  onClick={() =>
-    navigate("/attendance/monthly")
-  }
->
-  <h4>Monthly Attendance</h4>
-</div>
-
-<div
-  className="module-card"
-  onClick={() =>
-    navigate("/attendance/semester")
-  }
->
-  <h4>Semester Attendance</h4>
-</div>
-
-<div
-  className="module-card"
-  onClick={() =>
-    navigate("/tutor/duty-leaves")
-  }
->
-  <h4>Student Duty Leave</h4>
-</div>
-
-<div
-  className="module-card"
-  onClick={() =>
-    navigate("/faculty/duty-leaves")
-  }
->
-  <h4>Apply Duty Leave</h4>
-</div>
-
-<div
-  className="module-card"
-  onClick={() =>
-    navigate("/faculty/my-duty-leaves")
-  }
->
-  <h4>My Duty Leaves</h4>
-</div>
-<div
-  className="module-card"
-  onClick={() =>
-    navigate("/faculty/leave-balance")
-  }
->
-  <h4>Leave Balance</h4>
-</div>
-
-<div
-    className="module-card"
-    onClick={() =>
-        navigate("/faculty/late-entries")
-    }
->
-
-    <h4>
-        Late Entry Requests
-    </h4>
-
-    <p>
-        Review pending student
-        late entry requests.
-    </p>
-
-</div>
-<div
-    className="module-card"
-    onClick={() =>
-        navigate("/sportscommittee/dashboard")
-    }
->
-
-    <h4>
-        Sports Commitee
-    </h4>
-
-    <p>
-        Review Student sports
-        Activities
-    </p>
-
-</div>
-<div
-    className="module-card"
-    onClick={() =>
-        navigate("/faculty/sportsdashboard")
-    }
->
-
-    <h4>
-        Faculty Sports Dashboard
-    </h4>
-
-    <p>
-      Verify Student Sports Activity
-    </p>
+        {/* ==========================================
+            SECTION 5: General & System Tools
+           ========================================== */}
+        <section className="bento-section">
+          <div className="bento-section-header">
+            <h2>General</h2>
+            <span>System Tools</span>
+          </div>
+          
+          <div className="bento-grid">
+            <DashboardCard 
+              title="Gate Pass Requests" 
+              description="Review gate pass requests."
+              icon={faQrcode}
+              onClick={() => navigate("/gatepass/approval")}
+            />
+            <DashboardCard 
+              title="Manual Parent Verification" 
+              description="Verify parents by phone and override digitally."
+              icon={faPhoneAlt}
+              onClick={() => navigate("/tutor/manual-override")}
+            />
+            <DashboardCard 
+              title="Disciplinary Action" 
+              description="File and review disciplinary reports."
+              icon={faGavel}
+              onClick={() => navigate("/discipline/faculty")}
+            />
+            <DashboardCard 
+              title="Sports Committee" 
+              description="Review student sports activities."
+              icon={faTrophy}
+              onClick={() => navigate("/sportscommittee/dashboard")}
+            />
+            <DashboardCard 
+              title="Faculty Sports Dashboard" 
+              description="Verify student sports activity."
+              icon={faRunning}
+              onClick={() => navigate("/faculty/sportsdashboard")}
+            />
+            <DashboardCard 
+              title="Events Dashboard" 
+              description="Manage and view college events."
+              icon={faCalendarCheck}
+              onClick={() => navigate("/events")}
+            />
+          </div>
+        </section>
 
       </div>
-
-      <div
-    className="module-card"
-    onClick={() =>
-        navigate("/events")
-    }
->
-
-    <h4>
-      Events
-    </h4>
-
-    <p>
-      Event Dashboard
-    </p>
-
-      </div>
-      </div>
-
-
-
-      
-
     </div>
   );
 }
-
-export default FacultyDashboard;

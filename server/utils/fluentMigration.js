@@ -14,9 +14,19 @@ class ModuleClaimDefinition {
     this.controller = controllerName;
     this.parent = parentMigration;
     this.moduleTitle = controllerName;
+    this.masterMenuId = "General Workspace";
     this.routePath = "";
     this.iconClass = "fas fa-folder";
     this.roleClaims = {}; // { [role]: { list: boolean, add: boolean, ... } }
+  }
+
+  /**
+   * Set master category / heading for this module
+   * @param {string} id
+   */
+  masterMenu(id) {
+    this.masterMenuId = id;
+    return this;
   }
 
   /**

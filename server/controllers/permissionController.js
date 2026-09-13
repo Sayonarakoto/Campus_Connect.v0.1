@@ -10,6 +10,7 @@ for (const mod of initialMigration.modules) {
   for (const [role, actions] of Object.entries(mod.roleClaims)) {
     DEFAULT_PERMISSIONS.push({
       role,
+      masterMenuId: mod.masterMenuId || "General Workspace",
       controller: mod.controller,
       moduleTitle: mod.moduleTitle,
       path: mod.routePath,
@@ -80,6 +81,7 @@ exports.updatePermissions = async (req, res) => {
             "actions.download": Boolean(item.actions.download)
           },
           $setOnInsert: {
+            masterMenuId: item.masterMenuId || "General Workspace",
             moduleTitle: item.moduleTitle || item.controller,
             path: item.path || "/",
             icon: item.icon || "fas fa-folder"

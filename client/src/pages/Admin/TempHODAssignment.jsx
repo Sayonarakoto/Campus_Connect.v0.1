@@ -231,6 +231,10 @@ function TempHODAssignment() {
             Fire Technology and Safety
           </option>
 
+          <option value="General Department">
+            General Department
+          </option>
+
         </select>
 
         <input

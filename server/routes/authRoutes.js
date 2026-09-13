@@ -110,10 +110,8 @@ router.get("/leave-balance", getLeaveBalance);
 // =========================
 
 // Get all users (admin only)
-router.get("/users", getAllUsers);
 
 // Get user by ID (admin only)
-router.get("/users/:id", getUserById);
 
 // Delegate role
 router.post("/users/:id/delegate-role", delegateRole);

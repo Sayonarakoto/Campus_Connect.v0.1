@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "./WorkDashboard.css";
+import DynamicModuleGrid from "./DynamicModuleGrid";
 
 /**
  * Calculates human-readable tenure from Date of Joining

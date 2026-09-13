@@ -1,14 +1,13 @@
-const mongoose = require("mongoose");
-const path = require("path");
-require("dotenv").config({ path: path.join(__dirname, "../.env") });
 const Permission = require("../models/Permission");
 
-async function runMigration() {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("Connected to DB for migration...");
+/**
+ * Migration: 20260911_role_management_claim
+ * Grants PermissionController access to admin role.
+ */
+module.exports = {
+  name: "20260911_role_management_claim",
 
-    // Check if the admin already has PermissionController
+  async up() {
     const existing = await Permission.findOne({ role: "admin", controller: "PermissionController" });
     if (!existing) {
       await Permission.create({
@@ -19,15 +18,15 @@ async function runMigration() {
         icon: "fas fa-user-shield",
         actions: { list: true, add: true, update: true, delete: true, download: true }
       });
-      console.log("Migration: Inserted PermissionController for 'admin'.");
+      console.log("   ↳ Migration: Inserted PermissionController for 'admin'.");
     } else {
-      console.log("Migration: 'admin' already has PermissionController.");
+      console.log("   ↳ Migration: 'admin' already has PermissionController.");
     }
-    process.exit(0);
-  } catch (error) {
-    console.error("Migration Failed:", error);
-    process.exit(1);
-  }
-}
+    return { controllers: ["PermissionController"], totalClaimsUpserted: 1 };
+  },
 
-runMigration();
+  async down() {
+    await Permission.deleteOne({ role: "admin", controller: "PermissionController" });
+    return { controllers: ["PermissionController"] };
+  }
+};

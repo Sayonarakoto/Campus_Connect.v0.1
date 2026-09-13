@@ -14,6 +14,11 @@ const PermissionSchema = new mongoose.Schema(
       trim: true,
       lowercase: true
     },
+    masterMenuId: {
+      type: String,
+      default: "General Workspace",
+      trim: true
+    },
     controller: {
       type: String,
       required: true,

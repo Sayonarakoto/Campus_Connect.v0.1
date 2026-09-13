@@ -33,6 +33,16 @@ const DepartmentStudentViewSchema = new mongoose.Schema(
       required: true,
       index: true
     },
+    primaryDepartment: {
+      type: String,
+      default: "",
+      index: true
+    },
+    isGeneralDepartment: {
+      type: Boolean,
+      default: false,
+      index: true
+    },
     programme: {
       type: String,
       default: ""

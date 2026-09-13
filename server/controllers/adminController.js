@@ -160,3 +160,39 @@ async (req, res) => {
   }
 
 };
+
+// =====================================
+// SEMESTER PROMOTION JOB
+// =====================================
+
+const { promoteStudentsSemester } = require("../services/semesterPromotionService");
+
+/**
+ * Runs student semester increment and department transition.
+ * Transitions students advancing to Semester 3 from General Department to their core department.
+ */
+exports.promoteStudentSemester = async (req, res) => {
+  try {
+    const { studentIds, batch, currentSemester, autoUpdateAcademicYear = true } = req.body;
+
+    const result = await promoteStudentsSemester({
+      studentIds,
+      batch,
+      currentSemester,
+      autoUpdateAcademicYear,
+      actorId: req.user?._id || req.user?.id
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `Successfully processed ${result.totalProcessed} student(s). Promoted: ${result.promotedCount}, Transitioned from General Dept: ${result.transitionedCount}, Graduated: ${result.graduatedCount}.`,
+      data: result
+    });
+  } catch (error) {
+    console.error("promoteStudentSemester Controller Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to execute semester promotion job."
+    });
+  }
+};

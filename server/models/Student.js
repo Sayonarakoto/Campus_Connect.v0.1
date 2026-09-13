@@ -29,7 +29,27 @@ const StudentSchema = new mongoose.Schema(
 
     department: {
       type: String,
-      required : true,
+      required: true,
+      trim: true
+    },
+
+    // Permanent core branch (e.g. Mechanical Engineering, Computer Engineering)
+    primaryDepartment: {
+      type: String,
+      required: true,
+      trim: true
+    },
+
+    // Indicates temporary assignment to General Department during Semester 1 & 2
+    isGeneralDepartment: {
+      type: Boolean,
+      default: false
+    },
+
+    // Flag indicating diploma program completion
+    isGraduated: {
+      type: Boolean,
+      default: false
     },
 
     programme: {
@@ -39,7 +59,9 @@ const StudentSchema = new mongoose.Schema(
 
     semester: {
       type: Number,
-      default: 1
+      default: 1,
+      min: 1,
+      max: 6
     },
 
     batch: {
@@ -53,7 +75,8 @@ const StudentSchema = new mongoose.Schema(
       trim: true,
       validate: {
         validator: function (value) {
-          if (this.department === "Mechanical Engineering") {
+          const coreBranch = this.primaryDepartment || this.department;
+          if (coreBranch === "Mechanical Engineering") {
             return value === "Mech-A" || value === "Mech-B";
           }
           return value === null || value === undefined || value === "";

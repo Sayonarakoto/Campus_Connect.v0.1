@@ -11,10 +11,13 @@ const DEPARTMENT_SECTIONS = {
   "Automobile Engineering": [],
   "Electrical and Electronics Engineering": [],
   "Civil Engineering": [],
-  "Fire Technology and Safety": []
+  "Fire Technology and Safety": [],
+  "General Department": []
 };
 
-const DEPARTMENTS = Object.keys(DEPARTMENT_SECTIONS);
+const ALL_DEPARTMENTS = Object.keys(DEPARTMENT_SECTIONS);
+const DEPARTMENTS = ALL_DEPARTMENTS;
+const CORE_DEPARTMENTS = ALL_DEPARTMENTS.filter(dept => dept !== "General Department");
 
 /**
  * Checks if a given department requires section assignment.
@@ -37,9 +40,34 @@ const getAllowedSections = (department) => {
   return DEPARTMENT_SECTIONS[department] || [];
 };
 
+/**
+ * Calculates current college academic year (e.g. '2026-2027').
+ * In standard academic calendar, new academic session begins in June (month index 5).
+ * @param {Date} [date=new Date()]
+ * @returns {string} Formatted academic year string
+ */
+const getCurrentAcademicYear = (date = new Date()) => {
+  const year = date.getFullYear();
+  const month = date.getMonth(); // 0 = Jan, 5 = June
+  return month >= 5 ? `${year}-${year + 1}` : `${year - 1}-${year}`;
+};
+
+/**
+ * Checks if department is General Department.
+ * @param {string} department
+ * @returns {boolean}
+ */
+const isGeneralDepartment = (department) => {
+  return (department || "").trim().toLowerCase() === "general department";
+};
+
 module.exports = {
   DEPARTMENT_SECTIONS,
   DEPARTMENTS,
+  ALL_DEPARTMENTS,
+  CORE_DEPARTMENTS,
   requiresSection,
-  getAllowedSections
+  getAllowedSections,
+  getCurrentAcademicYear,
+  isGeneralDepartment
 };

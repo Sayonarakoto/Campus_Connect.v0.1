@@ -9,7 +9,8 @@ const roleMiddleware =
 
 const {
   assignTempHOD,
-  removeTempHOD
+  removeTempHOD,
+  promoteStudentSemester
 } = require("../controllers/adminController");
 
 router.put(
@@ -24,6 +25,13 @@ router.put(
   authMiddleware,
   roleMiddleware("admin"),
   removeTempHOD
+);
+
+router.post(
+  "/students/promote-semester",
+  authMiddleware,
+  roleMiddleware("admin", "hraccounts", "principal"),
+  promoteStudentSemester
 );
 
 module.exports = router;

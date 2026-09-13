@@ -1,7 +1,26 @@
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "./login.css";
 
 function Login() {
+  const navigate = useNavigate();
+
+  // If user is already authenticated, fast-forward directly to their role workspace dashboard
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userStr = localStorage.getItem("user");
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user && user.role) {
+          navigate(`/${user.role.toLowerCase()}/workdashboard`, { replace: true });
+        }
+      } catch (e) {
+        // Fallback: stay on gateway selection
+      }
+    }
+  }, [navigate]);
+
   const portals = [
     {
       name: "Student",

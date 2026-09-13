@@ -7,7 +7,7 @@ import "../pages/Dashboard/WorkDashboard.css";
    COMMON DEPARTMENTS
 =========================================================== */
 
-const DEPARTMENTS = [
+const CORE_DEPARTMENTS = [
   "Mechanical Engineering",
   "Computer Engineering",
   "Automobile Engineering",
@@ -15,6 +15,13 @@ const DEPARTMENTS = [
   "Civil Engineering",
   "Fire Technology and Safety"
 ];
+
+const ALL_DEPARTMENTS = [
+  ...CORE_DEPARTMENTS,
+  "General Department"
+];
+
+const DEPARTMENTS = CORE_DEPARTMENTS;
 
 const SEMESTERS = [
   { value: 1, label: "Semester 1" },
@@ -128,7 +135,7 @@ const roleRegistrationSpecs = {
         name: "department",
         label: "Department",
         type: "select",
-        options: DEPARTMENTS,
+        options: ALL_DEPARTMENTS,
         required: true
       },
       {
@@ -165,7 +172,7 @@ const roleRegistrationSpecs = {
         name: "department",
         label: "Department",
         type: "select",
-        options: DEPARTMENTS,
+        options: ALL_DEPARTMENTS,
         required: true
       },
       {
@@ -1007,6 +1014,24 @@ function Register() {
             })}
 
 
+
+            {/* ===========================
+                FIRST-YEAR FOUNDATIONAL PROGRAM NOTE
+            =========================== */}
+            {normalizedRole === "student" && Number(formData.semester) > 0 && Number(formData.semester) < 3 && (
+              <div style={{
+                backgroundColor: "#eff6ff",
+                border: "1px solid #bfdbfe",
+                color: "#1e40af",
+                padding: "12px 14px",
+                borderRadius: "8px",
+                fontSize: "0.85rem",
+                marginBottom: "20px",
+                lineHeight: "1.5"
+              }}>
+                ℹ️ <strong>First-Year Foundational Program:</strong> Students in Semester 1 & 2 are managed under the <strong>General Department</strong> for foundational basic sciences & engineering before automatically transitioning to your primary engineering branch in Semester 3.
+              </div>
+            )}
 
             {/* ===========================
                 SUBMIT BUTTON

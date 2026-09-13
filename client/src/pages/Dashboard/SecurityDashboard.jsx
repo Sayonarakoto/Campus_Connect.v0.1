@@ -4,6 +4,7 @@ import { Html5Qrcode } from "html5-qrcode";
 import axios from "axios";
 import { useToast } from "../../context/ToastContext";
 import "./SecurityDashboard.css";
+import DynamicModuleGrid from "./DynamicModuleGrid";
 
 const API_BASE = "http://localhost:5000";
 

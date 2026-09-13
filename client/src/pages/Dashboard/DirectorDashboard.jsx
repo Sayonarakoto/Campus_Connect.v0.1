@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./WorkDashboard.css";
+import DashboardCard from "./DashboardCard";
+import { faHistory, faCalendarCheck } from "@fortawesome/free-solid-svg-icons";
 
 const API = "http://localhost:5000/api/staffleave";
 const API_URL = "http://localhost:5000";

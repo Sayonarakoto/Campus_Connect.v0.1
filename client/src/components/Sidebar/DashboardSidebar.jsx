@@ -42,19 +42,22 @@ const ROLE_NAV_CONFIG = {
     { label: "HOD Leaves Overview", path: "/hod/leaves", icon: "fas fa-clipboard-list" },
     { label: "Duty Leave Queue", path: "/dutyleave/hod", icon: "fas fa-briefcase" },
     { label: "Late Entry Log", path: "/late-entry/hod", icon: "fas fa-clock" },
-    { label: "Disciplinary Review", path: "/discipline/hod", icon: "fas fa-balance-scale" }
+    { label: "Disciplinary Review", path: "/discipline/hod", icon: "fas fa-balance-scale" },
+    { label: "Approval Queue", path: "/approvals/queue", icon: "fas fa-tasks" }
   ],
   principal: [
     { label: "Dashboard Home", path: "/principal/workdashboard", icon: "fas fa-th-large" },
     { label: "Leave Reviews", path: "/leave/principal/review", icon: "fas fa-check-circle" },
-    { label: "Institutional Leaves", path: "/principal/leaves", icon: "fas fa-clipboard-list" }
+    { label: "Institutional Leaves", path: "/principal/leaves", icon: "fas fa-clipboard-list" },
+    { label: "Approval Queue", path: "/approvals/queue", icon: "fas fa-tasks" }
   ],
   director: [
     { label: "Dashboard Home", path: "/director/workdashboard", icon: "fas fa-th-large" },
     { label: "Executive Decisions", path: "/leave/director/approval", icon: "fas fa-check-circle" },
     { label: "Governance Overview", path: "/director/leaves", icon: "fas fa-university" },
     { label: "Coverage Queue", path: "/coverage/director", icon: "fas fa-user-clock" },
-    { label: "System Audit Logs", path: "/audit/dashboard", icon: "fas fa-shield-alt" }
+    { label: "System Audit Logs", path: "/audit/dashboard", icon: "fas fa-shield-alt" },
+    { label: "Approval Queue", path: "/approvals/queue", icon: "fas fa-tasks" }
   ],
   hraccounts: [
     { label: "Dashboard Home", path: "/hraccounts/workdashboard", icon: "fas fa-th-large" },
@@ -68,10 +71,12 @@ const ROLE_NAV_CONFIG = {
   ],
   admin: [
     { label: "Dashboard Home", path: "/admin/workdashboard", icon: "fas fa-th-large" },
-    { label: "User Directory", path: "/admin/users", icon: "fas fa-users" },
+    { label: "User Management", path: "/admin/users", icon: "fas fa-users" },
     { label: "Role Management", path: "/admin/permissions", icon: "fas fa-user-shield" },
     { label: "Temp HOD Delegations", path: "/admin/temp-hod", icon: "fas fa-user-cog" },
-    { label: "Promotion Dashboard", path: "/admin/promotions", icon: "fas fa-bullhorn" }
+    { label: "Promotion Dashboard", path: "/admin/promotions", icon: "fas fa-bullhorn" },
+    { label: "Workflow Engine", path: "/admin/workflows", icon: "fas fa-project-diagram" },
+    { label: "Approval Queue", path: "/approvals/queue", icon: "fas fa-tasks" }
   ]
 };
 
@@ -107,6 +112,7 @@ export default function DashboardSidebar({ isOpen, onClose, onOpenProfile, user 
           if (data.success && Array.isArray(data.menu) && data.menu.length > 0) {
             setDynamicMenu(
               data.menu.map((m) => ({
+                masterMenuId: m.masterMenuId || "General Workspace",
                 label: m.title,
                 path: m.path,
                 icon: m.icon || "fas fa-folder",
@@ -129,6 +135,13 @@ export default function DashboardSidebar({ isOpen, onClose, onOpenProfile, user 
 
   const roleKey = user?.role?.toLowerCase() || "student";
   const navItems = dynamicMenu || ROLE_NAV_CONFIG[roleKey] || ROLE_NAV_CONFIG.student;
+
+  const groupedNavItems = navItems.reduce((acc, item) => {
+    const category = item.masterMenuId || "General Workspace";
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(item);
+    return acc;
+  }, {});
 
   const photoSrc = user?.profilePhotoUrl
     ? `${API_BASE}${user.profilePhotoUrl}`
@@ -184,21 +197,25 @@ export default function DashboardSidebar({ isOpen, onClose, onOpenProfile, user 
 
         {/* Navigation Section */}
         <nav className="sidebar-nav-container">
-          <p className="sidebar-section-heading">Workspace Modules</p>
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                isActive ? "sidebar-nav-link active" : "sidebar-nav-link"
-              }
-              onClick={onClose}
-            >
-              <span className="sidebar-nav-icon">
-                <i className={item.icon} aria-hidden="true"></i>
-              </span>
-              <span>{item.label}</span>
-            </NavLink>
+          {Object.entries(groupedNavItems).map(([category, items]) => (
+            <React.Fragment key={category}>
+              <p className="sidebar-section-heading" style={{ marginTop: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.25rem' }}>{category}</p>
+              {items.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    isActive ? "sidebar-nav-link active" : "sidebar-nav-link"
+                  }
+                  onClick={onClose}
+                >
+                  <span className="sidebar-nav-icon">
+                    <i className={item.icon} aria-hidden="true"></i>
+                  </span>
+                  <span>{item.label}</span>
+                </NavLink>
+              ))}
+            </React.Fragment>
           ))}
         </nav>
 

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./WorkDashboard.css";
+import DynamicModuleGrid from "./DynamicModuleGrid";
 
 function AdminDashboard() {
   const [passes, setPasses] = useState([]);
@@ -257,45 +258,7 @@ function AdminDashboard() {
       </div>
 
       {/* Quick Action Modules */}
-      <div className="quick-actions">
-        <h2>Quick Actions</h2>
-        <div className="modules-grid">
-
-          <div
-            className="module-card"
-            onClick={() => navigate("/audit-dashboard")}
-          >
-            <h4><i className="fas fa-history"></i> Audit Trail</h4>
-            <p>View complete leave history and audit logs</p>
-          </div>
-
-          <div
-            className="module-card"
-            onClick={() => navigate("/temp-hod")}
-          >
-            <h4><i className="fas fa-user-clock"></i> Temporary HOD</h4>
-            <p>Assign faculty as acting HOD during leave periods</p>
-          </div>
-
-          <div
-            className="module-card"
-            onClick={() => navigate("/admin/promotions")}
-          >
-            <h4><i className="fas fa-bullhorn"></i> Promotions & Ads</h4>
-            <p>Manage ad campaigns and promotions</p>
-          </div>
-
-          <div
-            className="module-card"
-            onClick={() => navigate("/faculty/sports")}
-          >
-            <h4><i className="fas fa-medal"></i> Create Sports Events</h4>
-            <p>Create and manage new sports events</p>
-          </div>
-        </div>
-      </div>
-
-
+      <DynamicModuleGrid />
     </div>
   );
 }

@@ -118,6 +118,9 @@ app.use("/api/admin", require("./routes/adminRoutes"));
 // Permissions & Claims Matrix
 app.use("/api/permissions", require("./routes/permissionRoutes"));
 
+// Dynamic Hybrid Workflow & Approval Engine
+app.use("/api/workflow", require("./routes/workflowRoutes"));
+
 // Faculty duty-leave
 app.use("/api/faculty-duty-leave", require("./routes/facultyDutyLeaveRoutes"));
 

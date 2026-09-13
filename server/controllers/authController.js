@@ -9,7 +9,7 @@ const OTP = require("../models/OTP");
 const AuditLog = require("../models/AuditLog");
 const emailService = require("../services/emailService");
 const { uploadToGridFS, deleteFromGridFS, getBucket } = require("../config/gridfs");
-const { requiresSection, getAllowedSections } = require("../constants/academicConfig");
+const { requiresSection, getAllowedSections, CORE_DEPARTMENTS, ALL_DEPARTMENTS, getCurrentAcademicYear } = require("../constants/academicConfig");
 const { sendErrorResponse } = require("../utils/errorHandler");
 
 // ==========================================
@@ -231,6 +231,25 @@ exports.register = async (req, res) => {
         });
       }
 
+      // Semester validation (1 to 6)
+      if (customData.semester !== undefined && customData.semester !== null && customData.semester !== "") {
+        const parsedSem = Number(customData.semester);
+        if (isNaN(parsedSem) || parsedSem < 1 || parsedSem > 6) {
+          return res.status(400).json({
+            success: false,
+            message: "Semester must be a valid number between 1 and 6."
+          });
+        }
+      }
+
+      // Department validation: student must select a core engineering department
+      if (!department || !CORE_DEPARTMENTS.includes(department)) {
+        return res.status(400).json({
+          success: false,
+          message: `Students must select a valid core engineering department: ${CORE_DEPARTMENTS.join(", ")}.`
+        });
+      }
+
       // Mechanical Engineering section validation
       if (department === "Mechanical Engineering") {
         studentSection = customData?.section ? customData.section.trim() : null;
@@ -243,19 +262,27 @@ exports.register = async (req, res) => {
       } else {
         studentSection = null;
       }
-    } else if (["faculty", "hod"].includes(role) && customData.employeeId) {
-      studentSection = null;
-      const empId = customData.employeeId.toString().trim();
-      const escapedEmpId = empId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const existingStaff = await User.findOne({
-        role,
-        "customData.employeeId": { $regex: new RegExp(`^${escapedEmpId}$`, "i") }
-      });
-      if (existingStaff) {
+    } else if (["faculty", "hod"].includes(role)) {
+      if (department && !ALL_DEPARTMENTS.includes(department)) {
         return res.status(400).json({
           success: false,
-          message: `An account with Faculty ID '${empId}' already exists for role '${role}'.`
+          message: `Please select a valid department: ${ALL_DEPARTMENTS.join(", ")}.`
         });
+      }
+      if (customData.employeeId) {
+        studentSection = null;
+        const empId = customData.employeeId.toString().trim();
+        const escapedEmpId = empId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const existingStaff = await User.findOne({
+          role,
+          "customData.employeeId": { $regex: new RegExp(`^${escapedEmpId}$`, "i") }
+        });
+        if (existingStaff) {
+          return res.status(400).json({
+            success: false,
+            message: `An account with Faculty ID '${empId}' already exists for role '${role}'.`
+          });
+        }
       }
     } else if (role === "security") {
       studentSection = null;
@@ -360,14 +387,28 @@ exports.register = async (req, res) => {
     // ==========================================
     // CREATE USER
     // ==========================================
+    const isStudent = role === "student";
+    const studentSemesterNum = isStudent
+      ? (customData.semester ? Number(customData.semester) : 1)
+      : 1;
+    const isStudentSem1or2 = isStudent && studentSemesterNum < 3;
+    const operationalDepartment = isStudent
+      ? (isStudentSem1or2 ? "General Department" : department)
+      : department;
+
     const userData = {
       role,
+      roles: isStudentSem1or2 ? ["student", "general_department_student"] : [role],
       fullName,
       email: email.toLowerCase().trim(),
       password: hashedPassword,
       ...(userPhone ? { phoneNumber: userPhone } : {}),
       ...(parsedDateOfJoining ? { dateOfJoining: parsedDateOfJoining } : {}),
-      ...(department && ["student", "faculty", "tutor", "hod"].includes(role) ? { department } : {}),
+      ...(operationalDepartment && ["student", "faculty", "tutor", "hod"].includes(role) ? { department: operationalDepartment } : {}),
+      ...(isStudent ? {
+        primaryDepartment: department,
+        isGeneralDepartment: isStudentSem1or2
+      } : {}),
       ...(studentSection ? { section: studentSection } : {}),
       ...(role === "faculty" ? { isLabStaff: isLabStaffBool } : {}),
       profilePhoto: profilePhotoData, // null or GridFS object
@@ -394,8 +435,11 @@ exports.register = async (req, res) => {
       await Student.create({
         user: user._id,
         fullName,
-        department: department || '',
-        semester: customData.semester ? Number(customData.semester) : 1,
+        department: isStudentSem1or2 ? "General Department" : department,
+        primaryDepartment: department,
+        isGeneralDepartment: isStudentSem1or2,
+        semester: studentSemesterNum,
+        academicYear: getCurrentAcademicYear(),
         section: studentSection,
         admissionNo: studentAdmissionNo,
         regNo: studentRegNo,
@@ -1576,6 +1620,7 @@ exports.getAppMenu = async (req, res) => {
       allPermissions.forEach((p) => {
         if (!distinctModules[p.controller]) {
           distinctModules[p.controller] = {
+            masterMenuId: p.masterMenuId || "General Workspace",
             title: p.moduleTitle,
             path: p.path,
             controller: p.controller,
@@ -1586,12 +1631,11 @@ exports.getAppMenu = async (req, res) => {
       });
 
       const adminMenu = [
-        { title: "Dashboard Home", path: "/admin/workdashboard", controller: "AdminDashboard", icon: "fas fa-th-large", permissions: { list: true, add: true, update: true, delete: true, download: true } },
-        { title: "User Directory", path: "/admin/users", controller: "UserController", icon: "fas fa-users", permissions: { list: true, add: true, update: true, delete: true, download: true } },
-        { title: "Role Management", path: "/admin/permissions", controller: "PermissionController", icon: "fas fa-user-shield", permissions: { list: true, add: true, update: true, delete: true, download: true } },
-        { title: "Temp HOD Delegations", path: "/temp-hod", controller: "TempHODController", icon: "fas fa-user-cog", permissions: { list: true, add: true, update: true, delete: true, download: true } },
-        { title: "Promotion Dashboard", path: "/admin/promotions", controller: "PromotionController", icon: "fas fa-bullhorn", permissions: { list: true, add: true, update: true, delete: true, download: true } },
-        { title: "System Audit Trail", path: "/audit-dashboard", controller: "AuditController", icon: "fas fa-history", permissions: { list: true, add: true, update: true, delete: true, download: true } },
+        { masterMenuId: "General Workspace", title: "Dashboard Home", path: "/admin/workdashboard", controller: "AdminDashboard", icon: "fas fa-th-large", permissions: { list: true, add: true, update: true, delete: true, download: true } },
+        { masterMenuId: "System Administration", title: "Role Management", path: "/admin/permissions", controller: "PermissionController", icon: "fas fa-user-shield", permissions: { list: true, add: true, update: true, delete: true, download: true } },
+        { masterMenuId: "System Administration", title: "Temp HOD Delegations", path: "/temp-hod", controller: "TempHODController", icon: "fas fa-user-cog", permissions: { list: true, add: true, update: true, delete: true, download: true } },
+        { masterMenuId: "System Administration", title: "Promotion Dashboard", path: "/admin/promotions", controller: "PromotionController", icon: "fas fa-bullhorn", permissions: { list: true, add: true, update: true, delete: true, download: true } },
+        { masterMenuId: "System Administration", title: "System Audit Trail", path: "/audit-dashboard", controller: "AuditController", icon: "fas fa-history", permissions: { list: true, add: true, update: true, delete: true, download: true } },
         ...Object.values(distinctModules)
       ];
 
@@ -1609,6 +1653,7 @@ exports.getAppMenu = async (req, res) => {
 
     const appMenu = [
       {
+        masterMenuId: "General Workspace",
         title: "Dashboard Home",
         path: `/${activeRole}/workdashboard`,
         controller: "DashboardHome",
@@ -1616,6 +1661,7 @@ exports.getAppMenu = async (req, res) => {
         permissions: { list: true, add: false, update: false, delete: false, download: false }
       },
       ...permissions.map((p) => ({
+        masterMenuId: p.masterMenuId || "General Workspace",
         title: p.moduleTitle,
         path: p.path,
         controller: p.controller,

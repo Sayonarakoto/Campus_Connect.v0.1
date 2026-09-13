@@ -67,6 +67,8 @@ import FacultyLeaveBalance from "./pages/DutyLeaves/FacultyLeaveBalance";
 import AdminPromotionDashboard from "./pages/Admin/AdminPromotionDashboard";
 import RoleManagement from "./pages/Admin/RoleManagement";
 import UserManagement from "./pages/Admin/UserManagement";
+import WorkflowBuilder from "./pages/Admin/WorkflowBuilder";
+import ApprovalQueue from "./pages/Approval/ApprovalQueue";
 
 import StudentLateEntryForm from "./pages/LateEntry/StudentLateEntry";
 import StudentLateHistory from "./pages/LateEntry/StudentLateHistory";
@@ -202,6 +204,8 @@ function App() {
           <Route path="/admin/permissions" element={<ProtectedRoute><RoleManagement /></ProtectedRoute>} />
           <Route path="/admin/promotions" element={<ProtectedRoute><AdminPromotionDashboard /></ProtectedRoute>} />
           <Route path="/admin/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+          <Route path="/admin/workflows" element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>} />
+          <Route path="/approvals/queue" element={<ProtectedRoute><ApprovalQueue /></ProtectedRoute>} />
 
           <Route path="/student/late-entry" element={<ProtectedRoute><StudentLateEntryForm /></ProtectedRoute>} />
           <Route path="/student/late-history" element={<ProtectedRoute><StudentLateHistory /></ProtectedRoute>} />

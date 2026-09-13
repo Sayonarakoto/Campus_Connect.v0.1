@@ -6,7 +6,7 @@ import { useToast } from "../../context/ToastContext";
 import "./SecurityDashboard.css";
 import DynamicModuleGrid from "./DynamicModuleGrid";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 /**
  * Synthesizes clean audio feedback via Web Audio API

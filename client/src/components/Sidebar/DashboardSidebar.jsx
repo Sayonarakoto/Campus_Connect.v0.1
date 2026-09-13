@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import "./DashboardSidebar.css";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 /**
  * Role-Based Navigation Specifications using FontAwesome icons

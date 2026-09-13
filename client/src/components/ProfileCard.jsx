@@ -4,7 +4,7 @@ import { useToast } from "../context/ToastContext";
 import "./ProfileCard.css";
 import RoleSwitcher from "./RoleSwitcher";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 /**
  * Interactive ProfileCard Component

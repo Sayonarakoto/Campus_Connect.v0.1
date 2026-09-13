@@ -3,10 +3,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "../context/ToastContext";
 import "./roleauth.css";
 
-function RoleAuth({ roleOverride }) {
-  const { role: urlRole } = useParams();
-  const activeRole = roleOverride || urlRole;
-  const navigate = useNavigate();
+const API_BASE = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(/\/$/, "");
   const { showToast } = useToast();
 
   const [credentials, setCredentials] = useState({
@@ -62,7 +59,7 @@ function RoleAuth({ roleOverride }) {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/auth/login",
+        `${API_BASE}/api/auth/login`,
         {
           method: "POST",
           headers: {
@@ -116,7 +113,7 @@ function RoleAuth({ roleOverride }) {
 
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/auth/parent/send-otp", {
+      const response = await fetch(`${API_BASE}/api/auth/parent/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: cleanId })
@@ -159,7 +156,7 @@ function RoleAuth({ roleOverride }) {
 
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/auth/parent/verify-otp", {
+      const response = await fetch(`${API_BASE}/api/auth/parent/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -196,7 +193,7 @@ function RoleAuth({ roleOverride }) {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/parent/send-otp", {
+      const response = await fetch(`${API_BASE}/api/auth/parent/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: parentIdentifier.trim() })

@@ -245,30 +245,6 @@ function FormTopPromotion({ promotion }) {
                     }
                 }
 
-                /* Dark mode support */
-                @media (prefers-color-scheme: dark) {
-                    .glass-form-top {
-                        background: rgba(0, 0, 0, 0.4);
-                        border-color: rgba(255, 255, 255, 0.1);
-                    }
-
-                    .glass-form-top:hover {
-                        background: rgba(0, 0, 0, 0.5);
-                    }
-
-                    .form-top-title {
-                        color: #f0f0f0;
-                    }
-
-                    .form-top-description {
-                        color: #aaa;
-                    }
-
-                    .form-top-media {
-                        background: rgba(255, 255, 255, 0.05);
-                    }
-                }
-
                 /* Small screens */
                 @media (max-width: 480px) {
                     .glass-form-top {

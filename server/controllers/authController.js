@@ -371,7 +371,6 @@ exports.register = async (req, res) => {
       if (customData.parentEmail) cleanCustomData.parentEmail = customData.parentEmail;
     } else if (role === "faculty" || role === "hod") {
       if (customData.employeeId) cleanCustomData.employeeId = customData.employeeId.toString().trim();
-      if (role === "hod" && customData.clearanceToken) cleanCustomData.clearanceToken = customData.clearanceToken;
     } else if (role === "principal") {
       if (customData.employeeId) cleanCustomData.employeeId = customData.employeeId.toString().trim();
     } else if (role === "hraccounts") {

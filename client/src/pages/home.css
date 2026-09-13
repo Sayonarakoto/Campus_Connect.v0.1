@@ -1398,58 +1398,6 @@
 }
 
 /* ==========================================================================
-   DARK MODE SUPPORT
-   ========================================================================== */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-light: #111827;
-    --white: #1f2937;
-    --text-dark: #f3f4f6;
-    --text-light: #9ca3af;
-  }
-  
-  .feature-card {
-    background: var(--white);
-  }
-  
-  .feature-card p {
-    color: var(--text-light);
-  }
-  
-  .academic-box {
-    background: var(--white);
-  }
-  
-  .academic-box p {
-    color: var(--text-light);
-  }
-  
-  .news-card {
-    background: var(--white);
-  }
-  
-  .news-body p {
-    color: var(--text-light);
-  }
-  
-  .testimonial-card {
-    background: var(--white);
-  }
-  
-  .testimonial-text {
-    color: var(--text-dark);
-  }
-  
-  .testimonial-author p {
-    color: var(--text-light);
-  }
-  
-  .stats-banner {
-    background-color: var(--primary-color);
-  }
-}
-
-/* ==========================================================================
    PRINT STYLES
    ========================================================================== */
 @media print {

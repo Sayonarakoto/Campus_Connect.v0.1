@@ -155,7 +155,7 @@ function ForgotPassword() {
 
       setMessage({
         type: "success",
-        text: "Password updated successfully! Redirecting you to institutional gateways..."
+        text: "Password updated successfully! Redirecting you to login..."
       });
       showToast("Password updated successfully! Redirecting to login...", "success");
 

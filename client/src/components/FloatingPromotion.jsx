@@ -326,35 +326,6 @@ function FloatingPromotion({ promotion }) {
                     box-shadow: 0 4px 16px rgba(74, 108, 247, 0.4);
                 }
 
-                /* Dark mode support */
-                @media (prefers-color-scheme: dark) {
-                    .glass-floating {
-                        background: rgba(0, 0, 0, 0.5);
-                        border-color: rgba(255, 255, 255, 0.1);
-                    }
-
-                    .glass-floating:hover {
-                        background: rgba(0, 0, 0, 0.6);
-                    }
-
-                    .floating-title {
-                        color: #f0f0f0;
-                    }
-
-                    .floating-description {
-                        color: #aaa;
-                    }
-
-                    .floating-fallback {
-                        background: rgba(255, 255, 255, 0.05);
-                        color: #666;
-                    }
-
-                    .fallback-text {
-                        color: #666;
-                    }
-                }
-
                 /* Mobile responsive */
                 @media (max-width: 768px) {
                     .glass-floating {

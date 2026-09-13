@@ -290,27 +290,6 @@ function SidePromotion({ promotion, side }) {
           text-align: center;
         }
 
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-          .glass-side {
-            background: rgba(0, 0, 0, 0.5);
-            border-color: rgba(255, 255, 255, 0.1);
-          }
-
-          .glass-side:hover {
-            background: rgba(0, 0, 0, 0.6);
-          }
-
-          .side-fallback {
-            background: rgba(255, 255, 255, 0.05);
-            color: #666;
-          }
-
-          .fallback-text {
-            color: #666;
-          }
-        }
-
         /* Mobile responsive - hide side promotions on small screens */
         @media (max-width: 768px) {
           .glass-side {

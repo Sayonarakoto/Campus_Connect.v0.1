@@ -180,13 +180,6 @@ const roleRegistrationSpecs = {
         label: "Date of Joining",
         type: "date",
         required: true
-      },
-      {
-        name: "clearanceToken",
-        label: "Clearance Token",
-        type: "password",
-        placeholder: "Administrator Token",
-        required: true
       }
     ]
   },
@@ -338,7 +331,6 @@ function Register() {
     staffRole: "",
     adminClearanceLevel: "",
     systemPasskey: "",
-    clearanceToken: "",
     isLabStaff: false
   });
 
@@ -392,7 +384,7 @@ function Register() {
                 padding: "0.5rem"
               }}
             >
-              ← Return to Public Gateways
+              ← Return to Login
             </Link>
           </div>
         </div>

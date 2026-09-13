@@ -74,7 +74,7 @@ function Login() {
             St. Mary's Polytechnic College, Valliyode
           </span>
 
-          <h1>Institutional Gateways</h1>
+          <h1>Institutional Login Portal</h1>
 
           <p>
             Select your assigned account portal below to

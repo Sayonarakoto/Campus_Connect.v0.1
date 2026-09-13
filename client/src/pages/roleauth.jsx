@@ -230,7 +230,7 @@ function RoleAuth({ roleOverride }) {
             {isAdmin ? "Institutional Administration" : `${activeRole?.toUpperCase()} Module`}
           </span>
 
-          <h2>Authentication Gateway</h2>
+          <h2>Login</h2>
 
           <p>
             {isSecurity
@@ -240,7 +240,7 @@ function RoleAuth({ roleOverride }) {
                 ? "Enter your registered email address or 10-digit mobile number to receive a secure login passkey."
                 : `Enter the 6-digit login passkey sent to ${maskedEmail || "your registered email"}.`
               : isAdmin
-              ? "Super Administrator Gateway. Restricted access console for system bootstrapping and cross-role administration."
+              ? "Super Administrator Console. Restricted access console for system bootstrapping and cross-role administration."
               : "Provide active institutional access credentials to verify authorization routing layers."}
           </p>
         </header>
@@ -397,7 +397,7 @@ function RoleAuth({ roleOverride }) {
 
               <div className="auth-form-group">
                 <label>
-                  {isSecurity ? "Security Passkey" : "Gateway Password"}
+                  {isSecurity ? "Security Passkey" : "Password"}
                 </label>
 
                 <input
@@ -468,7 +468,7 @@ function RoleAuth({ roleOverride }) {
             to="/"
             className="auth-back-link"
           >
-            ← Cancel and Return to Gateways
+            ← Cancel and Return to Login Selection
           </Link>
         </main>
 

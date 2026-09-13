@@ -308,44 +308,6 @@ function DashboardPromotion({ promotion }) {
                     font-weight: 500;
                 }
 
-                /* Dark mode support */
-                @media (prefers-color-scheme: dark) {
-                    .glass-dashboard-card {
-                        background: rgba(255, 255, 255, 0.05);
-                        border-color: rgba(255, 255, 255, 0.1);
-                    }
-
-                    .glass-dashboard-card:hover {
-                        background: rgba(255, 255, 255, 0.08);
-                    }
-
-                    .promotion-title {
-                        color: #f0f0f0;
-                    }
-
-                    .promotion-description {
-                        color: #aaa;
-                    }
-
-                    .promotion-tag {
-                        background: rgba(255, 255, 255, 0.08);
-                        color: #aaa;
-                    }
-
-                    .promotion-media-fallback {
-                        background: rgba(255, 255, 255, 0.03);
-                        color: #666;
-                    }
-
-                    .fallback-text {
-                        color: #666;
-                    }
-
-                    .promotion-cta-text {
-                        color: #6b8cff;
-                    }
-                }
-
                 /* Responsive */
                 @media (max-width: 768px) {
                     .promotion-content {

@@ -821,7 +821,7 @@ function GatePassRequest() {
                 </div>
                 <div className="digital-otp-code-row">
                   <span className="digital-otp-code">
-                    {selectedDigitalPass.otp || "842910"}
+                    {selectedDigitalPass.otp || "----"}
                   </span>
                   <button
                     type="button"

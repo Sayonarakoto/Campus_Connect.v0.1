@@ -3,6 +3,23 @@ const Student = require("../models/Student");
 const User = require("../models/User");
 const GatePass = require("../models/GatePass");
 const { v4: uuidv4 } = require("uuid");
+const { generateGatePassOtp } = require("../utils/gatePassSecurity");
+
+function combineDateAndTime(dateValue, timeValue) {
+  const date = new Date(dateValue);
+  if (!timeValue) return date;
+
+  const match = String(timeValue).trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+  if (!match) return date;
+
+  let hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  const meridiem = match[3]?.toUpperCase();
+  if (meridiem === "PM" && hours < 12) hours += 12;
+  if (meridiem === "AM" && hours === 12) hours = 0;
+  date.setHours(hours, minutes, 0, 0);
+  return date;
+}
 
 /**
  * Helper to resolve the student record from authenticated user context
@@ -285,13 +302,15 @@ exports.reviewSpecialPass = async (req, res) => {
 
     // If approved and Gate Pass is required, create the approved GatePass with OTP & QR
     if (newStatus === "APPROVED" && specialPass.isGatePassRequired) {
-      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const otpCode = generateGatePassOtp();
       const qrToken = uuidv4();
       const passDateObj = new Date(specialPass.date);
 
       // Convert departure time to valid date or use pass date
-      const depDate = new Date(specialPass.date);
-      const retDate = specialPass.returnTime ? new Date(specialPass.date) : null;
+      const depDate = combineDateAndTime(specialPass.date, specialPass.departureTime);
+      const retDate = specialPass.returnTime
+        ? combineDateAndTime(specialPass.date, specialPass.returnTime)
+        : null;
 
       const createdGatePass = await GatePass.create({
         studentId: specialPass.user,
@@ -446,11 +465,11 @@ exports.issueBulkSpecialPass = async (req, res) => {
 
       // If Gate Pass is requested, create an approved GatePass record for this student
       if (isGatePassRequired && student.user) {
-        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpCode = generateGatePassOtp();
         const qrToken = uuidv4();
 
-        const depDate = new Date(passDate);
-        const retDate = returnTime ? new Date(passDate) : null;
+        const depDate = combineDateAndTime(passDate, departureTime);
+        const retDate = returnTime ? combineDateAndTime(passDate, returnTime) : null;
 
         const gatePass = await GatePass.create({
           studentId: student.user,

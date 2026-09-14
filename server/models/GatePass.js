@@ -47,7 +47,8 @@ const GatePassSchema = new mongoose.Schema(
       trim: true
     },
 
-    // 3-digit verification OTP
+    // Four-digit gate-pass/special-pass verification OTP.
+    // This is intentionally separate from the six-digit account recovery OTP.
     otp: {
       type: String,
       default: null,

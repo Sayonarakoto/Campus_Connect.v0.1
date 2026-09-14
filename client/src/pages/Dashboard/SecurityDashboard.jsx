@@ -67,6 +67,7 @@ export default function SecurityDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const scannerRef = useRef(null);
+  const scanHandledRef = useRef(false);
 
   // Digital clock interval
   useEffect(() => {
@@ -198,6 +199,7 @@ export default function SecurityDashboard() {
     let html5QrInstance = null;
 
     if (showScanner) {
+      scanHandledRef.current = false;
       const initScanner = async () => {
         try {
           html5QrInstance = new Html5Qrcode("scanner-camera-view");
@@ -211,7 +213,8 @@ export default function SecurityDashboard() {
             },
             (decodedText) => {
               // Successfully decoded QR
-              if (html5QrInstance.isScanning) {
+              if (html5QrInstance.isScanning && !scanHandledRef.current) {
+                scanHandledRef.current = true;
                 html5QrInstance.stop().then(() => {
                   html5QrInstance.clear();
                   scannerRef.current = null;
@@ -263,8 +266,8 @@ export default function SecurityDashboard() {
    */
   const handleManualSubmit = (e) => {
     e.preventDefault();
-    if (!studentId.trim() || otp.length !== 3) {
-      showToast("Please enter a valid Student ID and 3-digit OTP.", "warning");
+    if (!studentId.trim() || otp.length !== 4) {
+      showToast("Please enter a valid Student ID and 4-digit gate-pass OTP.", "warning");
       return;
     }
     handleVerification({ type: "otp", studentId: studentId.trim(), otp: otp.trim() });
@@ -380,7 +383,7 @@ export default function SecurityDashboard() {
           <form className="manual-entry-section" onSubmit={handleManualSubmit}>
             <h4>
               <i className="fas fa-key" aria-hidden="true"></i>
-              Enter Student ID & 3-Digit OTP
+              Enter Student ID & 4-Digit Gate-Pass OTP
             </h4>
 
             <div className="manual-inputs-grid">
@@ -398,17 +401,17 @@ export default function SecurityDashboard() {
               </div>
 
               <div className="manual-field">
-                <label htmlFor="sec-otp-code">3-Digit OTP Code</label>
+                <label htmlFor="sec-otp-code">4-Digit Gate-Pass OTP</label>
                 <input
                   id="sec-otp-code"
                   type="text"
                   inputMode="numeric"
-                  maxLength={3}
-                  placeholder="3 Digits"
+                  maxLength={4}
+                  placeholder="4 Digits"
                   value={otp}
                   onChange={(e) => {
                     const cleaned = e.target.value.replace(/\D/g, "");
-                    if (cleaned.length <= 3) setOtp(cleaned);
+                    if (cleaned.length <= 4) setOtp(cleaned);
                   }}
                   disabled={formLoading}
                   required
@@ -420,7 +423,7 @@ export default function SecurityDashboard() {
               <button
                 type="submit"
                 className="btn-verify-submit"
-                disabled={formLoading || !studentId.trim() || otp.length !== 3}
+                disabled={formLoading || !studentId.trim() || otp.length !== 4}
                 style={{ backgroundColor: headerColor }}
               >
                 {formLoading ? (

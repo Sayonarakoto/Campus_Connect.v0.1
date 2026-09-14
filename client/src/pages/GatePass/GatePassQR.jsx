@@ -102,7 +102,7 @@ function GatePassQR() {
                 </div>
                 <div className="digital-otp-code-row">
                   <span className="digital-otp-code">
-                    {passData?.otp || "842910"}
+                    {passData?.otp || "----"}
                   </span>
                   <button
                     type="button"

@@ -7,6 +7,10 @@ const {
 } = require("../services/workflowService");
 const { v4: uuidv4 } = require("uuid");
 const QRCode = require("qrcode");
+const {
+  generateGatePassOtp,
+  isValidGatePassOtp
+} = require("../utils/gatePassSecurity");
 
 
 // =============================
@@ -168,8 +172,8 @@ exports.getMyGatePasses = async (req, res) => {
 
     // Fallback: If an approved pass is missing OTP, generate and save one
     for (const pass of gatePasses) {
-      if (pass.status === "approved" && !pass.otp) {
-        pass.otp = Math.floor(100000 + Math.random() * 900000).toString();
+      if (pass.status === "approved" && !isValidGatePassOtp(pass.otp)) {
+        pass.otp = generateGatePassOtp();
         await pass.save();
       }
     }
@@ -418,13 +422,17 @@ exports.approveGatePass = async (req, res) => {
 
     // FINAL APPROVAL: Either HOD approving or last step in pipeline
     const qrToken = uuidv4();
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpCode = generateGatePassOtp();
 
     gatePass.status = "approved";
     gatePass.approverId = req.user.id;
     gatePass.qrToken = qrToken;
     gatePass.otp = otpCode;
-    gatePass.qrExpiry = new Date(Date.now() + 12 * 60 * 60 * 1000);
+    const minimumQrExpiry = new Date(Date.now() + 12 * 60 * 60 * 1000);
+    const plannedEnd = gatePass.returnTime || gatePass.departureTime;
+    gatePass.qrExpiry = plannedEnd && new Date(plannedEnd) > minimumQrExpiry
+      ? new Date(plannedEnd)
+      : minimumQrExpiry;
     gatePass.currentStepOrder = steps.length;
     gatePass.currentStepName = "Approved & Issued";
 
@@ -621,6 +629,19 @@ exports.getGatePassQR = async (req, res) => {
       });
     }
 
+    // Repair credentials for older approved passes created before the
+    // four-digit gate-pass OTP format was introduced.
+    let credentialsChanged = false;
+    if (!isValidGatePassOtp(gatePass.otp)) {
+      gatePass.otp = generateGatePassOtp();
+      credentialsChanged = true;
+    }
+    if (!gatePass.qrToken) {
+      gatePass.qrToken = uuidv4();
+      credentialsChanged = true;
+    }
+    if (credentialsChanged) await gatePass.save();
+
     const qrImage = await QRCode.toDataURL(gatePass.qrToken);
 
     res.json({
@@ -646,7 +667,7 @@ exports.verifyGatePass = async (req, res) => {
   try {
     const { token, qr_token, studentId, studentIdString, student_id, otp, verification_otp } = req.body;
 
-    const qrKey = token || qr_token;
+    const qrKey = (token || qr_token || "").toString().trim();
     const inputOtp = otp || verification_otp;
     const inputStudent = studentId || studentIdString || student_id;
 
@@ -661,6 +682,24 @@ exports.verifyGatePass = async (req, res) => {
         .populate("approverId", "fullName email role")
         .populate("selectedApproverId", "fullName email role");
     } else if (inputStudent || inputOtp) {
+      if (!inputStudent || !inputOtp) {
+        return res.status(400).json({
+          success: false,
+          is_valid: false,
+          display_status: "INVALID INPUT",
+          message: "Student ID and the four-digit gate-pass OTP are both required."
+        });
+      }
+
+      if (!isValidGatePassOtp(inputOtp)) {
+        return res.status(400).json({
+          success: false,
+          is_valid: false,
+          display_status: "INVALID OTP",
+          message: "Gate-pass OTP must contain exactly four digits."
+        });
+      }
+
       // 2. Manual search: Find student if provided
       let studentUserIds = [];
       if (inputStudent && typeof inputStudent === "string") {
@@ -698,17 +737,6 @@ exports.verifyGatePass = async (req, res) => {
         .populate("approverId", "fullName email role")
         .populate("selectedApproverId", "fullName email role");
 
-      // Fallback: If OTP wasn't stored on an older pass, check if pass matches student and is approved
-      if (!gatePass && studentUserIds.length > 0) {
-        gatePass = await GatePass.findOne({
-          studentId: { $in: studentUserIds },
-          status: "approved"
-        })
-          .sort({ updatedAt: -1, createdAt: -1 })
-          .populate("studentId", "fullName email department customData")
-          .populate("approverId", "fullName email role")
-          .populate("selectedApproverId", "fullName email role");
-      }
     } else {
       return res.status(400).json({
         success: false,
@@ -769,6 +797,14 @@ exports.verifyGatePass = async (req, res) => {
         actionType = "CHECK-OUT (EXIT)";
       } else if (!gatePass.checkInTime) {
         // Second scan/OTP: Student Returns to Campus
+        if (now < new Date(gatePass.checkOutTime)) {
+          return res.status(409).json({
+            success: false,
+            is_valid: false,
+            display_status: "INVALID TIME",
+            message: "Check-in cannot be recorded before the check-out time."
+          });
+        }
         gatePass.checkInTime = now;
         gatePass.status = "used"; // Marked completed upon return
         gatePass.scannedAt = now;
@@ -836,11 +872,7 @@ exports.verifyGatePass = async (req, res) => {
 exports.getSecurityLogs = async (req, res) => {
   try {
     const passes = await GatePass.find({
-      $or: [
-        { status: "used" },
-        { scannedAt: { $ne: null } },
-        { status: "approved" }
-      ]
+      scannedAt: { $ne: null }
     })
       .populate("studentId", "fullName email department customData")
       .populate("approverId", "fullName email role")

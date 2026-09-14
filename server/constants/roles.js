@@ -9,5 +9,6 @@ module.exports = {
     PARENT: "parent",
     SPORTS: "sports committee",
     SECURITY: "security",
-    HR: "hraccounts"
+    HR: "hraccounts",
+    DISCIPLINARY_COMMITTEE: "disciplinary_committee"
 };

@@ -82,6 +82,7 @@ module.exports = new FluentMigration("20260907_001_init_all_existing_controllers
     .icon("fas fa-exclamation-triangle")
     .grant("student", ["list"])
     .grant("faculty", ["list", "add"])
+    .grant("disciplinary_committee", ["list", "add", "update", "download"])
     .grant("hod", ["list", "add", "update", "delete", "download"])
     .grant("parent", ["list"])
     .grant("admin", ["list", "add", "update", "delete", "download"])

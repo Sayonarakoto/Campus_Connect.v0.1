@@ -84,8 +84,10 @@ function getMigrationFiles() {
 /**
  * Run 'up' migrations
  */
-async function runUp() {
-  await connectDB();
+async function runUp({ manageConnection = true } = {}) {
+  if (manageConnection) {
+    await connectDB();
+  }
   try {
     const files = getMigrationFiles();
     if (files.length === 0) {
@@ -142,7 +144,9 @@ async function runUp() {
       console.log(`\n🎉 Successfully applied ${appliedCount} migration(s).`);
     }
   } finally {
-    await disconnectDB();
+    if (manageConnection) {
+      await disconnectDB();
+    }
   }
 }
 
@@ -284,31 +288,41 @@ module.exports = new FluentMigration("${timestamp}_${cleanName}")
   console.log(`📄 File: ${filePath}\n`);
 }
 
-// CLI Command Dispatcher
-const command = (process.argv[2] || "status").toLowerCase().trim();
-const commandArg = process.argv[3];
+module.exports = {
+  runUp,
+  runDown,
+  runStatus,
+  runCreate
+};
 
-(async () => {
-  try {
-    switch (command) {
-      case "up":
-        await runUp();
-        break;
-      case "down":
-        await runDown();
-        break;
-      case "status":
-        await runStatus();
-        break;
-      case "create":
-        runCreate(commandArg);
-        break;
-      default:
-        console.log(`Unknown command '${command}'. Available: up, down, status, create <name>`);
-        process.exit(1);
+// Keep CLI behavior when invoked directly, while allowing server.js to reuse
+// runUp without starting a second process or disconnecting its DB connection.
+if (require.main === module) {
+  const command = (process.argv[2] || "status").toLowerCase().trim();
+  const commandArg = process.argv[3];
+
+  (async () => {
+    try {
+      switch (command) {
+        case "up":
+          await runUp();
+          break;
+        case "down":
+          await runDown();
+          break;
+        case "status":
+          await runStatus();
+          break;
+        case "create":
+          runCreate(commandArg);
+          break;
+        default:
+          console.log(`Unknown command '${command}'. Available: up, down, status, create <name>`);
+          process.exit(1);
+      }
+    } catch (err) {
+      console.error("❌ Migration Runner Error:", err);
+      process.exit(1);
     }
-  } catch (err) {
-    console.error("❌ Migration Runner Error:", err);
-    process.exit(1);
-  }
-})();
+  })();
+}

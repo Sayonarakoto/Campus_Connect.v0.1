@@ -1686,16 +1686,22 @@ exports.getAppMenu = async (req, res) => {
         GatePassController: "/gatepass/request",
         LateEntryController: "/student/late-entry",
         SpecialPassController: "/student/special-pass",
-        StudentLeaveController: "/student-leave/my",
-        DutyLeaveController: "/student/duty-leave"
+        StudentLeaveController: "/student-leave/apply",
+        DutyLeaveController: "/student/duty-leave",
+        DisciplinaryController: "/discpline/student"
       },
       faculty: {
         LateEntryController: "/faculty/late-entries",
-        DutyLeaveController: "/faculty/duty-leaves"
+        DutyLeaveController: "/faculty/duty-leaves",
+        DisciplinaryController: "/discpline/faculty"
+      },
+      disciplinary_committee: {
+        DisciplinaryController: "/discipline/hod"
       },
       hod: {
         LateEntryController: "/hod/late-entries",
-        DutyLeaveController: "/hod/duty-leaves"
+        DutyLeaveController: "/hod/duty-leaves",
+        DisciplinaryController: "/discipline/hod"
       },
       tutor: {
         DutyLeaveController: "/tutor/duty-leaves"
@@ -1737,6 +1743,29 @@ exports.getAppMenu = async (req, res) => {
           ];
         }
 
+        // Students need separate navigation entries for applying and viewing
+        // leave history, while both entries use the same StudentLeave claims.
+        if (activeRole === "student" && p.controller === "StudentLeaveController") {
+          return [
+            {
+              masterMenuId: p.masterMenuId || "Leaves & Passes",
+              title: "Apply for Leave",
+              path: "/student-leave/apply",
+              controller: p.controller,
+              icon: "fas fa-calendar-plus",
+              permissions: p.actions
+            },
+            {
+              masterMenuId: p.masterMenuId || "Leaves & Passes",
+              title: "My Leaves",
+              path: "/student-leave/my",
+              controller: p.controller,
+              icon: "fas fa-clipboard-list",
+              permissions: p.actions
+            }
+          ];
+        }
+
         const resolvedPath = (ROLE_SPECIFIC_CONTROLLER_PATHS[activeRole] && ROLE_SPECIFIC_CONTROLLER_PATHS[activeRole][p.controller]) || p.path;
         let resolvedTitle = p.moduleTitle;
         if (activeRole === "student" && p.controller === "GatePassController") {
@@ -1749,14 +1778,22 @@ exports.getAppMenu = async (req, res) => {
           resolvedTitle = "My Leaves";
         } else if (activeRole === "student" && p.controller === "DutyLeaveController") {
           resolvedTitle = "Duty Leave Application";
+        } else if (activeRole === "student" && p.controller === "DisciplinaryController") {
+          resolvedTitle = "Disciplinary Record";
         } else if (activeRole === "faculty" && p.controller === "LateEntryController") {
           resolvedTitle = "Late Entry Approvals";
         } else if (activeRole === "faculty" && p.controller === "DutyLeaveController") {
           resolvedTitle = "Duty Leaves";
+        } else if (activeRole === "faculty" && p.controller === "DisciplinaryController") {
+          resolvedTitle = "Disciplinary Actions";
+        } else if (activeRole === "disciplinary_committee" && p.controller === "DisciplinaryController") {
+          resolvedTitle = "Disciplinary Queue";
         } else if (activeRole === "hod" && p.controller === "LateEntryController") {
           resolvedTitle = "Late Entry Dashboard";
         } else if (activeRole === "hod" && p.controller === "DutyLeaveController") {
           resolvedTitle = "Duty Leave Queue";
+        } else if (activeRole === "hod" && p.controller === "DisciplinaryController") {
+          resolvedTitle = "Disciplinary Review";
         } else if (activeRole === "director" && p.controller === "DutyLeaveController") {
           resolvedTitle = "Faculty Duty Leaves";
         }

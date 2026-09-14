@@ -27,7 +27,8 @@ const UserSchema = new mongoose.Schema(
         "hraccounts",
         "security",
         "admin",
-        "sports committee"
+        "sports committee",
+        "disciplinary_committee"
       ]
     },
     roles: [{

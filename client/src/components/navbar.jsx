@@ -75,7 +75,7 @@ function Navbar() {
     ? `${API_BASE}${currentUser.profilePhoto.url}`
     : typeof currentUser?.profilePhoto === "string" && currentUser.profilePhoto
     ? `${API_BASE}${currentUser.profilePhoto}`
-    : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='%2394a3b8'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+    : "/Logo.png";
 
   // =========================================================================
   // RENDER 1: AUTHENTICATED DASHBOARD HEADER
@@ -102,9 +102,18 @@ function Navbar() {
               className="dashboard-header-brand"
               onClick={() => navigate(`/${currentUser.role}/workdashboard`)}
               title="Return to Workspace Home"
+              style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}
             >
-              <span className="brand-main">ST. MARY'S</span>
-              <span className="brand-sub">Campus Connect</span>
+              <img
+                src="/Logo.png"
+                alt="Campus Connect Logo"
+                style={{ height: "34px", width: "34px", objectFit: "contain", borderRadius: "6px" }}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span className="brand-main">CAMPUS CONNECT</span>
+                <span className="brand-sub">Portal</span>
+              </div>
             </div>
           </div>
 
@@ -178,7 +187,12 @@ function Navbar() {
               aria-label="Open User Profile"
               title="My Institutional Profile"
             >
-              <img src={photoSrc} alt={currentUser.fullName || "User Avatar"} className="header-profile-thumb" />
+              <img
+                src={photoSrc}
+                alt={currentUser.fullName || "User Avatar"}
+                className="header-profile-thumb"
+                onError={(e) => { e.target.src = "/Logo.png"; }}
+              />
               <span className="header-profile-name">
                 {currentUser.fullName ? currentUser.fullName.split(" ")[0] : "Profile"}
               </span>
@@ -213,13 +227,16 @@ function Navbar() {
   // =========================================================================
   return (
     <nav className="institutional-navbar" role="navigation">
-      <div className="navbar-brand-wrapper" onClick={() => navigate("/")}>
-        <div className="navbar-logo-icon">
-          <i className="fas fa-university" aria-hidden="true"></i>
-        </div>
+      <div className="navbar-brand-wrapper" onClick={() => navigate("/")} style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+        <img
+          src="/Logo.png"
+          alt="Campus Connect Logo"
+          style={{ height: "38px", width: "38px", objectFit: "contain", borderRadius: "6px", marginRight: "10px" }}
+          onError={(e) => { e.target.style.display = 'none'; }}
+        />
         <div className="navbar-logo-text">
-          <span className="logo-title">ST. MARY'S POLYTECHNIC</span>
-          <span className="logo-subtitle">Valliyode, Palakkad</span>
+          <span className="logo-title">CAMPUS CONNECT</span>
+          <span className="logo-subtitle">St. Mary's Polytechnic College</span>
         </div>
       </div>
 

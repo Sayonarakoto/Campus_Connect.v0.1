@@ -11,19 +11,9 @@ async function run() {
     await mongoose.connect(MONGO_URI);
     console.log("Connected to MongoDB.");
 
-    const targetControllers = ["StudentLeaveController", "TutorLeaveReviewController"];
-
-    // 1. Remove old conflated StudentLeaveController entries for faculty and hod
-    await Permission.deleteMany({
-      controller: "StudentLeaveController",
-      role: { $in: ["faculty", "tutor", "hod"] }
-    });
-    console.log("✓ Cleared obsolete faculty/tutor/hod entries from StudentLeaveController.");
-
-    // 2. Upsert fresh claims from DEFAULT_PERMISSIONS for both controllers
     let updated = 0;
     for (const p of DEFAULT_PERMISSIONS) {
-      if (targetControllers.includes(p.controller)) {
+      if (p.role === "disciplinary_committee") {
         await Permission.findOneAndUpdate(
           { role: p.role, controller: p.controller },
           {
@@ -46,7 +36,7 @@ async function run() {
       }
     }
 
-    console.log(`Successfully updated ${updated} leave permission records in MongoDB.`);
+    console.log(`Successfully updated ${updated} disciplinary_committee permission records in MongoDB.`);
     process.exit(0);
   } catch (error) {
     console.error("Migration failed:", error);
@@ -55,4 +45,3 @@ async function run() {
 }
 
 run();
-  

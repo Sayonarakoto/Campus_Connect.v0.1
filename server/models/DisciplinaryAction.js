@@ -29,6 +29,7 @@ const DisciplinarySchema = new mongoose.Schema(
       type: String,
       enum: [
         "DRAFT",
+        "COMMITTEE_PENDING",
         "HOD_PENDING",
         "APPROVED",
         "REJECTED"
@@ -36,7 +37,15 @@ const DisciplinarySchema = new mongoose.Schema(
       default: "DRAFT"
     },
 
+    workflowInstanceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ApprovalInstance",
+      default: null
+    },
+
     hodRemarks: String,
+
+    committeeRemarks: String,
 
     isVisibleToParent: {
       type: Boolean,

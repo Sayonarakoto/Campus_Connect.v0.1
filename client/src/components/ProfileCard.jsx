@@ -39,6 +39,11 @@ export default function ProfileCard({ user: propUser, isOpen = true, onClose, on
     }
   }, [propUser]);
 
+  const [disciplinaryData, setDisciplinaryData] = useState({
+    loading: false,
+    records: []
+  });
+
   useEffect(() => {
     if (currentUser) {
       setFormData({
@@ -47,6 +52,33 @@ export default function ProfileCard({ user: propUser, isOpen = true, onClose, on
       });
     }
   }, [currentUser]);
+
+  // Fetch disciplinary profile for student users
+  useEffect(() => {
+    if (!currentUser || !isOpen) return;
+
+    if (currentUser.role === "student") {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      setDisciplinaryData((prev) => ({ ...prev, loading: true }));
+      fetch(`${API_BASE}/api/disciplinary/profile`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.records)) {
+            setDisciplinaryData({ loading: false, records: data.records });
+          } else {
+            setDisciplinaryData({ loading: false, records: [] });
+          }
+        })
+        .catch((err) => {
+          console.error("Disciplinary fetch error:", err);
+          setDisciplinaryData({ loading: false, records: [] });
+        });
+    }
+  }, [currentUser, isOpen]);
 
   // Handle escape key to close modal
   useEffect(() => {
@@ -72,7 +104,7 @@ export default function ProfileCard({ user: propUser, isOpen = true, onClose, on
     ? `${API_BASE}${currentUser.profilePhoto.url}`
     : typeof currentUser.profilePhoto === "string" && currentUser.profilePhoto
     ? `${API_BASE}${currentUser.profilePhoto}`
-    : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='%2394a3b8'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+    : "/Logo.png";
 
   const handleInputChange = (e) => {
     setFormData((prev) => ({
@@ -243,6 +275,7 @@ export default function ProfileCard({ user: propUser, isOpen = true, onClose, on
               className="profile-card-image"
               src={photoSrc}
               alt={currentUser.fullName || "User Profile"}
+              onError={(e) => { e.target.src = "/Logo.png"; }}
             />
             <button
               type="button"
@@ -376,6 +409,143 @@ export default function ProfileCard({ user: propUser, isOpen = true, onClose, on
             </>
           )}
         </div>
+
+        {/* Modern Disciplinary Action Card */}
+        {!isEditing && (
+          <div className="profile-disciplinary-section">
+            {currentUser.role === "student" ? (
+              <div className={`profile-disciplinary-card ${disciplinaryData.records.length > 0 ? "warning" : "clean"}`}>
+                <div className="disciplinary-card-content">
+                  <div className={`disciplinary-icon-wrap ${disciplinaryData.records.length > 0 ? "warning" : "clean"}`}>
+                    <i className={disciplinaryData.records.length > 0 ? "fas fa-exclamation-triangle" : "fas fa-shield-alt"}></i>
+                  </div>
+                  <div className="disciplinary-info">
+                    <div className="disciplinary-title-row">
+                      <span className="disciplinary-title">Conduct Standing</span>
+                      <span className={`disciplinary-badge ${disciplinaryData.records.length > 0 ? "warning" : "clean"}`}>
+                        {disciplinaryData.loading
+                          ? "Checking..."
+                          : disciplinaryData.records.length > 0
+                          ? `${disciplinaryData.records.length} Notice(s)`
+                          : "Good Standing"}
+                      </span>
+                    </div>
+                    <p className="disciplinary-subtitle">
+                      {disciplinaryData.records.length > 0
+                        ? "Institutional conduct entries recorded on file."
+                        : "No disciplinary infractions or active notices on file."}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className={`btn-disciplinary-link ${disciplinaryData.records.length > 0 ? "warning" : ""}`}
+                  onClick={() => {
+                    if (onClose) onClose();
+                    navigate("/discpline/student");
+                  }}
+                >
+                  <span>View Discipline Record</span>
+                  <i className="fas fa-chevron-right"></i>
+                </button>
+              </div>
+            ) : currentUser.role === "parent" ? (
+              <div className="profile-disciplinary-card clean">
+                <div className="disciplinary-card-content">
+                  <div className="disciplinary-icon-wrap clean">
+                    <i className="fas fa-shield-alt"></i>
+                  </div>
+                  <div className="disciplinary-info">
+                    <div className="disciplinary-title-row">
+                      <span className="disciplinary-title">Student Conduct</span>
+                      <span className="disciplinary-badge clean">Parent Portal</span>
+                    </div>
+                    <p className="disciplinary-subtitle">View ward's official institutional conduct standing.</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-disciplinary-link"
+                  onClick={() => {
+                    if (onClose) onClose();
+                    navigate("/discpline/parent");
+                  }}
+                >
+                  <span>View Ward Discipline Log</span>
+                  <i className="fas fa-chevron-right"></i>
+                </button>
+              </div>
+            ) : (
+              // Staff: Faculty, Disciplinary Committee, HOD, Admin
+              (() => {
+                const isCommittee =
+                  currentUser.role === "disciplinary_committee" ||
+                  (Array.isArray(currentUser.roles) && currentUser.roles.includes("disciplinary_committee"));
+                const isHod = currentUser.role === "hod";
+                const isAdmin = currentUser.role === "admin";
+
+                return (
+                  <div className="profile-disciplinary-card staff">
+                    <div className="disciplinary-card-content">
+                      <div className={`disciplinary-icon-wrap ${isCommittee ? "committee" : "staff"}`}>
+                        <i className={isCommittee ? "fas fa-gavel" : isHod ? "fas fa-balance-scale" : "fas fa-user-shield"}></i>
+                      </div>
+                      <div className="disciplinary-info">
+                        <div className="disciplinary-title-row">
+                          <span className="disciplinary-title">Disciplinary Governance</span>
+                          {isCommittee && (
+                            <span className="disciplinary-badge committee">Disciplinary Committee</span>
+                          )}
+                          {!isCommittee && isHod && (
+                            <span className="disciplinary-badge hod">HOD Authority</span>
+                          )}
+                          {!isCommittee && !isHod && (
+                            <span className="disciplinary-badge staff">Faculty Authority</span>
+                          )}
+                        </div>
+                        <p className="disciplinary-subtitle">
+                          {isCommittee
+                            ? "Authorized to investigate, conduct hearings, and review infractions."
+                            : isHod
+                            ? "Authorized for final sanction review and department decisions."
+                            : "Authorized to report student conduct incidents and initiate inquiries."}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="disciplinary-actions-row">
+                      <button
+                        type="button"
+                        className="btn-disciplinary-action primary"
+                        onClick={() => {
+                          if (onClose) onClose();
+                          navigate("/discpline/faculty");
+                        }}
+                        title="File a new disciplinary incident"
+                      >
+                        <i className="fas fa-plus-circle" style={{ marginRight: 6 }}></i>
+                        File Incident
+                      </button>
+                      {(isCommittee || isHod || isAdmin) && (
+                        <button
+                          type="button"
+                          className="btn-disciplinary-action secondary"
+                          onClick={() => {
+                            if (onClose) onClose();
+                            navigate("/discipline/hod");
+                          }}
+                          title="Review disciplinary queues"
+                        >
+                          <i className="fas fa-tasks" style={{ marginRight: 6 }}></i>
+                          Review Queue
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()
+            )}
+          </div>
+        )}
 
         {/* Footer Actions */}
         <div className="profile-modal-footer">

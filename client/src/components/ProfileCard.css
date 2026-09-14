@@ -333,3 +333,217 @@
     flex-direction: column;
   }
 }
+
+/* ==========================================================================
+   Modern Disciplinary Action Card Styles
+   ========================================================================== */
+.profile-disciplinary-section {
+  padding: 0 20px 16px 20px;
+}
+
+.profile-disciplinary-card {
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  padding: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-disciplinary-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.profile-disciplinary-card.clean {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+  border-color: #bbf7d0;
+}
+
+.profile-disciplinary-card.warning {
+  background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+  border-color: #fecaca;
+}
+
+.profile-disciplinary-card.staff {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-color: #e2e8f0;
+}
+
+.disciplinary-card-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.disciplinary-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.disciplinary-icon-wrap.clean {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.disciplinary-icon-wrap.warning {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.disciplinary-icon-wrap.committee {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.disciplinary-icon-wrap.staff {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.disciplinary-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.disciplinary-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.disciplinary-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.disciplinary-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.disciplinary-badge.clean {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.disciplinary-badge.warning {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.disciplinary-badge.committee {
+  background: #f3e8ff;
+  color: #6b21a8;
+  border: 1px solid #d8b4fe;
+}
+
+.disciplinary-badge.hod {
+  background: #ffedd5;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+.disciplinary-badge.staff {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.disciplinary-subtitle {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.btn-disciplinary-link {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-disciplinary-link:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.btn-disciplinary-link.warning {
+  border-color: #fca5a5;
+  color: #b91c1c;
+  background: #fff5f5;
+}
+
+.btn-disciplinary-link.warning:hover {
+  background: #fee2e2;
+}
+
+.disciplinary-actions-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.btn-disciplinary-action {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+
+.btn-disciplinary-action.primary {
+  background: #1e3a8a;
+  color: #ffffff;
+}
+
+.btn-disciplinary-action.primary:hover {
+  background: #1e40af;
+}
+
+.btn-disciplinary-action.secondary {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-disciplinary-action.secondary:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}

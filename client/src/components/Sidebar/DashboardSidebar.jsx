@@ -26,8 +26,8 @@ const ROLE_NAV_CONFIG = {
     { label: "Special Pass Request", path: "/student/special-pass", icon: "fas fa-id-badge", masterMenuId: "Passes & Clearances" },
     { label: "Gate Pass Request", path: "/gatepass/request", icon: "fas fa-id-card", masterMenuId: "Leaves & Passes" },
     { label: "Late Entry Request", path: "/student/late-entry", icon: "fas fa-clock", masterMenuId: "Security & Access" },
-    { label: "Request Leave", path: "/leave/student/request", icon: "fas fa-calendar-plus", masterMenuId: "Leaves & Passes" },
-    { label: "My Leaves", path: "/leave/student/my", icon: "fas fa-clipboard-list", masterMenuId: "Leaves & Passes" },
+    { label: "Apply for Leave", path: "/student-leave/apply", icon: "fas fa-calendar-plus", masterMenuId: "Leaves & Passes" },
+    { label: "My Leaves", path: "/student-leave/my", icon: "fas fa-clipboard-list", masterMenuId: "Leaves & Passes" },
     { label: "My Gate Passes", path: "/gatepass/my", icon: "fas fa-ticket-alt", masterMenuId: "Leaves & Passes" },
     { label: "Duty Leave Application", path: "/dutyleave/student/apply", icon: "fas fa-briefcase", masterMenuId: "Leaves & Passes" },
     { label: "My Duty Leaves", path: "/dutyleave/student/my", icon: "fas fa-file-alt", masterMenuId: "Leaves & Passes" },
@@ -137,7 +137,7 @@ export default function DashboardSidebar({ isOpen, onClose, onOpenProfile, user 
     ? `${API_BASE}${user.profilePhoto.url}`
     : typeof user?.profilePhoto === "string" && user.profilePhoto
     ? `${API_BASE}${user.profilePhoto}`
-    : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='%2394a3b8'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+    : "/Logo.png";
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -155,12 +155,15 @@ export default function DashboardSidebar({ isOpen, onClose, onOpenProfile, user 
       <aside className="dashboard-sidebar-drawer" role="navigation" aria-label="Sidebar Navigation">
         {/* Header */}
         <div className="sidebar-header">
-          <div className="sidebar-brand-group">
-            <div className="sidebar-college-icon">
-              <i className="fas fa-university" aria-hidden="true"></i>
-            </div>
+          <div className="sidebar-brand-group" style={{ display: "flex", alignItems: "center" }}>
+            <img
+              src="/Logo.png"
+              alt="Campus Connect Logo"
+              style={{ height: "36px", width: "36px", objectFit: "contain", borderRadius: "6px", marginRight: "10px" }}
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
             <div className="sidebar-title-text">
-              <h4>ST. MARY'S</h4>
+              <h4>CAMPUS CONNECT</h4>
               <p>Valiyode Campus</p>
             </div>
           </div>
@@ -176,7 +179,12 @@ export default function DashboardSidebar({ isOpen, onClose, onOpenProfile, user 
 
         {/* User Identity Strip */}
         <div className="sidebar-user-strip">
-          <img className="sidebar-avatar-img" src={photoSrc} alt={user?.fullName || "User"} />
+          <img
+            className="sidebar-avatar-img"
+            src={photoSrc}
+            alt={user?.fullName || "User"}
+            onError={(e) => { e.target.src = "/Logo.png"; }}
+          />
           <div className="sidebar-user-meta">
             <h5 className="sidebar-user-name">{user?.fullName || "Campus User"}</h5>
             <span className="sidebar-role-badge">{user?.role}</span>

@@ -26,8 +26,8 @@ const HARDCODED_DEFAULT_WORKFLOWS = {
     { stepOrder: 2, roleRequired: "hod", actionName: "HOD Sanction", departmentSpecific: true }
   ],
   DisciplinaryAction: [
-    { stepOrder: 1, roleRequired: "hod", actionName: "HOD Review & Charge Formulation", departmentSpecific: true },
-    { stepOrder: 2, roleRequired: "principal", actionName: "Principal Hearing & Decision", departmentSpecific: false }
+    { stepOrder: 1, roleRequired: "disciplinary_committee", actionName: "Disciplinary Committee Inquiry & Review", departmentSpecific: false },
+    { stepOrder: 2, roleRequired: "hod", actionName: "HOD Sanction & Authorization", departmentSpecific: true }
   ],
   AttendanceCorrection: [
     { stepOrder: 1, roleRequired: "faculty", actionName: "Subject Faculty Verification", departmentSpecific: true },
@@ -94,18 +94,58 @@ async function initializeWorkflowInstance({ moduleName, targetRefId, applicantId
   }
 
   const firstStep = activeSteps[0];
+  let startingStepOrder = firstStep.stepOrder;
+  let startingRoleRequired = firstStep.roleRequired.toLowerCase();
+  const initialHistory = [];
+
+  // Dual-routing for DisciplinaryAction:
+  // If initiated directly by a Disciplinary Committee member, Step 1 (Committee Review)
+  // is auto-satisfied and the workflow fast-forwards directly to Step 2 (HOD).
+  if (resolution.moduleName.toLowerCase() === "disciplinaryaction" && applicantId) {
+    try {
+      const User = require("../models/User");
+      const applicant = await User.findById(applicantId).select("role roles");
+      if (applicant) {
+        const applicantRoles = new Set([
+          applicant.role?.toLowerCase(),
+          ...(Array.isArray(applicant.roles) ? applicant.roles.map((r) => r.toLowerCase().trim()) : [])
+        ]);
+
+        const isCommitteeMember =
+          applicantRoles.has("disciplinary_committee") ||
+          applicantRoles.has("disciplinary committee") ||
+          applicantRoles.has("dispcarycommite");
+
+        if (isCommitteeMember && activeSteps.length > 1 && firstStep.roleRequired === "disciplinary_committee") {
+          const nextStep = activeSteps[1];
+          startingStepOrder = nextStep.stepOrder;
+          startingRoleRequired = nextStep.roleRequired.toLowerCase();
+          initialHistory.push({
+            stepOrder: firstStep.stepOrder,
+            approverId: applicant._id,
+            role: "disciplinary_committee",
+            action: "Approved",
+            comment: "Directly initiated by Disciplinary Committee; auto-advanced to HOD for sanction.",
+            timestamp: new Date()
+          });
+        }
+      }
+    } catch (err) {
+      console.warn("Disciplinary workflow auto-advancement check error:", err.message);
+    }
+  }
 
   const instance = new ApprovalInstance({
     moduleName: resolution.moduleName,
     targetRefId,
     applicantId,
     department,
-    currentStepOrder: firstStep.stepOrder,
-    currentRoleRequired: firstStep.roleRequired.toLowerCase(),
+    currentStepOrder: startingStepOrder,
+    currentRoleRequired: startingRoleRequired,
     workflowSource: resolution.source,
     metadata,
     status: "Pending",
-    history: []
+    history: initialHistory
   });
 
   await instance.save();
@@ -133,14 +173,22 @@ async function processApprovalAction({ instanceId, user, action, comment = "" })
   }
 
   const userRole = (user.role || "").toLowerCase();
+  const userRoles = new Set([
+    userRole,
+    ...(Array.isArray(user.roles) ? user.roles.map((r) => r.toLowerCase().trim()) : [])
+  ]);
   const stepRole = (currentStep.roleRequired || "").toLowerCase();
 
-  // Role verification (Allow admin override, and match role synonyms like faculty/tutor)
+  // Role verification (Allow admin override, and match role synonyms like faculty/tutor/disciplinary_committee)
   const isRoleAuthorized =
     userRole === "admin" ||
-    userRole === stepRole ||
-    (stepRole === "faculty" && userRole === "tutor") ||
-    (stepRole === "class_tutor" && (userRole === "faculty" || userRole === "tutor"));
+    userRoles.has(stepRole) ||
+    (stepRole === "faculty" && userRoles.has("tutor")) ||
+    (stepRole === "class_tutor" && (userRoles.has("faculty") || userRoles.has("tutor"))) ||
+    (stepRole === "disciplinary_committee" &&
+      (userRoles.has("disciplinary_committee") ||
+        userRoles.has("disciplinary committee") ||
+        userRoles.has("dispcarycommite")));
 
   if (!isRoleAuthorized) {
     throw new Error(
@@ -208,7 +256,18 @@ async function processApprovalAction({ instanceId, user, action, comment = "" })
  */
 async function getPendingQueueForUser(user) {
   const userRole = (user.role || "").toLowerCase();
-  const userDept = (user.department || "").trim();
+  const allUserRoles = new Set([
+    userRole,
+    ...(Array.isArray(user.roles) ? user.roles.map((r) => r.toLowerCase().trim()) : [])
+  ]);
+
+  if (
+    allUserRoles.has("disciplinary_committee") ||
+    allUserRoles.has("disciplinary committee") ||
+    allUserRoles.has("dispcarycommite")
+  ) {
+    allUserRoles.add("disciplinary_committee");
+  }
 
   let query = { status: "Pending" };
 
@@ -218,15 +277,42 @@ async function getPendingQueueForUser(user) {
   } else if (["director", "principal"].includes(userRole)) {
     query.currentRoleRequired = userRole;
   } else {
-    // Departmental approvers (HOD, Faculty, Tutor, HR)
-    const roleMatches = [userRole];
-    if (userRole === "faculty" || userRole === "tutor") {
+    // Departmental / Committee approvers (HOD, Faculty, Tutor, Disciplinary Committee, HR)
+    const roleMatches = [...allUserRoles];
+    if (allUserRoles.has("faculty") || allUserRoles.has("tutor")) {
       roleMatches.push("faculty", "tutor", "class_tutor");
     }
 
-    query.currentRoleRequired = { $in: roleMatches };
+    const conditions = [];
+
+    // 1. Department-scoped conditions for standard academic/departmental roles
     if (userDept) {
-      query.department = new RegExp(`^${userDept}$`, "i");
+      const deptRoles = roleMatches.filter((r) => r !== "disciplinary_committee");
+      if (deptRoles.length > 0) {
+        conditions.push({
+          currentRoleRequired: { $in: deptRoles },
+          department: new RegExp(`^${userDept}$`, "i")
+        });
+      }
+    } else {
+      conditions.push({
+        currentRoleRequired: { $in: roleMatches }
+      });
+    }
+
+    // 2. Disciplinary Committee is campus-wide (not restricted by department)
+    if (allUserRoles.has("disciplinary_committee")) {
+      conditions.push({
+        currentRoleRequired: "disciplinary_committee"
+      });
+    }
+
+    if (conditions.length > 1) {
+      query.$or = conditions;
+    } else if (conditions.length === 1) {
+      Object.assign(query, conditions[0]);
+    } else {
+      query.currentRoleRequired = { $in: roleMatches };
     }
   }
 

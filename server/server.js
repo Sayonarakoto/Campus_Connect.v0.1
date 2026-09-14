@@ -10,6 +10,7 @@ const mongoose = require("mongoose");
 // Import DB connection and GridFS
 const connectDB = require("./config/db");
 const { initGridFS } = require("./config/gridfs");
+const { runUp: runPendingMigrations } = require("./utils/migrationRunner");
 
 // Connect to MongoDB
 connectDB();
@@ -236,6 +237,12 @@ const startServer = async () => {
         mongoose.connection.once('connected', resolve);
       }
     });
+
+    // Apply pending migrations before exposing the API.
+    // Reuse the server's active Mongoose connection.
+    console.log(" Checking for pending database migrations...");
+    await runPendingMigrations({ manageConnection: false });
+    console.log(" Database migrations are up to date.");
 
     // Initialize GridFS
     try {

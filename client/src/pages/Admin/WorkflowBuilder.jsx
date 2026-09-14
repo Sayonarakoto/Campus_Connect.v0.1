@@ -9,6 +9,7 @@ const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
 const AVAILABLE_ROLES = [
   { value: "faculty", label: "Faculty / Tutor" },
   { value: "class_tutor", label: "Class Tutor (Assigned)" },
+  { value: "disciplinary_committee", label: "Disciplinary Committee" },
   { value: "hod", label: "Head of Department (HOD)" },
   { value: "principal", label: "Principal" },
   { value: "director", label: "Director" },
@@ -39,10 +40,10 @@ const PRESETS = [
   {
     key: "DisciplinaryAction",
     displayName: "Disciplinary Action Approval",
-    description: "Formal disciplinary review and authorization workflow.",
+    description: "Multi-tier approval pipeline for student disciplinary incident reviews.",
     steps: [
-      { stepOrder: 1, roleRequired: "hod", actionName: "HOD Review & Charge Formulation", departmentSpecific: true },
-      { stepOrder: 2, roleRequired: "principal", actionName: "Principal Hearing & Decision", departmentSpecific: false }
+      { stepOrder: 1, roleRequired: "disciplinary_committee", actionName: "Disciplinary Committee Inquiry & Review", departmentSpecific: false },
+      { stepOrder: 2, roleRequired: "hod", actionName: "HOD Sanction & Authorization", departmentSpecific: true }
     ]
   },
   {

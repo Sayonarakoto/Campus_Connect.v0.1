@@ -23,6 +23,16 @@ const roleMiddleware = (...allowedRoles) => {
         userRoles.add("faculty");
       }
 
+      // A Disciplinary Committee member is fundamentally a Faculty member with committee duties
+      if (
+        userRoles.has("disciplinary_committee") ||
+        userRoles.has("disciplinary committee") ||
+        userRoles.has("dispcarycommite")
+      ) {
+        userRoles.add("faculty");
+        userRoles.add("disciplinary_committee");
+      }
+
       // Check if user's roles match any of the allowed roles
       const hasPermission = allowedRoles.some((allowed) => userRoles.has(allowed));
       if (!hasPermission) {

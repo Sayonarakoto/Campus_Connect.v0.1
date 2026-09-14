@@ -92,6 +92,12 @@ function UserManagement() {
   const handleEdit = (user) => {
     setEditingUser(user);
     const hasTutorRole = user.role === "tutor" || (Array.isArray(user.roles) && user.roles.includes("tutor"));
+    const hasDisciplinaryRole =
+      user.role === "disciplinary_committee" ||
+      (Array.isArray(user.roles) &&
+        (user.roles.includes("disciplinary_committee") ||
+          user.roles.includes("disciplinary committee") ||
+          user.roles.includes("dispcarycommite")));
     setFormData({
       fullName: user.fullName || "",
       email: user.email || "",
@@ -101,7 +107,8 @@ function UserManagement() {
       section: user.section || "",
       password: "", // Leave blank, only update if typed
       isLabStaff: user.isLabStaff || false,
-      isClassTutor: hasTutorRole
+      isClassTutor: hasTutorRole,
+      isDisciplinaryCommittee: hasDisciplinaryRole
     });
     setShowModal(true);
   };
@@ -117,7 +124,8 @@ function UserManagement() {
       section: "",
       password: "",
       isLabStaff: false,
-      isClassTutor: false
+      isClassTutor: false,
+      isDisciplinaryCommittee: false
     });
     setShowModal(true);
   };
@@ -139,6 +147,17 @@ function UserManagement() {
       } else {
         const idx = payloadRoles.indexOf("tutor");
         if (idx !== -1) payloadRoles.splice(idx, 1);
+      }
+
+      if (formData.isDisciplinaryCommittee) {
+        if (!payloadRoles.includes("disciplinary_committee")) payloadRoles.push("disciplinary_committee");
+      } else {
+        const idx1 = payloadRoles.indexOf("disciplinary_committee");
+        if (idx1 !== -1) payloadRoles.splice(idx1, 1);
+        const idx2 = payloadRoles.indexOf("disciplinary committee");
+        if (idx2 !== -1) payloadRoles.splice(idx2, 1);
+        const idx3 = payloadRoles.indexOf("dispcarycommite");
+        if (idx3 !== -1) payloadRoles.splice(idx3, 1);
       }
 
       const submitData = {
@@ -347,6 +366,23 @@ function UserManagement() {
                         + Tutor
                       </span>
                     )}
+                    {user.roles &&
+                      (user.roles.includes("disciplinary_committee") ||
+                        user.roles.includes("disciplinary committee") ||
+                        user.roles.includes("dispcarycommite")) &&
+                      user.role !== "disciplinary_committee" && (
+                        <span
+                          className="um-role-badge"
+                          style={{
+                            marginLeft: "0.35rem",
+                            backgroundColor: "#fef3c7",
+                            color: "#92400e",
+                            border: "1px solid #fde68a"
+                          }}
+                        >
+                          + Disciplinary
+                        </span>
+                      )}
                   </td>
                   <td>{user.department || "-"}</td>
                   <td>
@@ -409,6 +445,7 @@ function UserManagement() {
                       <option value="hod">HOD</option>
                       <option value="faculty">Faculty</option>
                       <option value="tutor">Tutor</option>
+                      <option value="disciplinary_committee">Disciplinary Committee</option>
                       <option value="student">Student</option>
                       <option value="security">Security</option>
                       <option value="principal">Principal</option>
@@ -419,13 +456,14 @@ function UserManagement() {
                     <>
                       <option value="faculty">Faculty</option>
                       <option value="tutor">Tutor</option>
+                      <option value="disciplinary_committee">Disciplinary Committee</option>
                       <option value="student">Student</option>
                     </>
                   )}
                 </select>
               </div>
 
-              {["faculty", "hod", "student", "tutor"].includes(formData.role) && (
+              {["faculty", "hod", "student", "tutor", "disciplinary_committee"].includes(formData.role) && (
                 <div className="form-group">
                   <label>Department {!["admin", "hraccounts"].includes(currentUserRole) ? "(Locked)" : ""}</label>
                   <input type="text" name="department" value={formData.department} onChange={handleFormChange} disabled={!["admin", "hraccounts"].includes(currentUserRole)} />
@@ -449,6 +487,20 @@ function UserManagement() {
                       onChange={handleFormChange}
                     />
                     Assign as Class Tutor (Tutor Add-on &bull; Max 3 per Department)
+                  </label>
+                </div>
+              )}
+
+              {["faculty", "tutor", "disciplinary_committee"].includes(formData.role) && (
+                <div className="form-group checkbox-group" style={{ marginTop: "0.25rem" }}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="isDisciplinaryCommittee"
+                      checked={Boolean(formData.isDisciplinaryCommittee)}
+                      onChange={handleFormChange}
+                    />
+                    Assign to Disciplinary Committee (Add-on Role)
                   </label>
                 </div>
               )}

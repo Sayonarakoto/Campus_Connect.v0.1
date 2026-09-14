@@ -7,6 +7,33 @@ const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
 export default function UserDetailsModal({ userId, onClose }) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showDisciplinaryDrawer, setShowDisciplinaryDrawer] = useState(false);
+  const [disciplinaryRecords, setDisciplinaryRecords] = useState([]);
+  const [loadingDisciplinary, setLoadingDisciplinary] = useState(false);
+
+  const handleToggleDisciplinary = async () => {
+    if (showDisciplinaryDrawer) {
+      setShowDisciplinaryDrawer(false);
+      return;
+    }
+
+    setShowDisciplinaryDrawer(true);
+    setLoadingDisciplinary(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`${API_BASE}/api/disciplinary/student/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        setDisciplinaryRecords(res.data.records || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch student disciplinary records:", err);
+      setDisciplinaryRecords([]);
+    } finally {
+      setLoadingDisciplinary(false);
+    }
+  };
 
   useEffect(() => {
     if (!userId) return;
@@ -63,33 +90,100 @@ export default function UserDetailsModal({ userId, onClose }) {
             </div>
 
             {stats.user.role === "student" && (
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <h5>Leave Requests</h5>
-                  <p>Total: {stats.leaves.total}</p>
-                  <p>Approved: {stats.leaves.approved}</p>
-                </div>
-                <div className="stat-card">
-                  <h5>Gate Passes</h5>
-                  <p>Total: {stats.gatePasses.total}</p>
-                  <p>Approved: {stats.gatePasses.approved}</p>
-                </div>
-                {stats.specialPasses && (
+              <>
+                <div className="stats-grid">
                   <div className="stat-card">
-                    <h5>Special Passes</h5>
-                    <p>Total: {stats.specialPasses.total}</p>
-                    <p>Approved: {stats.specialPasses.approved}</p>
+                    <h5>Leave Requests</h5>
+                    <p>Total: {stats.leaves.total}</p>
+                    <p>Approved: {stats.leaves.approved}</p>
+                  </div>
+                  <div className="stat-card">
+                    <h5>Gate Passes</h5>
+                    <p>Total: {stats.gatePasses.total}</p>
+                    <p>Approved: {stats.gatePasses.approved}</p>
+                  </div>
+                  {stats.specialPasses && (
+                    <div className="stat-card">
+                      <h5>Special Passes</h5>
+                      <p>Total: {stats.specialPasses.total}</p>
+                      <p>Approved: {stats.specialPasses.approved}</p>
+                    </div>
+                  )}
+                  <div className="stat-card">
+                    <h5>Late Arrivals</h5>
+                    <p>{stats.lateEntries}</p>
+                  </div>
+                  <div
+                    className="stat-card stat-card-interactive"
+                    onClick={handleToggleDisciplinary}
+                    title="Click to view disciplinary incident records"
+                  >
+                    <h5>Disciplinary</h5>
+                    <p>{stats.disciplinary}</p>
+                    <span className="stat-hint">
+                      {showDisciplinaryDrawer ? "Hide records ▲" : "View records ▼"}
+                    </span>
+                  </div>
+                </div>
+
+                {showDisciplinaryDrawer && (
+                  <div className="disciplinary-drawer">
+                    <div className="disciplinary-drawer-header">
+                      <h5>
+                        <i className="fas fa-exclamation-triangle" style={{ color: "#d97706" }}></i>
+                        Disciplinary Incident Log
+                      </h5>
+                      <button
+                        type="button"
+                        className="disciplinary-drawer-close"
+                        onClick={() => setShowDisciplinaryDrawer(false)}
+                      >
+                        &times;
+                      </button>
+                    </div>
+
+                    {loadingDisciplinary ? (
+                      <p style={{ fontSize: "0.85rem", color: "#64748b", margin: "8px 0" }}>
+                        Loading disciplinary records...
+                      </p>
+                    ) : disciplinaryRecords.length === 0 ? (
+                      <p style={{ fontSize: "0.85rem", color: "#16a34a", margin: "8px 0" }}>
+                        ✓ Clean Record: No disciplinary notices found.
+                      </p>
+                    ) : (
+                      <div className="disciplinary-list">
+                        {disciplinaryRecords.map((r) => (
+                          <div className="disciplinary-item-card" key={r._id}>
+                            <div className="disciplinary-item-top">
+                              <span className={`tag-category ${r.category || "MINOR"}`}>
+                                {r.category || "MINOR"}
+                              </span>
+                              <span className={`tag-status ${r.status}`}>
+                                {r.status}
+                              </span>
+                            </div>
+                            <p className="disciplinary-item-remark">{r.remark}</p>
+                            {r.committeeRemarks && (
+                              <p style={{ fontSize: "0.8rem", color: "#7c3aed", margin: "2px 0" }}>
+                                <strong>Committee:</strong> {r.committeeRemarks}
+                              </p>
+                            )}
+                            {r.hodRemarks && (
+                              <p style={{ fontSize: "0.8rem", color: "#c2410c", margin: "2px 0" }}>
+                                <strong>HOD:</strong> {r.hodRemarks}
+                              </p>
+                            )}
+                            <div className="disciplinary-item-meta">
+                              <span>Reported by: {r.createdBy?.fullName || "Staff"}</span>
+                              <span>{new Date(r.createdAt).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
-                <div className="stat-card">
-                  <h5>Late Arrivals</h5>
-                  <p>{stats.lateEntries}</p>
-                </div>
-                <div className="stat-card">
-                  <h5>Disciplinary</h5>
-                  <p>{stats.disciplinary}</p>
-                </div>
-              </div>
+              </>
             )}
             
             {stats.tutor && (

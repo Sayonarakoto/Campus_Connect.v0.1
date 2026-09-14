@@ -34,6 +34,20 @@ const LateEntrySchema = new mongoose.Schema(
       trim: true
     },
 
+    // Approver designation selected by student
+    approverRole: {
+      type: String,
+      enum: ["hod", "faculty"],
+      default: "faculty"
+    },
+
+    // Specific approver assigned (e.g., faculty member or HOD)
+    targetApprover: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null
+    },
+
     // Current workflow status
     status: {
       type: String,

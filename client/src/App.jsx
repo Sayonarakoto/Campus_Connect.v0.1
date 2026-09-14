@@ -12,6 +12,7 @@ import Register from "./pages/register";
 import RoleAuth from "./pages/roleauth";
 import ForgotPassword from "./pages/ForgotPassword";
 import { ToastProvider } from "./context/ToastContext";
+import { ConfirmProvider } from "./context/ConfirmContext";
 
 import GatePassRequest from "./pages/GatePass/GatePassRequest";
 import GatePassApproval from "./pages/GatePass/GatePassapproval";
@@ -75,6 +76,9 @@ import StudentLateHistory from "./pages/LateEntry/StudentLateHistory";
 import FacultyLateEntries from "./pages/LateEntry/FacultyLateEntries";
 import HODLateDashboard from "./pages/LateEntry/HODLateDashboard";
 
+import StudentSpecialPass from "./pages/SpecialPass/StudentSpecialPass";
+import HODSpecialPass from "./pages/SpecialPass/HODSpecialPass";
+
 import SportsCommitteeDashboard from "./pages/SportsCommittee/SportCommiteeDashboard";
 import SportsRegistration from "./pages/Sports/SportsRegistration";
 import SportsEventManagement from "./pages/Sports/SportsMangement";
@@ -110,7 +114,8 @@ function App() {
   return (
     <BrowserRouter>
       <ToastProvider>
-        <Navbar />
+        <ConfirmProvider>
+          <Navbar />
 
         {token && <PromotionEngine />}
 
@@ -211,6 +216,11 @@ function App() {
           <Route path="/student/late-history" element={<ProtectedRoute><StudentLateHistory /></ProtectedRoute>} />
           <Route path="/faculty/late-entries" element={<ProtectedRoute><FacultyLateEntries /></ProtectedRoute>} />
           <Route path="/hod/late-entries" element={<ProtectedRoute><HODLateDashboard /></ProtectedRoute>} />
+
+          <Route path="/student/special-pass" element={<ProtectedRoute><StudentSpecialPass /></ProtectedRoute>} />
+          <Route path="/hod/special-passes" element={<ProtectedRoute><HODSpecialPass /></ProtectedRoute>} />
+          <Route path="/hod/bulk-special-pass" element={<ProtectedRoute><HODSpecialPass defaultTab="bulk" /></ProtectedRoute>} />
+          <Route path="/hod/special-pass-approvals" element={<ProtectedRoute><HODSpecialPass defaultTab="pending" /></ProtectedRoute>} />
         
           <Route path="/events" element={<ProtectedRoute><FacultyEventDashboard /></ProtectedRoute>} />
           <Route path="/events/:id" element={<ProtectedRoute><EventDetails /></ProtectedRoute>} />
@@ -330,6 +340,7 @@ function App() {
       </main>
 
       <Footer />
+        </ConfirmProvider>
       </ToastProvider>
     </BrowserRouter>
   );

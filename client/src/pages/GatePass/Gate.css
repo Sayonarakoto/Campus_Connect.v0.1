@@ -813,3 +813,1333 @@
   font-weight: 600;
   text-transform: uppercase;
 }
+
+/* ===================================================
+   MODERN GATE PASS REQUEST REDESIGN
+=================================================== */
+
+.gate-header-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.gate-badge-pill {
+  display: inline-block;
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.gate-header-left h2 {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px;
+}
+
+.gate-header-left p {
+  color: #64748b;
+  font-size: 14px;
+  max-width: 650px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.gate-history-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  color: #0f172a;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid #cbd5e1;
+  transition: all 0.2s ease;
+}
+
+.gate-history-link:hover {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+.gate-form-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06);
+  padding: 32px;
+}
+
+/* Real-Time Locked Date Banner */
+.realtime-date-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 28px;
+}
+
+.date-banner-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.date-banner-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.date-banner-sub {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.date-banner-main {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.date-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #16a34a;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  letter-spacing: 0.3px;
+}
+
+/* Modern Form Elements */
+.modern-gate-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.field-label i {
+  color: #2563eb;
+}
+
+.field-hint {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 6px;
+}
+
+.modern-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #0f172a;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  resize: vertical;
+  min-height: 90px;
+}
+
+.modern-textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Time Grid */
+.time-grid-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .time-grid-block {
+    grid-template-columns: 1fr;
+  }
+}
+
+.time-field-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.time-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.modern-time-input {
+  width: 100%;
+  padding: 12px 46px 12px 16px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.modern-time-input:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.time-picker-icon-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 1.15rem;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.time-picker-icon-btn:hover {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+/* ===================================================
+   MOBILE CLOCK APP TIME SETTING DIALOG
+=================================================== */
+
+.clock-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  padding: 16px;
+  animation: clockFadeIn 0.2s ease-out;
+}
+
+@keyframes clockFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.clock-modal-card {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 340px;
+  box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.22);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.clock-modal-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.clock-modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.clock-modal-title i {
+  color: #2563eb;
+}
+
+.clock-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.clock-modal-close:hover {
+  color: #0f172a;
+}
+
+/* Digital Display (Header) */
+.clock-digital-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 8px 16px;
+  margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.time-unit-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #64748b;
+  border-radius: 10px;
+  padding: 2px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.time-unit-btn.active {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
+.time-unit-colon {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #94a3b8;
+  line-height: 1;
+}
+
+.period-toggle-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-left: 12px;
+}
+
+.period-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.period-btn.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+/* Clock Dial Face */
+.clock-dial-container {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  margin-bottom: 18px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.clock-dial-center-pin {
+  position: absolute;
+  left: 116px;
+  top: 116px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2563eb;
+  z-index: 10;
+}
+
+.clock-hand-line {
+  position: absolute;
+  left: 119px;
+  top: 35px;
+  width: 2px;
+  height: 85px;
+  background: #2563eb;
+  transform-origin: 50% 100%;
+  z-index: 4;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.clock-hand-circle {
+  position: absolute;
+  left: -17px;
+  top: -17px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #2563eb;
+  opacity: 0.2;
+}
+
+.clock-dial-num {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  z-index: 6;
+  user-select: none;
+  transition: all 0.15s ease;
+}
+
+.clock-dial-num:hover {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.clock-dial-num.active {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+}
+
+/* Quick minutes toolbar */
+.clock-quick-minutes {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.clock-quick-minutes button {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.clock-quick-minutes button:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+/* Actions */
+.clock-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
+}
+
+.btn-clock-cancel {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-clock-cancel:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.btn-clock-save {
+  background: #2563eb;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+  transition: all 0.15s ease;
+}
+
+.btn-clock-save:hover {
+  background: #1d4ed8;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+}
+
+/* Approver Selection */
+.approver-selection-block {
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.department-context-tag {
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 14px;
+}
+
+.department-context-tag strong {
+  color: #0f172a;
+}
+
+.approver-type-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 640px) {
+  .approver-type-toggle {
+    grid-template-columns: 1fr;
+  }
+}
+
+.toggle-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-pill:hover {
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.toggle-pill.active {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #1d4ed8;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+}
+
+.approver-loading-box {
+  padding: 20px;
+  text-align: center;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.approver-preview-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+
+.approver-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #dbeafe;
+  color: #1d4ed8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.approver-details h4 {
+  margin: 0 0 2px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.approver-details p {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.approver-role-badge {
+  display: inline-block;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.no-approver-notice {
+  font-size: 13px;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #fde68a;
+}
+
+.faculty-picker-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sub-picker-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.modern-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #0f172a;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modern-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.selected-faculty-meta {
+  font-size: 13px;
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+/* Submit Footer */
+.form-submit-footer {
+  margin-top: 10px;
+}
+
+.btn-submit-gatepass {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-submit-gatepass:hover:not(:disabled) {
+  background: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+}
+
+.btn-submit-gatepass:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ===================================================
+   PASS DURATION SELECTOR & HALF-DAY CARDS
+=================================================== */
+
+.pass-duration-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.duration-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.duration-pill i {
+  font-size: 1.25rem;
+  color: #64748b;
+  padding: 8px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.duration-pill-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.duration-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.duration-sub {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.duration-pill:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.duration-pill.active {
+  background: #eff6ff;
+  border-color: #2563eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+
+.duration-pill.active i {
+  color: #2563eb;
+  background: #dbeafe;
+  border-color: #bfdbfe;
+}
+
+.duration-pill.active .duration-title {
+  color: #1e40af;
+}
+
+/* Single column exit time */
+.time-field-box.single {
+  grid-column: 1 / -1;
+}
+
+/* Half Day Info Advisory Card */
+.halfday-info-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: #1e3a8a;
+  grid-column: 1 / -1;
+}
+
+.halfday-info-icon i {
+  font-size: 1.35rem;
+  color: #2563eb;
+  margin-top: 2px;
+}
+
+.halfday-info-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 3px;
+  color: #1e40af;
+}
+
+.halfday-info-desc {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #3b82f6;
+}
+
+/* Status / Duration Badges for Pass lists */
+.badge-halfday {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #ede9fe;
+  color: #6b21a8;
+  border: 1px solid #ddd6fe;
+}
+
+@media (max-width: 640px) {
+  .pass-duration-toggle {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===================================================
+   WORKFLOW PIPELINE STEP BADGE
+=================================================== */
+.pipeline-step-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  margin: 6px 0 12px;
+}
+
+.pipeline-step-badge i {
+  color: #15803d;
+}
+
+/* ===================================================
+   EMBEDDED PAST HISTORY SECTION (IN GATEPASS REQUEST)
+=================================================== */
+.past-history-section {
+  margin-top: 36px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+}
+
+.past-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.past-history-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.past-history-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.past-history-title i {
+  color: #4f46e5;
+}
+
+.past-history-count-badge {
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid #c7d2fe;
+}
+
+.btn-refresh-history {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-refresh-history:hover:not(:disabled) {
+  background: #ffffff;
+  border-color: #94a3b8;
+  color: #0f172a;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.btn-refresh-history:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.history-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 20px;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  position: relative;
+}
+
+.history-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+.history-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.history-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.history-status-badge.status-pending {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.history-status-badge.status-approved {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.history-status-badge.status-rejected {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.history-status-badge.status-used {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.history-status-badge.status-expired {
+  background: #faf5ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+}
+
+.history-card-body {
+  flex: 1;
+}
+
+.history-purpose {
+  font-size: 13.5px;
+  color: #1e293b;
+  margin: 0 0 12px 0;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.history-time-row {
+  display: flex;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.history-time-col {
+  flex: 1;
+}
+
+.history-time-lbl {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.03em;
+  margin-bottom: 2px;
+}
+
+.history-time-val {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.history-approver-meta {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-bottom: 14px;
+}
+
+.history-card-footer {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.history-date-created {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.btn-view-digital-pass {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #4f46e5;
+  color: #ffffff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);
+}
+
+.btn-view-digital-pass:hover {
+  background: #4338ca;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.history-empty-container {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+}
+
+.history-empty-icon {
+  font-size: 2.5rem;
+  color: #cbd5e1;
+  margin-bottom: 12px;
+}
+
+/* ===================================================
+   DIGITAL PASS CARD MODAL & OTP DISPLAY
+=================================================== */
+.digital-pass-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10040;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: confirmFadeIn 0.2s ease;
+}
+
+.digital-pass-card {
+  background: #ffffff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 440px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.35);
+  animation: confirmScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.digital-pass-header {
+  background: linear-gradient(135deg, #0c2340 0%, #1e3a8a 100%);
+  color: #ffffff;
+  padding: 20px 24px 18px;
+  position: relative;
+}
+
+.digital-pass-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.digital-pass-logo {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #93c5fd;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.digital-pass-close-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #ffffff;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: all 0.15s ease;
+}
+
+.digital-pass-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.digital-pass-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.digital-pass-body {
+  padding: 22px 24px 24px;
+}
+
+.digital-qr-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.digital-qr-box {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 16px;
+  border: 2px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.digital-qr-box img {
+  width: 170px;
+  height: 170px;
+  object-fit: contain;
+  display: block;
+}
+
+.digital-qr-caption {
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Security Verification OTP Container */
+.digital-otp-container {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.digital-otp-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #475569;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.digital-otp-code-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.digital-otp-code {
+  font-family: monospace;
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  color: #0f172a;
+}
+
+.digital-otp-copy-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.digital-otp-copy-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.digital-otp-subtext {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.35;
+  margin-top: 6px;
+}
+
+.digital-pass-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  font-size: 12px;
+  background: #f1f5f9;
+  padding: 12px 14px;
+  border-radius: 12px;
+}
+
+.digital-pass-meta-item strong {
+  display: block;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.03em;
+  margin-bottom: 1px;
+}
+
+.digital-pass-meta-item span {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+

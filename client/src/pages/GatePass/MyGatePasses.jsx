@@ -144,11 +144,16 @@ function MyGatePasses() {
               key={item._id || Math.random()}
               className="gate-card my-pass-card"
             >
-              {/* Status Badge */}
+              {/* Status & Duration Badge */}
               <div className="card-status">
                 <span className={`status-badge ${getStatusBadgeClass(item.status)}`}>
                   {getStatusDisplay(item.status)}
                 </span>
+                {item.isHalfDay && (
+                  <span className="badge-halfday">
+                    <i className="fas fa-walking"></i> Half Day
+                  </span>
+                )}
               </div>
 
               {/* Purpose */}
@@ -169,7 +174,13 @@ function MyGatePasses() {
                 <div className="time-item">
                   <span className="time-label">Return:</span>
                   <span className="time-value">
-                    {formatDate(item.returnTime)}
+                    {item.isHalfDay ? (
+                      <span className="badge-halfday">No Return</span>
+                    ) : item.returnTime ? (
+                      formatDate(item.returnTime)
+                    ) : (
+                      "N/A"
+                    )}
                   </span>
                 </div>
               </div>

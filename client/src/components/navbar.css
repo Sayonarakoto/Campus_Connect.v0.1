@@ -486,13 +486,68 @@
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
+  .dashboard-navbar {
+    padding: 8px 12px;
+    gap: 8px;
+    box-sizing: border-box;
+  }
+  .dashboard-header-left {
+    gap: 10px;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  .dashboard-header-brand .brand-main {
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dashboard-header-brand .brand-sub {
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+  }
   .dashboard-header-center {
     display: none;
+  }
+  .dashboard-header-right {
+    gap: 6px;
+    flex-shrink: 0;
   }
   .header-profile-name {
     display: none;
   }
   .header-profile-btn {
-    padding: 3px;
+    padding: 0;
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    touch-action: manipulation;
+    cursor: pointer;
   }
-}
+  .header-profile-thumb {
+    width: 32px;
+    height: 32px;
+  }
+  .header-icon-btn {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    touch-action: manipulation;
+  }
+}
+
+@media (max-width: 420px) {
+  .dashboard-navbar {
+    padding: 8px 6px;
+  }
+  .dashboard-header-brand .brand-sub {
+    display: none;
+  }
+}
+

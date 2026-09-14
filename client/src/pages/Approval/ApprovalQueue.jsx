@@ -103,7 +103,23 @@ export default function ApprovalQueue() {
     return matchesModule && matchesSearch;
   });
 
-  const moduleTabs = ["all", "GatePass", "DutyLeave", "LateComer", "StaffLeave"];
+  // Dynamically compute module tabs combining primary modules with any active request types
+  const defaultModules = [
+    "GatePass",
+    "DutyLeave",
+    "LateComer",
+    "StaffLeave",
+    "StudentLeave",
+    "DisciplinaryAction",
+    "AttendanceCorrection"
+  ];
+  const dynamicActiveModules = Array.from(new Set(requests.map((r) => r.moduleName).filter(Boolean)));
+  const moduleTabs = ["all", ...Array.from(new Set([...defaultModules, ...dynamicActiveModules]))];
+
+  const getModuleCount = (tab) => {
+    if (tab === "all") return requests.length;
+    return requests.filter((r) => r.moduleName?.toLowerCase() === tab.toLowerCase()).length;
+  };
 
   return (
     <div className="approval-queue-container workspace-container">
@@ -123,17 +139,24 @@ export default function ApprovalQueue() {
       {/* Filter Tabs & Search */}
       <div className="aq-controls">
         <div className="aq-tabs">
-          {moduleTabs.map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              className={`aq-tab ${selectedModule === tab ? "active" : ""}`}
-              onClick={() => setSelectedModule(tab)}
-            >
-              {tab === "all" ? "All Modules" : tab}
-              {tab === "all" && <span className="tab-badge">{requests.length}</span>}
-            </button>
-          ))}
+          {moduleTabs.map((tab) => {
+            const count = getModuleCount(tab);
+            // Hide tabs that have 0 items unless it's "all" or has items
+            if (tab !== "all" && count === 0 && !defaultModules.slice(0, 4).includes(tab)) {
+              return null;
+            }
+            return (
+              <button
+                key={tab}
+                type="button"
+                className={`aq-tab ${selectedModule === tab ? "active" : ""}`}
+                onClick={() => setSelectedModule(tab)}
+              >
+                {tab === "all" ? "All Modules" : tab}
+                <span className="tab-badge">{count}</span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="aq-search">

@@ -149,6 +149,9 @@ app.use("/api/promotions", require("./routes/promotionRoutes"));
 // Late Entry
 app.use("/api/late-entry", require("./routes/lateEntryRoutes"));
 
+// Special Pass
+app.use("/api/special-pass", require("./routes/specialPassRoutes"));
+
 // Sport Events
 app.use("/api/sports-events", require("./routes/sportsEventRoutes"));
 

@@ -11,9 +11,37 @@ exports.searchUsers = async (req, res) => {
     const { q } = req.query;
     if (!q || q.length < 2) return res.json({ success: true, users: [] });
 
-    const regex = new RegExp(q, "i");
-    
-    // Search both Users and Students
+    const regex = new RegExp(q.trim(), "i");
+    const userMap = new Map();
+
+    // 1. Search Student collection by admissionNo, regNo, fullName
+    const studentMatches = await Student.find({
+      $or: [
+        { admissionNo: regex },
+        { regNo: regex },
+        { fullName: regex }
+      ]
+    }).populate("user", "_id fullName role email department profilePhoto");
+
+    studentMatches.forEach(sm => {
+      if (sm.user && sm.user._id) {
+        const uId = sm.user._id.toString();
+        userMap.set(uId, {
+          _id: sm.user._id,
+          fullName: sm.fullName || sm.user.fullName,
+          role: sm.user.role || "student",
+          email: sm.user.email,
+          department: sm.department || sm.user.department,
+          profilePhoto: sm.user.profilePhoto,
+          admissionNo: sm.admissionNo,
+          regNo: sm.regNo,
+          semester: sm.semester,
+          section: sm.section
+        });
+      }
+    });
+
+    // 2. Search direct Users
     const users = await User.find({
       $or: [
         { fullName: regex },
@@ -23,7 +51,40 @@ exports.searchUsers = async (req, res) => {
       ]
     }).select("_id fullName role email department profilePhoto");
 
-    res.json({ success: true, users });
+    // Fetch student info for any direct student matches not yet mapped
+    const unmappedStudentUserIds = users
+      .filter(u => u.role === "student" && !userMap.has(u._id.toString()))
+      .map(u => u._id);
+
+    let additionalStudentMap = {};
+    if (unmappedStudentUserIds.length > 0) {
+      const extraStudents = await Student.find({ user: { $in: unmappedStudentUserIds } })
+        .select("user admissionNo regNo semester section");
+      extraStudents.forEach(s => {
+        additionalStudentMap[s.user.toString()] = s;
+      });
+    }
+
+    users.forEach(u => {
+      const uId = u._id.toString();
+      if (!userMap.has(uId)) {
+        const sInfo = additionalStudentMap[uId];
+        userMap.set(uId, {
+          _id: u._id,
+          fullName: u.fullName,
+          role: u.role,
+          email: u.email,
+          department: u.department,
+          profilePhoto: u.profilePhoto,
+          admissionNo: sInfo ? sInfo.admissionNo : (u.customData?.admissionNo || null),
+          regNo: sInfo ? sInfo.regNo : null,
+          semester: sInfo ? sInfo.semester : null,
+          section: sInfo ? sInfo.section : null
+        });
+      }
+    });
+
+    res.json({ success: true, users: Array.from(userMap.values()) });
   } catch (error) {
     console.error("Search Users Error:", error);
     res.status(500).json({ success: false, message: "Search failed" });
@@ -60,6 +121,8 @@ exports.getUserStats = async (req, res) => {
         stats.user.semester = student.semester;
         stats.user.section = student.section;
         stats.user.admissionNo = student.admissionNo;
+        stats.user.regNo = student.regNo;
+        stats.user.primaryDepartment = student.primaryDepartment;
         stats.tutor = student.tutor;
       }
       

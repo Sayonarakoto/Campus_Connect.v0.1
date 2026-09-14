@@ -14,8 +14,18 @@ const roleMiddleware = (...allowedRoles) => {
         return next();
       }
 
-      // Check if user's role is allowed
-      if (!allowedRoles.includes(req.user.role)) {
+      // Collect all active and secondary roles of the authenticated user
+      const userRoles = new Set([req.user.role, ...(req.user.roles || [])]);
+
+      // Role hierarchy / alias inheritance:
+      // A Class Tutor is fundamentally a Faculty member with addon tutor duties
+      if (userRoles.has("tutor")) {
+        userRoles.add("faculty");
+      }
+
+      // Check if user's roles match any of the allowed roles
+      const hasPermission = allowedRoles.some((allowed) => userRoles.has(allowed));
+      if (!hasPermission) {
         return res.status(403).json({
           success: false,
           message: `Access denied. Allowed roles: ${allowedRoles.join(", ")}`

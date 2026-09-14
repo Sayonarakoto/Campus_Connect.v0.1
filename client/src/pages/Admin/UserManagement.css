@@ -83,6 +83,99 @@
 .um-role-badge.role-hod { background: #fef3c7; color: #d97706; }
 .um-role-badge.role-faculty { background: #e0e7ff; color: #4f46e5; }
 .um-role-badge.role-student { background: #dcfce7; color: #16a34a; }
+.um-role-badge.role-hraccounts { background: #ede9fe; color: #7c3aed; }
+.um-role-badge.role-principal { background: #fce7f3; color: #db2777; }
+.um-role-badge.role-director { background: #fbcfe8; color: #9d174d; }
+.um-role-badge.role-parent { background: #ffedd5; color: #ea580c; }
+.um-role-badge.role-tutor { background: #cffafe; color: #0891b2; }
+
+/* Filter Controls Bar */
+.um-filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  background: #ffffff;
+  padding: 14px 18px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.25rem;
+}
+
+.um-filter-search {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+.um-filter-search i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.um-filter-search input {
+  width: 100%;
+  padding: 8px 12px 8px 34px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.um-filter-search input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.um-filter-select {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: #f8fafc;
+  color: #334155;
+  outline: none;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.um-filter-select:focus {
+  border-color: #3b82f6;
+}
+
+.um-filter-clear-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.um-filter-clear-btn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+
+.um-filter-count {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-left: auto;
+  font-weight: 500;
+}
 
 .um-actions {
   display: flex;

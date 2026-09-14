@@ -179,7 +179,13 @@ export default function CommandPalette({ menuData = defaultMenuData, currentUser
                   ) : (
                     <>
                       <i className="fas fa-user"></i>
-                      <span>{item.fullName}</span>
+                      <div style={{ display: "flex", flexDirection: "column", flex: 1, textAlign: "left", overflow: "hidden" }}>
+                        <span style={{ fontWeight: 600, color: "#1e293b", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>{item.fullName}</span>
+                        <span style={{ fontSize: "0.75rem", color: "#64748b", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                          {item.admissionNo ? `Adm: ${item.admissionNo}` : item.email}
+                          {item.department ? ` • ${item.department}` : ""}
+                        </span>
+                      </div>
                       <small className="command-badge user-badge">{item.role.toUpperCase()}</small>
                     </>
                   )}

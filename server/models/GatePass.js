@@ -54,16 +54,22 @@ const GatePassSchema = new mongoose.Schema(
       trim: true
     },
 
+    // Whether this pass is a half-day exit (no return required today)
+    isHalfDay: {
+      type: Boolean,
+      default: false
+    },
+
     // Planned exit time
     departureTime: {
       type: Date,
       required: true
     },
 
-    // Planned return time
+    // Planned return time (nullable if isHalfDay is true)
     returnTime: {
       type: Date,
-      required: true
+      default: null
     },
 
     // Actual check-out timestamp recorded at gate
@@ -124,6 +130,41 @@ const GatePassSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
+
+    // Workflow Engine Hierarchy Tracking
+    currentStepOrder: {
+      type: Number,
+      default: 1
+    },
+    totalSteps: {
+      type: Number,
+      default: 2
+    },
+    currentRoleRequired: {
+      type: String,
+      default: "faculty",
+      lowercase: true,
+      trim: true
+    },
+    currentStepName: {
+      type: String,
+      default: "Tutor / Faculty Review"
+    },
+    workflowInstanceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ApprovalInstance",
+      default: null
+    },
+    workflowHistory: [
+      {
+        stepOrder: { type: Number, required: true },
+        approverId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        role: { type: String, required: true },
+        action: { type: String, enum: ["Approved", "Rejected"], required: true },
+        comment: { type: String, default: "" },
+        timestamp: { type: Date, default: Date.now }
+      }
+    ],
 
     // QR token
     qrToken: {

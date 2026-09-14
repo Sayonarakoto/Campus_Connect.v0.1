@@ -14,19 +14,25 @@ const lateEntryController =
   require("../controllers/lateEntryController");
 
 // ================================
+// GET APPROVERS (HOD / FACULTY)
+// ================================
+
+router.get(
+  "/approvers",
+  authMiddleware,
+  roleMiddleware("student"),
+  lateEntryController.getLateEntryApprovers
+);
+
+// ================================
 // STUDENT SUBMIT
 // ================================
 
 router.post(
-
   "/submit",
-
   authMiddleware,
-
   roleMiddleware("student"),
-
   lateEntryController.submitLateEntry
-
 );
 
 // ================================

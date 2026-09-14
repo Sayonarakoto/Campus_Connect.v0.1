@@ -43,10 +43,23 @@ export default function UserDetailsModal({ userId, onClose }) {
         ) : stats ? (
           <div className="modal-body">
             <div className="user-profile-header">
-              <h4>{stats.user.fullName}</h4>
-              <span className="role-badge">{stats.user.role.toUpperCase()}</span>
-              {stats.user.department && <p>Department: {stats.user.department}</p>}
-              <p>Email: {stats.user.email}</p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                <h4 style={{ margin: 0 }}>{stats.user.fullName}</h4>
+                <span className="role-badge">{stats.user.role.toUpperCase()}</span>
+              </div>
+              <p style={{ margin: "4px 0", color: "#475569" }}><strong>Email:</strong> {stats.user.email}</p>
+              {stats.user.department && <p style={{ margin: "4px 0", color: "#475569" }}><strong>Department:</strong> {stats.user.department}</p>}
+              {stats.user.primaryDepartment && stats.user.primaryDepartment !== stats.user.department && (
+                <p style={{ margin: "4px 0", color: "#475569" }}><strong>Core Branch:</strong> {stats.user.primaryDepartment}</p>
+              )}
+              {stats.user.role === "student" && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginTop: "8px", padding: "8px 12px", background: "#f1f5f9", borderRadius: "6px", fontSize: "0.85rem" }}>
+                  {stats.user.admissionNo && <span><strong>Admission No:</strong> {stats.user.admissionNo}</span>}
+                  {stats.user.regNo && <span><strong>Reg No:</strong> {stats.user.regNo}</span>}
+                  {stats.user.semester && <span><strong>Semester:</strong> {stats.user.semester}</span>}
+                  {stats.user.section && <span><strong>Section:</strong> {stats.user.section}</span>}
+                </div>
+              )}
             </div>
 
             {stats.user.role === "student" && (

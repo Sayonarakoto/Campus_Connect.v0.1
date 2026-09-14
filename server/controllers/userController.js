@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Student = require("../models/Student");
 const bcrypt = require("bcrypt");
 
 // Helper to get photo URL
@@ -13,21 +14,59 @@ const getProfilePhotoUrl = (photoObj) => {
 exports.getUsers = async (req, res) => {
   try {
     const activeRole = req.user.role.toLowerCase();
+    const institutionalRoles = ["admin", "hraccounts", "principal", "director"];
     let query = {};
 
     if (activeRole === "hod") {
       query.department = req.user.department;
       query.role = { $in: ["faculty", "student", "tutor"] };
-    } else if (activeRole !== "admin") {
+    } else if (!institutionalRoles.includes(activeRole)) {
       return res.status(403).json({ success: false, message: "Unauthorized access" });
+    }
+
+    const { role, department, search } = req.query;
+    if (role && role !== "all") {
+      if (activeRole === "hod") {
+        if (["faculty", "student", "tutor"].includes(role.toLowerCase())) {
+          query.role = role.toLowerCase();
+        }
+      } else {
+        query.role = role.toLowerCase();
+      }
+    }
+    if (department && department !== "all") {
+      if (activeRole !== "hod") {
+        query.department = department;
+      }
+    }
+    if (search && search.trim()) {
+      const sRegex = new RegExp(search.trim(), "i");
+      query.$or = [{ fullName: sRegex }, { email: sRegex }];
     }
 
     const users = await User.find(query).select("-password").sort({ createdAt: -1 });
     
-    const usersWithPhotoUrls = users.map(user => ({
-      ...user.toObject(),
-      profilePhotoUrl: getProfilePhotoUrl(user.profilePhoto)
-    }));
+    // Fetch any student records for these users to include admission numbers
+    const studentUserIds = users.filter(u => u.role === "student").map(u => u._id);
+    let studentMap = {};
+    if (studentUserIds.length > 0) {
+      const students = await Student.find({ user: { $in: studentUserIds } }).select("user admissionNo regNo semester section");
+      students.forEach(s => {
+        studentMap[s.user.toString()] = s;
+      });
+    }
+
+    const usersWithPhotoUrls = users.map(user => {
+      const uObj = user.toObject();
+      const studentInfo = studentMap[user._id.toString()];
+      return {
+        ...uObj,
+        profilePhotoUrl: getProfilePhotoUrl(user.profilePhoto),
+        admissionNo: studentInfo ? studentInfo.admissionNo : (uObj.customData?.admissionNo || null),
+        regNo: studentInfo ? studentInfo.regNo : null,
+        semester: studentInfo ? studentInfo.semester : null
+      };
+    });
 
     res.json({ success: true, users: usersWithPhotoUrls });
   } catch (err) {
@@ -54,7 +93,7 @@ exports.createUser = async (req, res) => {
       if (department !== req.user.department) {
         return res.status(403).json({ success: false, message: "HODs can only create users in their own department." });
       }
-    } else if (activeRole !== "admin") {
+    } else if (!["admin", "hraccounts"].includes(activeRole)) {
       return res.status(403).json({ success: false, message: "Unauthorized access" });
     }
 
@@ -100,7 +139,7 @@ exports.updateUser = async (req, res) => {
       if (targetUser.department !== req.user.department || !["faculty", "student", "tutor"].includes(targetUser.role)) {
         return res.status(403).json({ success: false, message: "Unauthorized to update this user" });
       }
-    } else if (activeRole !== "admin") {
+    } else if (!["admin", "hraccounts"].includes(activeRole)) {
       return res.status(403).json({ success: false, message: "Unauthorized access" });
     }
 
@@ -109,7 +148,7 @@ exports.updateUser = async (req, res) => {
     if (department) targetUser.department = department;
     if (section) targetUser.section = section;
     if (isLabStaff !== undefined) targetUser.isLabStaff = isLabStaff;
-    if (role && activeRole === "admin") targetUser.role = role.toLowerCase();
+    if (role && ["admin", "hraccounts"].includes(activeRole)) targetUser.role = role.toLowerCase();
     if (password) targetUser.password = await bcrypt.hash(password, 10);
 
     await targetUser.save();
@@ -129,8 +168,8 @@ exports.deleteUser = async (req, res) => {
     const activeRole = req.user.role.toLowerCase();
     const { id } = req.params;
 
-    if (activeRole !== "admin") {
-      return res.status(403).json({ success: false, message: "Only Admins can delete users" });
+    if (!["admin", "hraccounts"].includes(activeRole)) {
+      return res.status(403).json({ success: false, message: "Only Admins or HR/Accounts can delete users" });
     }
 
     await User.findByIdAndDelete(id);

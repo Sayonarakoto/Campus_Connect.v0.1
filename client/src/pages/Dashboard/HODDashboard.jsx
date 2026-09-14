@@ -48,6 +48,18 @@ function HODDashboard() {
               onClick={() => navigate("/hod/late-entries")}
             />
             <DashboardCard 
+              title="Special Pass Approvals" 
+              description="Review and action individual student special pass requests."
+              iconClass="fas fa-id-badge"
+              onClick={() => navigate("/hod/special-passes?tab=pending")}
+            />
+            <DashboardCard 
+              title="Bulk Special Pass" 
+              description="Issue bulk special permission passes for Friday prayer, rain, or events."
+              iconClass="fas fa-users-cog"
+              onClick={() => navigate("/hod/special-passes?tab=bulk")}
+            />
+            <DashboardCard 
               title="Events" 
               description="To View All Events"
               icon={faCalendar}

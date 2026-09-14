@@ -56,6 +56,8 @@ module.exports = (req, res, next) => {
 
       role: decoded.role,
 
+      roles: decoded.roles || [decoded.role],
+
       department: decoded.department,
 
       isLabStaff: decoded.isLabStaff,

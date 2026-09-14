@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useToast } from "../../context/ToastContext";
+import { useConfirm } from "../../context/ConfirmContext";
 import "./Gate.css";
 
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 function GatePassApproval() {
+  const { showToast } = useToast();
+  const { confirm } = useConfirm();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState(null);
@@ -15,7 +21,7 @@ function GatePassApproval() {
     try {
       setLoading(true);
       const response = await axios.get(
-        "http://localhost:5000/api/gatepass/pending",
+        `${API_BASE}/api/gatepass/pending`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -39,9 +45,10 @@ function GatePassApproval() {
       
     } catch (error) {
       console.error(error);
-      alert(
+      showToast(
         error.response?.data?.message ||
-        "Failed to load pending requests"
+        "Failed to load pending requests",
+        "error"
       );
       setRequests([]);
     } finally {
@@ -49,9 +56,8 @@ function GatePassApproval() {
     }
   };
 
-  // Function to filter requests based on user role
+  // Function to filter requests based on user role and department
   const filterRequestsByUser = (allRequests) => {
-    // Get current user info from localStorage or token
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const currentUserId = user._id || user.id;
     const currentUserRole = user.role || "";
@@ -63,40 +69,35 @@ function GatePassApproval() {
     if (currentUserRole === "hod") {
       // HOD can see all pending requests from their department
       return allRequests.filter(
-        (request) => request.studentId?.department === currentUserDepartment
+        (request) =>
+          request.studentId?.department === currentUserDepartment ||
+          request.department === currentUserDepartment
       );
     } else if (currentUserRole === "faculty") {
-      // Faculty can only see requests where:
-      // 1. They are specifically selected as "other" approver
-      // 2. They are the faculty advisor (selectedApproverRole === "faculty")
-      // 3. They are the HOD (but this is handled above)
+      // Faculty sees requests assigned to them or waiting for faculty in their department
       return allRequests.filter((request) => {
-        // Check if faculty is specifically selected as approver
         if (request.selectedApproverRole === "other") {
-          return request.selectedApproverId?._id === currentUserId || 
-                 request.selectedApproverId === currentUserId;
+          return (
+            request.selectedApproverId?._id === currentUserId ||
+            request.selectedApproverId === currentUserId
+          );
         }
         
-        // Check if request is assigned to faculty advisor
-        if (request.selectedApproverRole === "faculty") {
-          // Only show if the student's faculty advisor is this faculty member
-          // You might need to check this based on your database structure
-          return request.studentId?.department === currentUserDepartment;
-        }
-        
-        // Check if request is for HOD (faculty can see these but only if they have permission)
-        if (request.selectedApproverRole === "hod") {
-          // Faculty can see HOD requests from their department
-          return request.studentId?.department === currentUserDepartment;
-        }
-        
-        return false;
+        // Show if waiting for faculty review and matching department
+        const matchesDept =
+          request.studentId?.department === currentUserDepartment ||
+          request.department === currentUserDepartment;
+
+        const isFacultyStep =
+          !request.currentRoleRequired ||
+          ["faculty", "tutor", "class_tutor"].includes(request.currentRoleRequired);
+
+        return matchesDept && (isFacultyStep || request.selectedApproverRole === "faculty");
       });
     } else if (currentUserRole === "admin") {
       // Admin can see all requests
       return allRequests;
     } else {
-      // For other roles, return empty array
       return [];
     }
   };
@@ -110,45 +111,68 @@ function GatePassApproval() {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const currentUserId = user._id || user.id;
     const currentUserRole = user.role || "";
+    const userDepartment = user.department || "";
+
+    if (currentUserRole === "admin") {
+      return true;
+    }
 
     if (currentUserRole === "hod") {
-      return true; // HOD can act on all department requests
+      return (
+        request.studentId?.department === userDepartment ||
+        request.department === userDepartment ||
+        request.selectedApproverRole === "hod"
+      );
     } else if (currentUserRole === "faculty") {
-      // Faculty can act if they are the selected approver
       if (request.selectedApproverRole === "other") {
-        return request.selectedApproverId?._id === currentUserId || 
-               request.selectedApproverId === currentUserId;
+        return (
+          request.selectedApproverId?._id === currentUserId ||
+          request.selectedApproverId === currentUserId
+        );
       }
-      // Faculty can act on faculty advisor requests from their department
-      if (request.selectedApproverRole === "faculty") {
-        return request.studentId?.department === user.department;
-      }
-      // Faculty can act on HOD requests (with delegation)
-      if (request.selectedApproverRole === "hod") {
-        return request.studentId?.department === user.department;
-      }
-      return false;
+      return (
+        request.studentId?.department === userDepartment ||
+        request.department === userDepartment
+      );
     }
     return false;
   };
 
   const approveRequest = async (id) => {
-    const request = requests.find(r => r._id === id);
+    const request = requests.find((r) => r._id === id);
     if (!request) return;
 
     if (!isAuthorizedToAct(request)) {
-      alert("You are not authorized to approve this request");
+      showToast("You are not authorized to approve this request", "warning");
       return;
     }
 
-    if (!window.confirm("Are you sure you want to approve this gate pass?")) {
+    const currentStep = request.currentStepOrder || 1;
+    const totalSteps = request.totalSteps || 2;
+    const isStep1 = currentStep < totalSteps;
+
+    const studentName = request.studentId?.fullName || "this student";
+    const modalTitle = isStep1 ? "Verify & Recommend Gate Pass (Step 1)" : "Approve & Issue Gate Pass";
+    const modalMessage = isStep1
+      ? `Verify and forward the gate pass for ${studentName} to the HOD for final sanction?`
+      : `Grant final authorization for ${studentName} and issue the Digital QR Pass?`;
+
+    const isConfirmed = await confirm({
+      title: modalTitle,
+      message: modalMessage,
+      confirmText: isStep1 ? "Recommend & Forward" : "Approve & Issue Pass",
+      cancelText: "Cancel",
+      variant: "success"
+    });
+
+    if (!isConfirmed) {
       return;
     }
 
     try {
       setProcessingId(id);
       const response = await axios.put(
-        `http://localhost:5000/api/gatepass/${id}/approve`,
+        `${API_BASE}/api/gatepass/${id}/approve`,
         {},
         {
           headers: {
@@ -157,12 +181,12 @@ function GatePassApproval() {
         }
       );
 
-      alert(response.data.message || "Gate pass approved successfully!");
+      showToast(response.data.message || "Gate pass approved successfully!", "success");
       fetchRequests();
     } catch (error) {
-      alert(
-        error.response?.data?.message ||
-        "Approval failed"
+      showToast(
+        error.response?.data?.message || "Approval failed",
+        "error"
       );
     } finally {
       setProcessingId(null);
@@ -170,22 +194,31 @@ function GatePassApproval() {
   };
 
   const rejectRequest = async (id) => {
-    const request = requests.find(r => r._id === id);
+    const request = requests.find((r) => r._id === id);
     if (!request) return;
 
     if (!isAuthorizedToAct(request)) {
-      alert("You are not authorized to reject this request");
+      showToast("You are not authorized to reject this request", "warning");
       return;
     }
 
-    if (!window.confirm("Are you sure you want to reject this gate pass?")) {
+    const studentName = request.studentId?.fullName || "this student";
+    const isConfirmed = await confirm({
+      title: "Reject Gate Pass",
+      message: `Are you sure you want to reject the gate pass for ${studentName}? This action cannot be reversed.`,
+      confirmText: "Reject Pass",
+      cancelText: "Cancel",
+      variant: "danger"
+    });
+
+    if (!isConfirmed) {
       return;
     }
 
     try {
       setProcessingId(id);
       const response = await axios.put(
-        `http://localhost:5000/api/gatepass/${id}/reject`,
+        `${API_BASE}/api/gatepass/${id}/reject`,
         {},
         {
           headers: {
@@ -194,12 +227,12 @@ function GatePassApproval() {
         }
       );
 
-      alert(response.data.message || "Gate pass rejected successfully!");
+      showToast(response.data.message || "Gate pass rejected successfully!", "success");
       fetchRequests();
     } catch (error) {
-      alert(
-        error.response?.data?.message ||
-        "Rejection failed"
+      showToast(
+        error.response?.data?.message || "Rejection failed",
+        "error"
       );
     } finally {
       setProcessingId(null);
@@ -270,7 +303,11 @@ function GatePassApproval() {
         </span>
       </div>
 
-      {requests.length === 0 ? (
+      {loading ? (
+        <div className="loading" style={{ textAlign: "center", padding: "40px" }}>
+          Loading pending gate passes...
+        </div>
+      ) : requests.length === 0 ? (
         <div className="empty-message">
           <p> No pending gate pass requests</p>
           <p className="empty-subtext">
@@ -312,6 +349,25 @@ function GatePassApproval() {
                 <span className="role-badge">
                   {item.studentId?.role || "Student"}
                 </span>
+                {item.isHalfDay && (
+                  <span className="badge-halfday">
+                    <i className="fas fa-walking"></i> Half Day
+                  </span>
+                )}
+              </div>
+
+              {/* Workflow Pipeline Step Badge */}
+              <div className="pipeline-step-badge">
+                <i className="fas fa-project-diagram"></i>
+                <span>
+                  Step {item.currentStepOrder || 1} of {item.totalSteps || 2}:{" "}
+                  <strong>
+                    {item.currentStepName ||
+                      (item.currentRoleRequired === "hod"
+                        ? "HOD Approval"
+                        : "Faculty / Tutor Review")}
+                  </strong>
+                </span>
               </div>
 
               {/* Purpose */}
@@ -332,7 +388,13 @@ function GatePassApproval() {
                 <div className="time-item">
                   <span className="time-label">Return:</span>
                   <span className="time-value">
-                    {formatDate(item.returnTime)}
+                    {item.isHalfDay ? (
+                      <span className="badge-halfday">No Return (Half Day)</span>
+                    ) : item.returnTime ? (
+                      formatDate(item.returnTime)
+                    ) : (
+                      "N/A"
+                    )}
                   </span>
                 </div>
               </div>
@@ -386,8 +448,10 @@ function GatePassApproval() {
                 >
                   {processingId === item._id ? (
                     <span className="btn-loading">Processing...</span>
+                  ) : (item.currentStepOrder || 1) < (item.totalSteps || 2) ? (
+                    <span><i className="fas fa-check"></i> Recommend to HOD</span>
                   ) : (
-                    "Approve"
+                    <span><i className="fas fa-qrcode"></i> Final Approve & Issue QR</span>
                   )}
                 </button>
 

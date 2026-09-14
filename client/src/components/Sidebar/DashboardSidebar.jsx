@@ -21,15 +21,17 @@ const ROLE_NAV_CONFIG = {
     { label: "Disciplinary Log", path: "/faculty/discipline", icon: "fas fa-exclamation-triangle" }
   ],
   student: [
-    { label: "Dashboard Home", path: "/student/workdashboard", icon: "fas fa-th-large" },
-    { label: "Request Leave", path: "/leave/student/request", icon: "fas fa-calendar-plus" },
-    { label: "My Leaves", path: "/leave/student/my", icon: "fas fa-clipboard-list" },
-    { label: "Gate Pass Request", path: "/gatepass/request", icon: "fas fa-id-card" },
-    { label: "My Gate Passes", path: "/gatepass/my", icon: "fas fa-ticket-alt" },
-    { label: "Duty Leave Application", path: "/dutyleave/student/apply", icon: "fas fa-briefcase" },
-    { label: "My Duty Leaves", path: "/dutyleave/student/my", icon: "fas fa-file-alt" },
-    { label: "Attendance History", path: "/attendance/student/history", icon: "fas fa-chart-bar" },
-    { label: "Sports Registration", path: "/student/sports", icon: "fas fa-medal" }
+    { label: "Dashboard Home", path: "/student/workdashboard", icon: "fas fa-th-large", masterMenuId: "General Workspace" },
+    { label: "Special Pass Request", path: "/student/special-pass", icon: "fas fa-id-badge", masterMenuId: "Passes & Clearances" },
+    { label: "Gate Pass Request", path: "/gatepass/request", icon: "fas fa-id-card", masterMenuId: "Leaves & Passes" },
+    { label: "Late Entry Request", path: "/student/late-entry", icon: "fas fa-clock", masterMenuId: "Security & Access" },
+    { label: "Request Leave", path: "/leave/student/request", icon: "fas fa-calendar-plus", masterMenuId: "Leaves & Passes" },
+    { label: "My Leaves", path: "/leave/student/my", icon: "fas fa-clipboard-list", masterMenuId: "Leaves & Passes" },
+    { label: "My Gate Passes", path: "/gatepass/my", icon: "fas fa-ticket-alt", masterMenuId: "Leaves & Passes" },
+    { label: "Duty Leave Application", path: "/dutyleave/student/apply", icon: "fas fa-briefcase", masterMenuId: "Leaves & Passes" },
+    { label: "My Duty Leaves", path: "/dutyleave/student/my", icon: "fas fa-file-alt", masterMenuId: "Leaves & Passes" },
+    { label: "Attendance History", path: "/attendance/student/history", icon: "fas fa-chart-bar", masterMenuId: "Academics & Conduct" },
+    { label: "Sports Registration", path: "/student/sports", icon: "fas fa-medal", masterMenuId: "Campus Activities" }
   ],
   parent: [
     { label: "Dashboard Home", path: "/parent/workdashboard", icon: "fas fa-th-large" },
@@ -37,13 +39,16 @@ const ROLE_NAV_CONFIG = {
     { label: "Disciplinary Reports", path: "/discipline/parent", icon: "fas fa-exclamation-triangle" }
   ],
   hod: [
-    { label: "Dashboard Home", path: "/hod/workdashboard", icon: "fas fa-th-large" },
-    { label: "Leave Approvals", path: "/leave/hod/approval", icon: "fas fa-check-circle" },
-    { label: "HOD Leaves Overview", path: "/hod/leaves", icon: "fas fa-clipboard-list" },
-    { label: "Duty Leave Queue", path: "/dutyleave/hod", icon: "fas fa-briefcase" },
-    { label: "Late Entry Log", path: "/late-entry/hod", icon: "fas fa-clock" },
-    { label: "Disciplinary Review", path: "/discipline/hod", icon: "fas fa-balance-scale" },
-    { label: "Approval Queue", path: "/approvals/queue", icon: "fas fa-tasks" }
+    { label: "Dashboard Home", path: "/hod/workdashboard", icon: "fas fa-th-large", masterMenuId: "General Workspace" },
+    { label: "Special Pass Approvals", path: "/hod/special-passes?tab=pending", icon: "fas fa-id-badge", masterMenuId: "Department Clearances" },
+    { label: "Bulk Special Pass", path: "/hod/special-passes?tab=bulk", icon: "fas fa-users-cog", masterMenuId: "Department Clearances" },
+    { label: "Gate Pass Management", path: "/gatepass/approval", icon: "fas fa-qrcode", masterMenuId: "Leaves & Passes" },
+    { label: "Late Entry Dashboard", path: "/hod/late-entries", icon: "fas fa-clock", masterMenuId: "Security & Access" },
+    { label: "Leave Approvals", path: "/leave/hod/approval", icon: "fas fa-check-circle", masterMenuId: "Leaves & Passes" },
+    { label: "HOD Leaves Overview", path: "/hod/leaves", icon: "fas fa-clipboard-list", masterMenuId: "Leaves & Passes" },
+    { label: "Duty Leave Queue", path: "/dutyleave/hod", icon: "fas fa-briefcase", masterMenuId: "Leaves & Passes" },
+    { label: "Disciplinary Review", path: "/discipline/hod", icon: "fas fa-balance-scale", masterMenuId: "Academics & Conduct" },
+    { label: "Approval Queue", path: "/approvals/queue", icon: "fas fa-tasks", masterMenuId: "Administration & Governance" }
   ],
   principal: [
     { label: "Dashboard Home", path: "/principal/workdashboard", icon: "fas fa-th-large" },
@@ -126,9 +131,7 @@ export default function DashboardSidebar({ isOpen, onClose, onOpenProfile, user 
       }
     };
 
-    if (isOpen) {
-      fetchMenu();
-    }
+    fetchMenu();
   }, [isOpen, user?.role]);
 
   if (!isOpen) return null;

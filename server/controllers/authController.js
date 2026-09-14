@@ -397,7 +397,7 @@ exports.register = async (req, res) => {
 
     const userData = {
       role,
-      roles: isStudentSem1or2 ? ["student", "general_department_student"] : [role],
+      roles: [role],
       fullName,
       email: email.toLowerCase().trim(),
       password: hashedPassword,
@@ -806,10 +806,14 @@ exports.login = async (req, res) => {
     // ==========================================
     // GENERATE JWT
     // ==========================================
+    const allRoles = Array.from(new Set([user.role, ...(user.roles || [])]))
+      .filter((r) => r && r !== "general_department_student");
+
     const token = jwt.sign(
       {
         id: user._id,
         role: user.role,
+        roles: allRoles,
         department: user.department,
         isLabStaff: user.isLabStaff,
         isTempHOD: user.isTempHOD,
@@ -828,7 +832,7 @@ exports.login = async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       role: user.role,
-      roles: user.roles || [],
+      roles: allRoles,
       phoneNumber: user.phoneNumber || null,
       profilePhoto: user.profilePhoto,
       profilePhotoUrl: getProfilePhotoUrl(user.profilePhoto),
@@ -837,6 +841,8 @@ exports.login = async (req, res) => {
 
     if (user.dateOfJoining) cleanUser.dateOfJoining = user.dateOfJoining;
     if (user.department) cleanUser.department = user.department;
+    if (user.primaryDepartment) cleanUser.primaryDepartment = user.primaryDepartment;
+    if (user.isGeneralDepartment !== undefined) cleanUser.isGeneralDepartment = user.isGeneralDepartment;
     if (user.section) cleanUser.section = user.section;
     if (user.role === "faculty") cleanUser.isLabStaff = !!user.isLabStaff;
     if (user.role === "faculty" || user.role === "hod") {
@@ -877,10 +883,16 @@ exports.profile = async (req, res) => {
       profile = await Student.findOne({ user: user._id });
     }
 
+    const allRoles = Array.from(new Set([user.role, ...(user.roles || [])]))
+      .filter((r) => r && r !== "general_department_student");
+
+    const userObj = user.toObject();
+    userObj.roles = allRoles;
+
     return res.json({
       success: true,
       user: {
-        ...user.toObject(),
+        ...userObj,
         profilePhotoUrl: getProfilePhotoUrl(user.profilePhoto),
         profile
       }
@@ -1618,14 +1630,33 @@ exports.getAppMenu = async (req, res) => {
       const distinctModules = {};
       allPermissions.forEach((p) => {
         if (!distinctModules[p.controller]) {
-          distinctModules[p.controller] = {
-            masterMenuId: p.masterMenuId || "General Workspace",
-            title: p.moduleTitle,
-            path: p.path,
-            controller: p.controller,
-            icon: p.icon || "fas fa-shield-alt",
-            permissions: { list: true, add: true, update: true, delete: true, download: true }
-          };
+          if (p.controller === "SpecialPassController") {
+            distinctModules["SpecialPassController_Approval"] = {
+              masterMenuId: "Department Clearances",
+              title: "Special Pass Approvals",
+              path: "/hod/special-passes?tab=pending",
+              controller: "SpecialPassController",
+              icon: "fas fa-id-badge",
+              permissions: { list: true, add: true, update: true, delete: true, download: true }
+            };
+            distinctModules["SpecialPassController_Bulk"] = {
+              masterMenuId: "Department Clearances",
+              title: "Bulk Special Pass",
+              path: "/hod/special-passes?tab=bulk",
+              controller: "SpecialPassController",
+              icon: "fas fa-users-cog",
+              permissions: { list: true, add: true, update: true, delete: true, download: true }
+            };
+          } else {
+            distinctModules[p.controller] = {
+              masterMenuId: p.masterMenuId || "General Workspace",
+              title: p.moduleTitle,
+              path: p.path,
+              controller: p.controller,
+              icon: p.icon || "fas fa-shield-alt",
+              permissions: { list: true, add: true, update: true, delete: true, download: true }
+            };
+          }
         }
       });
 
@@ -1650,6 +1681,20 @@ exports.getAppMenu = async (req, res) => {
       "actions.list": true
     }).sort({ controller: 1 });
 
+    const ROLE_SPECIFIC_CONTROLLER_PATHS = {
+      student: {
+        GatePassController: "/gatepass/request",
+        LateEntryController: "/student/late-entry",
+        SpecialPassController: "/student/special-pass"
+      },
+      faculty: {
+        LateEntryController: "/faculty/late-entries"
+      },
+      hod: {
+        LateEntryController: "/hod/late-entries"
+      }
+    };
+
     const appMenu = [
       {
         masterMenuId: "General Workspace",
@@ -1659,14 +1704,52 @@ exports.getAppMenu = async (req, res) => {
         icon: "fas fa-th-large",
         permissions: { list: true, add: false, update: false, delete: false, download: false }
       },
-      ...permissions.map((p) => ({
-        masterMenuId: p.masterMenuId || "General Workspace",
-        title: p.moduleTitle,
-        path: p.path,
-        controller: p.controller,
-        icon: p.icon || "fas fa-folder",
-        permissions: p.actions
-      }))
+      ...permissions.flatMap((p) => {
+        // Special case for HOD: Provide separate menu items for Approvals and Bulk Pass
+        if (activeRole === "hod" && p.controller === "SpecialPassController") {
+          return [
+            {
+              masterMenuId: p.masterMenuId || "Department Clearances",
+              title: "Special Pass Approvals",
+              path: "/hod/special-passes?tab=pending",
+              controller: "SpecialPassController",
+              icon: "fas fa-id-badge",
+              permissions: p.actions
+            },
+            {
+              masterMenuId: p.masterMenuId || "Department Clearances",
+              title: "Bulk Special Pass",
+              path: "/hod/special-passes?tab=bulk",
+              controller: "SpecialPassController",
+              icon: "fas fa-users-cog",
+              permissions: p.actions
+            }
+          ];
+        }
+
+        const resolvedPath = (ROLE_SPECIFIC_CONTROLLER_PATHS[activeRole] && ROLE_SPECIFIC_CONTROLLER_PATHS[activeRole][p.controller]) || p.path;
+        let resolvedTitle = p.moduleTitle;
+        if (activeRole === "student" && p.controller === "GatePassController") {
+          resolvedTitle = "Gate Pass Request";
+        } else if (activeRole === "student" && p.controller === "LateEntryController") {
+          resolvedTitle = "Late Entry Request";
+        } else if (activeRole === "student" && p.controller === "SpecialPassController") {
+          resolvedTitle = "Special Pass Request";
+        } else if (activeRole === "faculty" && p.controller === "LateEntryController") {
+          resolvedTitle = "Late Entry Approvals";
+        } else if (activeRole === "hod" && p.controller === "LateEntryController") {
+          resolvedTitle = "Late Entry Dashboard";
+        }
+
+        return [{
+          masterMenuId: p.masterMenuId || "General Workspace",
+          title: resolvedTitle,
+          path: resolvedPath,
+          controller: p.controller,
+          icon: p.icon || "fas fa-folder",
+          permissions: p.actions
+        }];
+      })
     ];
 
     return res.status(200).json({
@@ -1704,10 +1787,17 @@ exports.switchRole = async (req, res) => {
       return res.status(403).json({ success: false, message: `Access Denied: You do not have the '${targetRole}' role.` });
     }
 
+    // ==========================================
+    // GENERATE JWT
+    // ==========================================
+    const allRoles = Array.from(new Set([user.role, ...(user.roles || [])]))
+      .filter((r) => r && r !== "general_department_student");
+
     const token = jwt.sign(
       {
         id: user._id,
         role: targetRole,
+        roles: allRoles,
         department: user.department,
         isLabStaff: user.isLabStaff,
         isTempHOD: user.isTempHOD,
@@ -1718,12 +1808,15 @@ exports.switchRole = async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    // ==========================================
+    // SUCCESS
+    // ==========================================
     const cleanUser = {
       id: user._id,
       fullName: user.fullName,
       email: user.email,
       role: targetRole,
-      roles: user.roles || [],
+      roles: allRoles,
       phoneNumber: user.phoneNumber || null,
       profilePhoto: user.profilePhoto,
       profilePhotoUrl: getProfilePhotoUrl(user.profilePhoto),
@@ -1732,8 +1825,17 @@ exports.switchRole = async (req, res) => {
 
     if (user.dateOfJoining) cleanUser.dateOfJoining = user.dateOfJoining;
     if (user.department) cleanUser.department = user.department;
+    if (user.primaryDepartment) cleanUser.primaryDepartment = user.primaryDepartment;
+    if (user.isGeneralDepartment !== undefined) cleanUser.isGeneralDepartment = user.isGeneralDepartment;
     if (user.section) cleanUser.section = user.section;
     if (targetRole === "faculty") cleanUser.isLabStaff = !!user.isLabStaff;
+    if (targetRole === "faculty" || targetRole === "hod") {
+      cleanUser.isTempHOD = !!user.isTempHOD;
+      if (user.isTempHOD) {
+        cleanUser.tempHODDepartment = user.tempHODDepartment;
+        cleanUser.tempHODUntil = user.tempHODUntil;
+      }
+    }
 
     return res.status(200).json({
       success: true,

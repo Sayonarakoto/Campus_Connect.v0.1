@@ -26,6 +26,40 @@ for (const mod of initialMigration.modules) {
   }
 }
 
+// Ensure SpecialPassController is present in DEFAULT_PERMISSIONS
+const SPECIAL_PASS_DEFAULTS = [
+  {
+    role: "student",
+    masterMenuId: "Passes & Clearances",
+    controller: "SpecialPassController",
+    moduleTitle: "Special Pass Request",
+    path: "/student/special-pass",
+    icon: "fas fa-id-badge",
+    actions: { list: true, add: true, update: false, delete: false, download: true }
+  },
+  {
+    role: "hod",
+    masterMenuId: "Department Clearances",
+    controller: "SpecialPassController",
+    moduleTitle: "Special Passes",
+    path: "/hod/special-passes",
+    icon: "fas fa-id-badge",
+    actions: { list: true, add: true, update: true, delete: true, download: true }
+  },
+  {
+    role: "admin",
+    masterMenuId: "Department Clearances",
+    controller: "SpecialPassController",
+    moduleTitle: "Special Passes",
+    path: "/hod/special-passes",
+    icon: "fas fa-id-badge",
+    actions: { list: true, add: true, update: true, delete: true, download: true }
+  }
+];
+for (const sp of SPECIAL_PASS_DEFAULTS) {
+  DEFAULT_PERMISSIONS.push(sp);
+}
+
 /**
  * Get permissions for a specific role or all permissions
  * GET /api/permissions?role=...

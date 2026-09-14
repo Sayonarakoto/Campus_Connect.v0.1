@@ -16,33 +16,58 @@ exports.getWorkflowDefinitions = async (req, res) => {
     const customDefinitions = await WorkflowDefinition.find({}).sort({ moduleName: 1 });
     const customMap = new Map(customDefinitions.map((d) => [d.moduleName.toLowerCase(), d]));
 
-    // Combine with known fallback modules
-    const allModules = Object.keys(HARDCODED_DEFAULT_WORKFLOWS);
-    const result = allModules.map((modKey) => {
+    const fallbackKeys = Object.keys(HARDCODED_DEFAULT_WORKFLOWS);
+    const seenModules = new Set();
+    const result = [];
+
+    // 1. Process all known fallback modules (use custom DB override if present)
+    for (const modKey of fallbackKeys) {
+      seenModules.add(modKey.toLowerCase());
       const custom = customMap.get(modKey.toLowerCase());
       if (custom) {
-        return {
+        result.push({
           moduleName: custom.moduleName,
           displayName: custom.displayName,
           description: custom.description,
           steps: custom.steps,
           isActive: custom.isActive,
           source: "dynamic_database",
+          isBuiltIn: true,
           updatedAt: custom.updatedAt,
           _id: custom._id
-        };
+        });
+      } else {
+        result.push({
+          moduleName: modKey,
+          displayName: modKey,
+          description: `Default system fallback pipeline for ${modKey}`,
+          steps: HARDCODED_DEFAULT_WORKFLOWS[modKey],
+          isActive: true,
+          source: "hardcoded_fallback",
+          isBuiltIn: true,
+          updatedAt: null,
+          _id: null
+        });
       }
-      return {
-        moduleName: modKey,
-        displayName: modKey,
-        description: `Default system fallback pipeline for ${modKey}`,
-        steps: HARDCODED_DEFAULT_WORKFLOWS[modKey],
-        isActive: true,
-        source: "hardcoded_fallback",
-        updatedAt: null,
-        _id: null
-      };
-    });
+    }
+
+    // 2. Append any custom user-created workflows in DB that are not in fallbacks
+    for (const custom of customDefinitions) {
+      if (!seenModules.has(custom.moduleName.toLowerCase())) {
+        seenModules.add(custom.moduleName.toLowerCase());
+        result.push({
+          moduleName: custom.moduleName,
+          displayName: custom.displayName,
+          description: custom.description,
+          steps: custom.steps,
+          isActive: custom.isActive,
+          source: "dynamic_database",
+          isBuiltIn: false,
+          updatedAt: custom.updatedAt,
+          _id: custom._id
+        });
+      }
+    }
 
     return res.status(200).json({
       success: true,
@@ -135,16 +160,29 @@ exports.upsertWorkflowDefinition = async (req, res) => {
 exports.deleteWorkflowDefinition = async (req, res) => {
   try {
     const { moduleName } = req.params;
-    await WorkflowDefinition.findOneAndDelete({
+    const deleted = await WorkflowDefinition.findOneAndDelete({
       moduleName: { $regex: new RegExp(`^${moduleName}$`, "i") }
     });
 
-    const fallback = HARDCODED_DEFAULT_WORKFLOWS[moduleName] || null;
+    const matchingKey = Object.keys(HARDCODED_DEFAULT_WORKFLOWS).find(
+      (k) => k.toLowerCase() === moduleName.toLowerCase()
+    );
+    const fallback = matchingKey ? HARDCODED_DEFAULT_WORKFLOWS[matchingKey] : null;
+
+    if (fallback) {
+      return res.status(200).json({
+        success: true,
+        isBuiltIn: true,
+        message: `Custom database workflow for '${moduleName}' removed. Reverted to built-in system fallback.`,
+        fallback
+      });
+    }
 
     return res.status(200).json({
       success: true,
-      message: `Custom database workflow for '${moduleName}' removed. Reverted to built-in hardcoded fallback.`,
-      fallback
+      isBuiltIn: false,
+      message: `Workflow '${moduleName}' has been completely deleted.`,
+      fallback: null
     });
   } catch (err) {
     console.error("deleteWorkflowDefinition Error:", err);

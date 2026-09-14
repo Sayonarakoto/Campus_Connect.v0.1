@@ -270,7 +270,7 @@ export default function ProfileCard({ user: propUser, isOpen = true, onClose, on
           <h4 className="profile-user-name">{currentUser.fullName}</h4>
           <span className="profile-role-pill">{currentUser.role}</span>
           
-          <div style={{ marginTop: '12px' }}>
+          <div style={{ width: "100%", maxWidth: "380px" }}>
             <RoleSwitcher user={currentUser} />
           </div>
         </div>
@@ -326,7 +326,21 @@ export default function ProfileCard({ user: propUser, isOpen = true, onClose, on
               {currentUser.department && (
                 <div className="profile-info-row">
                   <span className="profile-info-label">Department</span>
-                  <span className="profile-info-value">{currentUser.department}</span>
+                  <span className="profile-info-value">
+                    {currentUser.department}
+                    {currentUser.isGeneralDepartment && (
+                      <span className="profile-dept-subtag"> (Sem 1 & 2)</span>
+                    )}
+                  </span>
+                </div>
+              )}
+
+              {(currentUser.primaryDepartment || currentUser.customData?.primaryDepartment) && (
+                <div className="profile-info-row">
+                  <span className="profile-info-label">Primary Branch</span>
+                  <span className="profile-info-value">
+                    {currentUser.primaryDepartment || currentUser.customData?.primaryDepartment}
+                  </span>
                 </div>
               )}
 

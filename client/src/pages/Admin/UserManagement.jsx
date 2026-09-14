@@ -1,15 +1,24 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useToast } from "../../context/ToastContext";
+import { useConfirm } from "../../context/ConfirmContext";
 import "./UserManagement.css";
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-const UserManagement = () => {
+function UserManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [currentUserRole, setCurrentUserRole] = useState("admin"); // Fallback
+  const { showToast } = useToast();
+  const { confirm } = useConfirm();
+
+  // Column / List Filter State
+  const [filterText, setFilterText] = useState("");
+  const [filterRole, setFilterRole] = useState("all");
+  const [filterDepartment, setFilterDepartment] = useState("all");
   
   // Form State
   const [formData, setFormData] = useState({
@@ -48,24 +57,35 @@ const UserManagement = () => {
       });
       if (res.data.success) {
         setUsers(res.data.users);
+      } else {
+        showToast(res.data.message || "Failed to load users", "error");
       }
     } catch (err) {
       console.error("Failed to fetch users", err);
+      showToast(err.response?.data?.message || "Failed to fetch users", "error");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) return;
+    const isConfirmed = await confirm({
+      title: "Delete User",
+      message: "Are you sure you want to delete this user? This action cannot be undone.",
+      confirmText: "Delete User",
+      cancelText: "Cancel",
+      variant: "danger"
+    });
+    if (!isConfirmed) return;
     try {
-      await axios.delete(`${API_BASE}/api/users/${id}`, {
+      const res = await axios.delete(`${API_BASE}/api/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      showToast(res.data?.message || "User deleted successfully", "success");
       fetchUsers();
     } catch (err) {
       console.error("Failed to delete user", err);
-      alert(err.response?.data?.message || "Failed to delete user");
+      showToast(err.response?.data?.message || "Failed to delete user", "error");
     }
   };
 
@@ -86,7 +106,7 @@ const UserManagement = () => {
   const handleCreate = () => {
     setEditingUser(null);
     setFormData({
-      fullName: "", email: "", role: currentUserRole === "admin" ? "admin" : "faculty", department: "", section: "", password: "", isLabStaff: false
+      fullName: "", email: "", role: ["admin", "hraccounts"].includes(currentUserRole) ? "faculty" : "student", department: "", section: "", password: "", isLabStaff: false
     });
     setShowModal(true);
   };
@@ -106,23 +126,31 @@ const UserManagement = () => {
         await axios.put(`${API_BASE}/api/users/${editingUser._id}`, formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        showToast("User updated successfully", "success");
       } else {
         await axios.post(`${API_BASE}/api/users`, formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        showToast("User created successfully", "success");
       }
-      setShowModal(true);
       fetchUsers();
       setShowModal(false);
     } catch (err) {
       console.error("Failed to save user", err);
-      alert(err.response?.data?.message || "Failed to save user");
+      showToast(err.response?.data?.message || "Failed to save user", "error");
     }
   };
 
   const handleRunPromotion = async (e) => {
     e.preventDefault();
-    if (!window.confirm("Are you sure you want to run Semester Promotion? This will increment matching students' semester by 1 and transition Semester 3+ students from General Department back to their core branches.")) {
+    const isConfirmed = await confirm({
+      title: "Run Semester Promotion",
+      message: "Are you sure you want to run Semester Promotion? This will increment matching students' semester by 1 and transition Semester 3+ students from General Department back to their core branches.",
+      confirmText: "Run Promotion",
+      cancelText: "Cancel",
+      variant: "warning"
+    });
+    if (!isConfirmed) {
       return;
     }
 
@@ -146,14 +174,41 @@ const UserManagement = () => {
 
       if (res.data.success) {
         setPromotionResult(res.data.data);
+        showToast("Semester promotion completed successfully!", "success");
         fetchUsers();
       }
     } catch (err) {
       console.error("Failed to run promotion:", err);
-      alert(err.response?.data?.message || "Failed to execute semester promotion.");
+      showToast(err.response?.data?.message || "Failed to execute semester promotion.", "error");
     } finally {
       setPromotionLoading(false);
     }
+  };
+
+  // Distinct filter options
+  const distinctRoles = Array.from(new Set(users.map(u => u.role).filter(Boolean))).sort();
+  const distinctDepartments = Array.from(new Set(users.map(u => u.department).filter(Boolean))).sort();
+
+  // Filtered Users List
+  const filteredUsers = users.filter(user => {
+    const term = filterText.trim().toLowerCase();
+    const matchesText = !term ||
+      (user.fullName && user.fullName.toLowerCase().includes(term)) ||
+      (user.email && user.email.toLowerCase().includes(term)) ||
+      (user.admissionNo && String(user.admissionNo).toLowerCase().includes(term)) ||
+      (user.regNo && String(user.regNo).toLowerCase().includes(term));
+
+    const matchesRole = filterRole === "all" || (user.role && user.role.toLowerCase() === filterRole.toLowerCase());
+    const matchesDept = filterDepartment === "all" || (user.department && user.department.toLowerCase() === filterDepartment.toLowerCase());
+
+    return matchesText && matchesRole && matchesDept;
+  });
+
+  const isFilterActive = filterText.trim() !== "" || filterRole !== "all" || filterDepartment !== "all";
+  const handleClearFilters = () => {
+    setFilterText("");
+    setFilterRole("all");
+    setFilterDepartment("all");
   };
 
   return (
@@ -179,8 +234,53 @@ const UserManagement = () => {
         </div>
       </div>
 
+      {/* Filter Controls Bar */}
+      <div className="um-filters-bar">
+        <div className="um-filter-search">
+          <i className="fas fa-search"></i>
+          <input
+            type="text"
+            placeholder="Search by Name, Email, or Admission No..."
+            value={filterText}
+            onChange={e => setFilterText(e.target.value)}
+          />
+        </div>
+
+        <select
+          className="um-filter-select"
+          value={filterRole}
+          onChange={e => setFilterRole(e.target.value)}
+        >
+          <option value="all">All Roles</option>
+          {distinctRoles.map(r => (
+            <option key={r} value={r}>{r.toUpperCase()}</option>
+          ))}
+        </select>
+
+        <select
+          className="um-filter-select"
+          value={filterDepartment}
+          onChange={e => setFilterDepartment(e.target.value)}
+        >
+          <option value="all">All Departments</option>
+          {distinctDepartments.map(d => (
+            <option key={d} value={d}>{d}</option>
+          ))}
+        </select>
+
+        {isFilterActive && (
+          <button className="um-filter-clear-btn" onClick={handleClearFilters} title="Reset all filters">
+            <i className="fas fa-times"></i> Clear Filters
+          </button>
+        )}
+
+        <div className="um-filter-count">
+          Showing <strong>{filteredUsers.length}</strong> of {users.length} users
+        </div>
+      </div>
+
       {loading ? (
-        <p>Loading users...</p>
+        <p style={{ padding: "1.5rem", color: "#64748b" }}>Loading users...</p>
       ) : (
         <div className="um-table-container">
           <table className="um-table">
@@ -194,7 +294,7 @@ const UserManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map(user => (
+              {filteredUsers.map(user => (
                 <tr key={user._id}>
                   <td>
                     <div className="um-user-info">
@@ -205,7 +305,14 @@ const UserManagement = () => {
                           <i className="fas fa-user-circle"></i>
                         )}
                       </div>
-                      <span>{user.fullName}</span>
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <span style={{ fontWeight: 600, color: "#1e293b" }}>{user.fullName}</span>
+                        {user.admissionNo && (
+                          <small style={{ color: "#64748b", fontSize: "0.78rem" }}>
+                            Adm: <strong>{user.admissionNo}</strong> {user.regNo ? `• Reg: ${user.regNo}` : ""}
+                          </small>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td>{user.email}</td>
@@ -216,7 +323,7 @@ const UserManagement = () => {
                       <button className="btn-icon edit" onClick={() => handleEdit(user)} title="Edit">
                         <i className="fas fa-edit"></i>
                       </button>
-                      {currentUserRole === "admin" && (
+                      {["admin", "hraccounts"].includes(currentUserRole) && (
                         <button className="btn-icon delete" onClick={() => handleDelete(user._id)} title="Delete">
                           <i className="fas fa-trash"></i>
                         </button>
@@ -225,9 +332,21 @@ const UserManagement = () => {
                   </td>
                 </tr>
               ))}
-              {users.length === 0 && (
+              {filteredUsers.length === 0 && (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: "center", padding: "2rem" }}>No users found</td>
+                  <td colSpan="5" style={{ textAlign: "center", padding: "2.5rem 1rem", color: "#64748b" }}>
+                    <i className="fas fa-users-slash" style={{ fontSize: "2rem", marginBottom: "0.75rem", color: "#94a3b8", display: "block" }}></i>
+                    {isFilterActive ? (
+                      <div>
+                        <p style={{ margin: "0 0 0.75rem 0", fontWeight: 500 }}>No users match your filter criteria.</p>
+                        <button className="btn-secondary" style={{ padding: "6px 14px", fontSize: "0.85rem", cursor: "pointer" }} onClick={handleClearFilters}>
+                          Clear Filters
+                        </button>
+                      </div>
+                    ) : (
+                      <p style={{ margin: 0, fontWeight: 500 }}>No users found in the system.</p>
+                    )}
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -252,8 +371,8 @@ const UserManagement = () => {
 
               <div className="form-group">
                 <label>Role *</label>
-                <select name="role" value={formData.role} onChange={handleFormChange} required disabled={editingUser && currentUserRole !== "admin"}>
-                  {currentUserRole === "admin" ? (
+                <select name="role" value={formData.role} onChange={handleFormChange} required disabled={editingUser && !["admin", "hraccounts"].includes(currentUserRole)}>
+                  {["admin", "hraccounts"].includes(currentUserRole) ? (
                     <>
                       <option value="admin">Admin</option>
                       <option value="hod">HOD</option>
@@ -277,8 +396,8 @@ const UserManagement = () => {
 
               {["faculty", "hod", "student", "tutor"].includes(formData.role) && (
                 <div className="form-group">
-                  <label>Department {currentUserRole !== "admin" ? "(Locked)" : ""}</label>
-                  <input type="text" name="department" value={formData.department} onChange={handleFormChange} disabled={currentUserRole !== "admin"} />
+                  <label>Department {!["admin", "hraccounts"].includes(currentUserRole) ? "(Locked)" : ""}</label>
+                  <input type="text" name="department" value={formData.department} onChange={handleFormChange} disabled={!["admin", "hraccounts"].includes(currentUserRole)} />
                 </div>
               )}
 
@@ -417,6 +536,6 @@ const UserManagement = () => {
       )}
     </div>
   );
-};
+}
 
 export default UserManagement;

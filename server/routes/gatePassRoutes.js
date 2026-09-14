@@ -28,7 +28,7 @@ router.get(
   "/approvers",
   authMiddleware,
   roleMiddleware("student"),
-  authorizeClaim("GatePassController", "list"),
+  authorizeClaim("GatePassController", ["list", "add"]),
   getAvailableApprovers
 );
 

@@ -1,0 +1,122 @@
+/* ==========================================================================
+   ROLE SWITCHER COMPONENT STYLESHEET
+   St. Mary's Polytechnic College - Design System
+   ========================================================================== */
+
+.role-switcher-container {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px 14px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.role-switcher-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.role-switcher-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.75px;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.role-switcher-label i {
+  color: var(--secondary-color, #d97706);
+  font-size: 0.78rem;
+}
+
+.role-switcher-active-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  background-color: #dbeafe;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+/* Styled Dropdown Control */
+.role-switcher-control-wrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.role-switcher-icon-prefix {
+  position: absolute;
+  left: 12px;
+  color: var(--primary-color, #1e3a8a);
+  font-size: 0.9rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.role-switcher-select {
+  width: 100%;
+  padding: 9px 36px 9px 34px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.role-switcher-select:hover:not(:disabled) {
+  border-color: var(--primary-color, #1e3a8a);
+  background-color: #ffffff;
+}
+
+.role-switcher-select:focus {
+  border-color: var(--primary-color, #1e3a8a);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
+}
+
+.role-switcher-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #f1f5f9;
+}
+
+.role-switcher-chevron {
+  position: absolute;
+  right: 12px;
+  color: #64748b;
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.role-switcher-loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--secondary-color, #d97706);
+  padding: 4px 0;
+}

@@ -1,8 +1,14 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import axios from "axios";
+import { useToast } from "../../context/ToastContext";
+import { useConfirm } from "../../context/ConfirmContext";
 import "../Dashboard/WorkDashboard.css";
 
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 function AdminPromotionDashboard() {
+  const { showToast } = useToast();
+  const { confirm } = useConfirm();
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const userRole = user?.role || "student";
@@ -116,11 +122,11 @@ function AdminPromotionDashboard() {
   const createPromotion = async (e) => {
     e.preventDefault();
     if (!isAdmin) {
-      alert("Only administrators can create promotions");
+      showToast("Only administrators can create promotions", "warning");
       return;
     }
     if (!media) {
-      alert("Please select a media file");
+      showToast("Please select a media file", "warning");
       return;
     }
 
@@ -136,19 +142,19 @@ function AdminPromotionDashboard() {
       data.append("semester", form.semester.toString());
       data.append("media", media);
 
-      await axios.post("http://localhost:5000/api/promotions/create", data, {
+      await axios.post(`${API_BASE}/api/promotions/create`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
         }
       });
 
-      alert("Promotion Created Successfully");
+      showToast("Promotion Created Successfully", "success");
       resetForm();
       handleRefresh();
     } catch (err) {
       console.error("Create error:", err);
-      alert(err.response?.data?.message || "Failed to create promotion");
+      showToast(err.response?.data?.message || "Failed to create promotion", "error");
     } finally {
       setLoading(false);
     }
@@ -157,7 +163,7 @@ function AdminPromotionDashboard() {
   const updatePromotion = async (e) => {
     e.preventDefault();
     if (!isAdmin) {
-      alert("Only administrators can update promotions");
+      showToast("Only administrators can update promotions", "warning");
       return;
     }
 
@@ -173,19 +179,19 @@ function AdminPromotionDashboard() {
       data.append("semester", form.semester.toString());
       if (media) data.append("media", media);
 
-      await axios.put(`http://localhost:5000/api/promotions/${editingId}`, data, {
+      await axios.put(`${API_BASE}/api/promotions/${editingId}`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
         }
       });
 
-      alert("Promotion Updated Successfully");
+      showToast("Promotion Updated Successfully", "success");
       resetForm();
       handleRefresh();
     } catch (err) {
       console.error("Update error:", err);
-      alert(err.response?.data?.message || "Failed to update promotion");
+      showToast(err.response?.data?.message || "Failed to update promotion", "error");
     } finally {
       setLoading(false);
     }
@@ -210,14 +216,15 @@ function AdminPromotionDashboard() {
     if (!isAdmin) return;
     try {
       await axios.put(
-        `http://localhost:5000/api/promotions/publish/${id}`,
+        `${API_BASE}/api/promotions/publish/${id}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      showToast("Promotion published successfully", "success");
       handleRefresh();
     } catch (err) {
       console.error("Publish error:", err);
-      alert(err.response?.data?.message || "Failed to publish");
+      showToast(err.response?.data?.message || "Failed to publish", "error");
     }
   };
 
@@ -225,28 +232,38 @@ function AdminPromotionDashboard() {
     if (!isAdmin) return;
     try {
       await axios.put(
-        `http://localhost:5000/api/promotions/unpublish/${id}`,
+        `${API_BASE}/api/promotions/unpublish/${id}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      showToast("Promotion unpublished", "info");
       handleRefresh();
     } catch (err) {
       console.error("Unpublish error:", err);
-      alert(err.response?.data?.message || "Failed to unpublish");
+      showToast(err.response?.data?.message || "Failed to unpublish", "error");
     }
   };
 
   const deletePromotion = async (id) => {
     if (!isAdmin) return;
-    if (!window.confirm("Delete this promotion?")) return;
+    const isConfirmed = await confirm({
+      title: "Delete Promotion",
+      message: "Are you sure you want to delete this promotion?",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "danger"
+    });
+    if (!isConfirmed) return;
+
     try {
-      await axios.delete(`http://localhost:5000/api/promotions/${id}`, {
+      await axios.delete(`${API_BASE}/api/promotions/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      showToast("Promotion deleted successfully", "success");
       handleRefresh();
     } catch (err) {
       console.error("Delete error:", err);
-      alert(err.response?.data?.message || "Failed to delete");
+      showToast(err.response?.data?.message || "Failed to delete", "error");
     }
   };
 
@@ -270,7 +287,7 @@ function AdminPromotionDashboard() {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
-        alert("File size should be less than 10MB");
+        showToast("File size should be less than 10MB", "warning");
         e.target.value = "";
         return;
       }
@@ -282,7 +299,7 @@ function AdminPromotionDashboard() {
         "video/mp4"
       ];
       if (!validTypes.includes(file.type)) {
-        alert("Only images and MP4 videos are allowed");
+        showToast("Only images and MP4 videos are allowed", "warning");
         e.target.value = "";
         return;
       }

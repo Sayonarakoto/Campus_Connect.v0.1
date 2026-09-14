@@ -18,6 +18,16 @@ const AVAILABLE_ROLES = [
 
 const PRESETS = [
   {
+    key: "StaffLeave",
+    displayName: "Faculty Leave Approval",
+    description: "Three-level approval pipeline for faculty and staff leave requests.",
+    steps: [
+      { stepOrder: 1, roleRequired: "hod", actionName: "HOD Recommendation", departmentSpecific: true },
+      { stepOrder: 2, roleRequired: "principal", actionName: "Principal Authorization", departmentSpecific: false },
+      { stepOrder: 3, roleRequired: "director", actionName: "Director Final Approval", departmentSpecific: false }
+    ]
+  },
+  {
     key: "StudentLeave",
     displayName: "Student Leave Approval",
     description: "Multi-tier approval pipeline for student leave requests.",
@@ -804,4 +814,3 @@ export default function WorkflowBuilder() {
     </div>
   );
 }
-

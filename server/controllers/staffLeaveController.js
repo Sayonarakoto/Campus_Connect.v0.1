@@ -31,6 +31,11 @@ exports.getMyLeaves = async (req, res) => {
 // ==========================
 exports.getPendingLeaves = async (req, res) => {
   try {
+    const department = (req.user.department || "").trim();
+    const departmentRegex = new RegExp(
+      `^${department.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+      "i"
+    );
 
     const requests = await StaffLeave.find({
       status: {
@@ -42,9 +47,12 @@ exports.getPendingLeaves = async (req, res) => {
     })
       .populate({
         path: "applicantId",
-        select: "fullName email department customData profilePhoto",
+        select: "fullName email department primaryDepartment customData profilePhoto",
         match: {
-          department: req.user.department
+          $or: [
+            { department: departmentRegex },
+            { primaryDepartment: departmentRegex }
+          ]
         }
       })
       .populate(
@@ -85,7 +93,35 @@ exports.approveLeave = async (req, res) => {
       });
     }
 
+    const applicant = await User.findById(leave.applicantId).select("department primaryDepartment");
+    const hodDepartment = (req.user.department || "").trim().toLowerCase();
+    const applicantDepartments = [applicant?.department, applicant?.primaryDepartment]
+      .filter(Boolean)
+      .map((value) => value.trim().toLowerCase());
+
+    if (!applicantDepartments.includes(hodDepartment)) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only review faculty leave requests from your department."
+      });
+    }
+
+    if (!["COVERAGE_ACCEPTED", "EMERGENCY_PENDING"].includes(leave.status)) {
+      return res.status(400).json({
+        success: false,
+        message: "This leave request is not waiting for HOD review."
+      });
+    }
+
     leave.status = "HOD_VERIFIED";
+    leave.hodId = req.user.id;
+    leave.hodRemarks = req.body.remarks || "";
+    leave.hodVerifiedAt = new Date();
+    leave.auditLogs.push({
+      action: "HOD_APPROVED",
+      performedBy: req.user.id,
+      remarks: leave.hodRemarks
+    });
     await leave.save();
 
     res.json({
@@ -170,9 +206,22 @@ exports.principalReviewLeave = async (req, res) => {
       });
     }
 
+    if (leave.status !== "HOD_VERIFIED") {
+      return res.status(400).json({
+        success: false,
+        message: "This leave request is not waiting for Principal review."
+      });
+    }
+
     leave.status = "PRINCIPAL_REVIEWED";
     leave.principalRemarks = req.body.remarks;
     leave.principalId = req.user.id;
+    leave.principalReviewedAt = new Date();
+    leave.auditLogs.push({
+      action: "PRINCIPAL_APPROVED",
+      performedBy: req.user.id,
+      remarks: leave.principalRemarks || ""
+    });
 
     await leave.save();
 
@@ -265,6 +314,13 @@ exports.directorApproveLeave = async (req, res) => {
       });
     }
 
+    if (leave.status !== "PRINCIPAL_REVIEWED") {
+      return res.status(400).json({
+        success: false,
+        message: "This leave request is not waiting for Director review."
+      });
+    }
+
     const applicant = await User.findById(
       leave.applicantId
     );
@@ -323,7 +379,8 @@ leave.isLocked =
       action:
         "DIRECTOR_APPROVED",
       performedBy:
-        req.user.id
+        req.user.id,
+      remarks: leave.directorRemarks
     });
 
     await leave.save();

@@ -132,6 +132,28 @@ exports.approveLeave = async (req, res) => {
       remarks: req.body.remarks || ""
     });
 
+    // Synchronize Workflow Engine ApprovalInstance
+    if (leave.workflowInstanceId) {
+      try {
+        const ApprovalInstance = require("../models/ApprovalInstance");
+        const instance = await ApprovalInstance.findById(leave.workflowInstanceId);
+        if (instance) {
+          instance.status = "Approved";
+          instance.history.push({
+            stepOrder: instance.currentStepOrder,
+            approverId: req.user.id,
+            role: req.user.role || "faculty",
+            action: "Approved",
+            comment: req.body.remarks || "Tutor approved",
+            timestamp: new Date()
+          });
+          await instance.save();
+        }
+      } catch (wfErr) {
+        console.warn("Could not sync ApprovalInstance on approve:", wfErr.message);
+      }
+    }
+
     res.json({
       success: true,
       message: "Leave approved successfully"
@@ -196,6 +218,28 @@ exports.rejectLeave = async (req, res) => {
       actorId: req.user.id,
       remarks: req.body.remarks || ""
     });
+
+    // Synchronize Workflow Engine ApprovalInstance
+    if (leave.workflowInstanceId) {
+      try {
+        const ApprovalInstance = require("../models/ApprovalInstance");
+        const instance = await ApprovalInstance.findById(leave.workflowInstanceId);
+        if (instance) {
+          instance.status = "Rejected";
+          instance.history.push({
+            stepOrder: instance.currentStepOrder,
+            approverId: req.user.id,
+            role: req.user.role || "faculty",
+            action: "Rejected",
+            comment: req.body.remarks || "Tutor rejected",
+            timestamp: new Date()
+          });
+          await instance.save();
+        }
+      } catch (wfErr) {
+        console.warn("Could not sync ApprovalInstance on reject:", wfErr.message);
+      }
+    }
 
     res.json({
       success: true,

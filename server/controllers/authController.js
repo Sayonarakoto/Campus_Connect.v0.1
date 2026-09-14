@@ -1685,13 +1685,23 @@ exports.getAppMenu = async (req, res) => {
       student: {
         GatePassController: "/gatepass/request",
         LateEntryController: "/student/late-entry",
-        SpecialPassController: "/student/special-pass"
+        SpecialPassController: "/student/special-pass",
+        StudentLeaveController: "/student-leave/my",
+        DutyLeaveController: "/student/duty-leave"
       },
       faculty: {
-        LateEntryController: "/faculty/late-entries"
+        LateEntryController: "/faculty/late-entries",
+        DutyLeaveController: "/faculty/duty-leaves"
       },
       hod: {
-        LateEntryController: "/hod/late-entries"
+        LateEntryController: "/hod/late-entries",
+        DutyLeaveController: "/hod/duty-leaves"
+      },
+      tutor: {
+        DutyLeaveController: "/tutor/duty-leaves"
+      },
+      director: {
+        DutyLeaveController: "/director/duty-leaves"
       }
     };
 
@@ -1735,10 +1745,20 @@ exports.getAppMenu = async (req, res) => {
           resolvedTitle = "Late Entry Request";
         } else if (activeRole === "student" && p.controller === "SpecialPassController") {
           resolvedTitle = "Special Pass Request";
+        } else if (activeRole === "student" && p.controller === "StudentLeaveController") {
+          resolvedTitle = "My Leaves";
+        } else if (activeRole === "student" && p.controller === "DutyLeaveController") {
+          resolvedTitle = "Duty Leave Application";
         } else if (activeRole === "faculty" && p.controller === "LateEntryController") {
           resolvedTitle = "Late Entry Approvals";
+        } else if (activeRole === "faculty" && p.controller === "DutyLeaveController") {
+          resolvedTitle = "Duty Leaves";
         } else if (activeRole === "hod" && p.controller === "LateEntryController") {
           resolvedTitle = "Late Entry Dashboard";
+        } else if (activeRole === "hod" && p.controller === "DutyLeaveController") {
+          resolvedTitle = "Duty Leave Queue";
+        } else if (activeRole === "director" && p.controller === "DutyLeaveController") {
+          resolvedTitle = "Faculty Duty Leaves";
         }
 
         return [{

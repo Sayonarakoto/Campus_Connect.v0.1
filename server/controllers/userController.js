@@ -97,12 +97,39 @@ exports.createUser = async (req, res) => {
       return res.status(403).json({ success: false, message: "Unauthorized access" });
     }
 
+    const roleLower = (role || "").toLowerCase().trim();
+    const secondaryRoles = Array.isArray(req.body.roles)
+      ? req.body.roles.map((r) => r.toLowerCase().trim())
+      : [];
+
+    // Enforce Class Tutor department quota: maximum 3 per department
+    const isAssigningTutor = roleLower === "tutor" || secondaryRoles.includes("tutor");
+    if (isAssigningTutor) {
+      if (!department || !department.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Department is required when assigning the Class Tutor role."
+        });
+      }
+      const activeTutorCount = await User.countDocuments({
+        department: new RegExp(`^${department.trim()}$`, "i"),
+        $or: [{ role: "tutor" }, { roles: "tutor" }]
+      });
+      if (activeTutorCount >= 3) {
+        return res.status(400).json({
+          success: false,
+          message: `Department '${department}' has already reached the maximum limit of 3 Class Tutors.`
+        });
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
       fullName,
-      email: email.toLowerCase(),
-      role: role.toLowerCase(),
+      email: email.toLowerCase().trim(),
+      role: roleLower,
+      roles: secondaryRoles,
       password: hashedPassword,
       department,
       section,
@@ -130,7 +157,7 @@ exports.updateUser = async (req, res) => {
   try {
     const activeRole = req.user.role.toLowerCase();
     const { id } = req.params;
-    const { fullName, email, department, section, isLabStaff, role, password } = req.body;
+    const { fullName, email, department, section, isLabStaff, role, roles, password } = req.body;
 
     const targetUser = await User.findById(id);
     if (!targetUser) return res.status(404).json({ success: false, message: "User not found" });
@@ -143,12 +170,41 @@ exports.updateUser = async (req, res) => {
       return res.status(403).json({ success: false, message: "Unauthorized access" });
     }
 
+    const targetDept = department !== undefined ? department.trim() : targetUser.department;
+    const newRoleLower = role ? role.toLowerCase().trim() : targetUser.role;
+    const newSecondaryRoles = roles !== undefined
+      ? (Array.isArray(roles) ? roles.map((r) => r.toLowerCase().trim()) : [])
+      : (targetUser.roles || []);
+
+    // Enforce Class Tutor department quota: maximum 3 per department
+    const isAssigningTutor = newRoleLower === "tutor" || newSecondaryRoles.includes("tutor");
+    if (isAssigningTutor) {
+      if (!targetDept) {
+        return res.status(400).json({
+          success: false,
+          message: "Department is required when assigning the Class Tutor role."
+        });
+      }
+      const activeTutorCount = await User.countDocuments({
+        _id: { $ne: targetUser._id },
+        department: new RegExp(`^${targetDept}$`, "i"),
+        $or: [{ role: "tutor" }, { roles: "tutor" }]
+      });
+      if (activeTutorCount >= 3) {
+        return res.status(400).json({
+          success: false,
+          message: `Department '${targetDept}' has already reached the maximum limit of 3 Class Tutors.`
+        });
+      }
+    }
+
     targetUser.fullName = fullName || targetUser.fullName;
-    targetUser.email = email ? email.toLowerCase() : targetUser.email;
-    if (department) targetUser.department = department;
-    if (section) targetUser.section = section;
+    targetUser.email = email ? email.toLowerCase().trim() : targetUser.email;
+    if (department !== undefined) targetUser.department = department;
+    if (section !== undefined) targetUser.section = section;
     if (isLabStaff !== undefined) targetUser.isLabStaff = isLabStaff;
-    if (role && ["admin", "hraccounts"].includes(activeRole)) targetUser.role = role.toLowerCase();
+    if (role && ["admin", "hraccounts", "hod"].includes(activeRole)) targetUser.role = newRoleLower;
+    if (roles !== undefined) targetUser.roles = newSecondaryRoles;
     if (password) targetUser.password = await bcrypt.hash(password, 10);
 
     await targetUser.save();

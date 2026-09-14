@@ -18,7 +18,8 @@ const HARDCODED_DEFAULT_WORKFLOWS = {
   ],
   StaffLeave: [
     { stepOrder: 1, roleRequired: "hod", actionName: "HOD Recommendation", departmentSpecific: true },
-    { stepOrder: 2, roleRequired: "principal", actionName: "Principal Authorization", departmentSpecific: false }
+    { stepOrder: 2, roleRequired: "principal", actionName: "Principal Authorization", departmentSpecific: false },
+    { stepOrder: 3, roleRequired: "director", actionName: "Director Final Approval", departmentSpecific: false }
   ],
   StudentLeave: [
     { stepOrder: 1, roleRequired: "faculty", actionName: "Tutor Recommendation", departmentSpecific: true },

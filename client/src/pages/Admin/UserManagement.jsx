@@ -91,14 +91,17 @@ function UserManagement() {
 
   const handleEdit = (user) => {
     setEditingUser(user);
+    const hasTutorRole = user.role === "tutor" || (Array.isArray(user.roles) && user.roles.includes("tutor"));
     setFormData({
       fullName: user.fullName || "",
       email: user.email || "",
       role: user.role || "",
+      roles: user.roles || [],
       department: user.department || "",
       section: user.section || "",
       password: "", // Leave blank, only update if typed
-      isLabStaff: user.isLabStaff || false
+      isLabStaff: user.isLabStaff || false,
+      isClassTutor: hasTutorRole
     });
     setShowModal(true);
   };
@@ -106,7 +109,15 @@ function UserManagement() {
   const handleCreate = () => {
     setEditingUser(null);
     setFormData({
-      fullName: "", email: "", role: ["admin", "hraccounts"].includes(currentUserRole) ? "faculty" : "student", department: "", section: "", password: "", isLabStaff: false
+      fullName: "",
+      email: "",
+      role: ["admin", "hraccounts"].includes(currentUserRole) ? "faculty" : "student",
+      roles: [],
+      department: "",
+      section: "",
+      password: "",
+      isLabStaff: false,
+      isClassTutor: false
     });
     setShowModal(true);
   };
@@ -122,13 +133,26 @@ function UserManagement() {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
+      const payloadRoles = Array.isArray(formData.roles) ? [...formData.roles] : [];
+      if (formData.isClassTutor) {
+        if (!payloadRoles.includes("tutor")) payloadRoles.push("tutor");
+      } else {
+        const idx = payloadRoles.indexOf("tutor");
+        if (idx !== -1) payloadRoles.splice(idx, 1);
+      }
+
+      const submitData = {
+        ...formData,
+        roles: payloadRoles
+      };
+
       if (editingUser) {
-        await axios.put(`${API_BASE}/api/users/${editingUser._id}`, formData, {
+        await axios.put(`${API_BASE}/api/users/${editingUser._id}`, submitData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         showToast("User updated successfully", "success");
       } else {
-        await axios.post(`${API_BASE}/api/users`, formData, {
+        await axios.post(`${API_BASE}/api/users`, submitData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         showToast("User created successfully", "success");
@@ -316,7 +340,14 @@ function UserManagement() {
                     </div>
                   </td>
                   <td>{user.email}</td>
-                  <td><span className={`um-role-badge role-${user.role}`}>{user.role}</span></td>
+                  <td>
+                    <span className={`um-role-badge role-${user.role}`}>{user.role}</span>
+                    {user.roles && user.roles.includes("tutor") && user.role !== "tutor" && (
+                      <span className="um-role-badge role-tutor" style={{ marginLeft: "0.35rem" }}>
+                        + Tutor
+                      </span>
+                    )}
+                  </td>
                   <td>{user.department || "-"}</td>
                   <td>
                     <div className="um-actions">
@@ -405,6 +436,20 @@ function UserManagement() {
                 <div className="form-group">
                   <label>Section</label>
                   <input type="text" name="section" value={formData.section} onChange={handleFormChange} />
+                </div>
+              )}
+
+              {["faculty", "tutor"].includes(formData.role) && (
+                <div className="form-group checkbox-group" style={{ marginTop: "0.25rem" }}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="isClassTutor"
+                      checked={Boolean(formData.isClassTutor)}
+                      onChange={handleFormChange}
+                    />
+                    Assign as Class Tutor (Tutor Add-on &bull; Max 3 per Department)
+                  </label>
                 </div>
               )}
 

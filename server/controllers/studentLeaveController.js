@@ -171,14 +171,37 @@ exports.applyLeave = async (req, res) => {
         status: "PENDING_PARENT"
       });
 
-      await createAuditLog({
-  leaveId: leave._id,
-  studentId: leave.student,
-  action: "LEAVE_APPLIED",
-  actorId: req.user.id,
-  remarks: leave.reason
-});
-      
+    await createAuditLog({
+      leaveId: leave._id,
+      studentId: leave.student,
+      action: "LEAVE_APPLIED",
+      actorId: req.user.id,
+      remarks: leave.reason
+    });
+
+    // Initialize ApprovalInstance for Workflow Engine integration
+    try {
+      const { initializeWorkflowInstance } = require("../services/workflowService");
+      const { instance } = await initializeWorkflowInstance({
+        moduleName: "StudentLeave",
+        targetRefId: leave._id,
+        applicantId: req.user.id,
+        department: student.department,
+        metadata: {
+          leaveType,
+          fromDate: startDate,
+          toDate: endDate,
+          days,
+          reason
+        }
+      });
+      if (instance) {
+        leave.workflowInstanceId = instance._id;
+        await leave.save();
+      }
+    } catch (wfErr) {
+      console.warn("Could not initialize ApprovalInstance for StudentLeave:", wfErr.message);
+    }
 
     return res.status(201).json({
       success: true,

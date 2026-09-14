@@ -33,12 +33,21 @@ module.exports = new FluentMigration("20260907_001_init_all_existing_controllers
   // 3. Student Leave Applications
   .forController("StudentLeaveController")
     .masterMenu("Leaves & Passes")
-    .title("Student Leave Review")
-    .path("/tutor/review")
+    .title("My Leaves")
+    .path("/student-leave/my")
     .icon("fas fa-user-clock")
     .grant("student", ["list", "add"])
-    .grant("faculty", ["list", "update"])
     .grant("parent", ["list", "update"])
+    .grant("admin", ["list", "add", "update", "delete", "download"])
+
+  // 3b. Tutor Student Leave Review
+  .forController("TutorLeaveReviewController")
+    .masterMenu("Leaves & Passes")
+    .title("Student Leave Review")
+    .path("/tutor/review")
+    .icon("fas fa-clipboard-check")
+    .grant("faculty", ["list", "update"])
+    .grant("tutor", ["list", "update"])
     .grant("hod", ["list", "update", "download"])
     .grant("admin", ["list", "add", "update", "delete", "download"])
 

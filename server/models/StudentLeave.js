@@ -61,6 +61,12 @@ const StudentLeaveSchema = new mongoose.Schema(
       ref: "User"
     },
 
+    workflowInstanceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ApprovalInstance",
+      default: null
+    },
+
     attendanceSnapshot: {
       type: Number,
       default: 0

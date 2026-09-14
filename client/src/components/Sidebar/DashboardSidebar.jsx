@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
+import { usePermissions } from "../../context/PermissionContext";
 import "./DashboardSidebar.css";
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -91,7 +92,7 @@ const ROLE_NAV_CONFIG = {
 export default function DashboardSidebar({ isOpen, onClose, onOpenProfile, user }) {
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const [dynamicMenu, setDynamicMenu] = useState(null);
+  const { menu, refreshPermissions } = usePermissions();
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -103,41 +104,25 @@ export default function DashboardSidebar({ isOpen, onClose, onOpenProfile, user 
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Fetch dynamic menu driven by database claims
+  // Re-sync permissions when sidebar drawer opens
   useEffect(() => {
-    const fetchMenu = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-        const res = await fetch(`${API_BASE}/api/auth/menu`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success && Array.isArray(data.menu) && data.menu.length > 0) {
-            setDynamicMenu(
-              data.menu.map((m) => ({
-                masterMenuId: m.masterMenuId || "General Workspace",
-                label: m.title,
-                path: m.path,
-                icon: m.icon || "fas fa-folder",
-                permissions: m.permissions
-              }))
-            );
-          }
-        }
-      } catch (err) {
-        console.warn("Could not fetch dynamic menu, using fallback:", err);
-      }
-    };
-
-    fetchMenu();
-  }, [isOpen, user?.role]);
+    if (isOpen) {
+      refreshPermissions();
+    }
+  }, [isOpen, refreshPermissions]);
 
   if (!isOpen) return null;
 
   const roleKey = user?.role?.toLowerCase() || "student";
-  const navItems = dynamicMenu || ROLE_NAV_CONFIG[roleKey] || ROLE_NAV_CONFIG.student;
+  const navItems = (Array.isArray(menu) && menu.length > 0)
+    ? menu.map((m) => ({
+        masterMenuId: m.masterMenuId || "General Workspace",
+        label: m.title,
+        path: m.path,
+        icon: m.icon || "fas fa-folder",
+        permissions: m.permissions
+      }))
+    : (ROLE_NAV_CONFIG[roleKey] || ROLE_NAV_CONFIG.student);
 
   const groupedNavItems = navItems.reduce((acc, item) => {
     const category = item.masterMenuId || "General Workspace";

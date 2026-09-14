@@ -13,6 +13,7 @@ import RoleAuth from "./pages/roleauth";
 import ForgotPassword from "./pages/ForgotPassword";
 import { ToastProvider } from "./context/ToastContext";
 import { ConfirmProvider } from "./context/ConfirmContext";
+import { PermissionProvider } from "./context/PermissionContext";
 
 import GatePassRequest from "./pages/GatePass/GatePassRequest";
 import GatePassApproval from "./pages/GatePass/GatePassapproval";
@@ -115,7 +116,8 @@ function App() {
     <BrowserRouter>
       <ToastProvider>
         <ConfirmProvider>
-          <Navbar />
+          <PermissionProvider>
+            <Navbar />
 
         {token && <PromotionEngine />}
 
@@ -340,6 +342,7 @@ function App() {
       </main>
 
       <Footer />
+          </PermissionProvider>
         </ConfirmProvider>
       </ToastProvider>
     </BrowserRouter>

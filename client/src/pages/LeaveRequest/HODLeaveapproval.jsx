@@ -343,14 +343,14 @@ function HODLeaveApproval() {
                     <button
                       className="btn btn-success"
                       onClick={() => approveLeave(leave._id)}
-                      disabled={isLoading || leave.status !== 'pending'}
+                      disabled={isLoading || !['COVERAGE_ACCEPTED', 'EMERGENCY_PENDING'].includes(leave.status)}
                     >
                       {isLoading ? '⏳ Processing...' : '✅ Approve'}
                     </button>
                     <button
                       className="btn btn-danger"
                       onClick={() => rejectLeave(leave._id)}
-                      disabled={isLoading || leave.status !== 'pending'}
+                      disabled={isLoading || !['COVERAGE_ACCEPTED', 'EMERGENCY_PENDING'].includes(leave.status)}
                     >
                       {isLoading ? '⏳ Processing...' : '❌ Reject'}
                     </button>

@@ -100,6 +100,12 @@ import FacultyEventDashboard from "./pages/Event/FacultyEventDashboard";
 import EventForm from "./pages/Event/EventForm";
 import StudentEvents from "./pages/Event/StudentEvent";
 
+import AcademicCalendarPage from "./pages/AcademicCalendar/AcademicCalendarPage";
+import AcademicProgramForm from "./pages/AcademicCalendar/AcademicProgramForm";
+import AcademicCalendarDashboard from "./pages/AcademicCalendar/AcademicCalendarDashboard";
+import ExcelBulkUpload from "./pages/AcademicCalendar/ExcelBulkUpload";
+import ProgramDetail from "./pages/AcademicCalendar/ProgramDetail";
+
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
 
@@ -231,6 +237,14 @@ function App() {
           <Route path="/events/create" element={<ProtectedRoute><EventForm /></ProtectedRoute>} />
           <Route path="/events/edit/:id" element={<ProtectedRoute><EventForm /></ProtectedRoute>} />
           <Route path="/student/events" element={<ProtectedRoute><StudentEvents /></ProtectedRoute>} />
+
+          {/* Academic Calendar Routes */}
+          <Route path="/academic-calendar" element={<ProtectedRoute><AcademicCalendarPage /></ProtectedRoute>} />
+          <Route path="/academic-calendar/create" element={<ProtectedRoute><AcademicProgramForm /></ProtectedRoute>} />
+          <Route path="/academic-calendar/edit/:id" element={<ProtectedRoute><AcademicProgramForm /></ProtectedRoute>} />
+          <Route path="/academic-calendar/upload" element={<ProtectedRoute><ExcelBulkUpload /></ProtectedRoute>} />
+          <Route path="/academic-calendar/dashboard" element={<ProtectedRoute><AcademicCalendarDashboard /></ProtectedRoute>} />
+          <Route path="/academic-calendar/:id" element={<ProtectedRoute><ProgramDetail /></ProtectedRoute>} />
 
 
           {/* Sports Committee Routes */}

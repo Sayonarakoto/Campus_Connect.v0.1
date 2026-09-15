@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { generateStudentLeavePDF } from "../../utils/studentLeavePdfGenerator";
 import "./Leaves.css";
 
 const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 function TutorLeaveReview() {
-
   const [leaves, setLeaves] = useState([]);
   const [loading, setLoading] = useState(true);
   const [imageErrors, setImageErrors] = useState({});
@@ -329,11 +329,24 @@ function TutorLeaveReview() {
                         className="remarks-btn"
                         onClick={() => alert(`Remarks: ${leave.remarks}`)}
                         title="View remarks"
+                      <button
+                        className="remarks-btn"
+                        onClick={() => alert(`Remarks: ${leave.remarks}`)}
+                        title="View remarks"
                       >
                         💬
                       </button>
                     )}
                     <button className="remarks-btn" onClick={() => setSelectedLeave(leave)} title="View student and parent details" aria-label="View student and parent details">👁</button>
+                    <button
+                      className="remarks-btn"
+                      onClick={() => generateStudentLeavePDF(leave, leave.student)}
+                      title="Download Student Leave Form PDF"
+                      aria-label="Download Student Leave Form PDF"
+                      style={{ background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca" }}
+                    >
+                      📄
+                    </button>
                   </td>
 
                   <td><span className={`tutor-route-chip ${leave.approvalMode === "class_tutor" ? "direct" : "parent"}`}>{leave.approvalMode === "class_tutor" ? "Tutor direct" : "Parent → tutor"}</span></td>
@@ -365,7 +378,21 @@ function TutorLeaveReview() {
               <span>Parent</span><strong>{selectedLeave.student?.parent?.fullName || "—"}</strong>
               <span>Parent phone</span><strong>{selectedLeave.student?.parent?.phoneNumber || "Not available"}</strong>
             </div>
-            {selectedLeave.medicalCertificate?.fileId && <button className="student-leave-certificate-link" onClick={() => openCertificate(selectedLeave._id)}>View medical certificate PDF</button>}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "20px", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                className="sldm-pdf-btn"
+                onClick={() => generateStudentLeavePDF(selectedLeave, selectedLeave.student)}
+                style={{ padding: "8px 16px", fontSize: "0.84rem" }}
+              >
+                📄 Download PDF Form
+              </button>
+              {selectedLeave.medicalCertificate?.fileId && (
+                <button className="student-leave-certificate-link" style={{ marginTop: 0 }} onClick={() => openCertificate(selectedLeave._id)}>
+                  View medical certificate PDF
+                </button>
+              )}
+            </div>
           </section>
         </div>
       )}

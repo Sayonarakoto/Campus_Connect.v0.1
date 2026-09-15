@@ -25,6 +25,11 @@ function UserManagement() {
     fullName: "", email: "", role: "", department: "", section: "", password: "", isLabStaff: false
   });
 
+  // Tutor assignment state
+  const [availableTutors, setAvailableTutors] = useState([]);
+  const [assignedTutorId, setAssignedTutorId] = useState("");
+  const [studentId, setStudentId] = useState("");
+
   // Semester Promotion Modal State
   const [showPromotionModal, setShowPromotionModal] = useState(false);
   const [promotionFilters, setPromotionFilters] = useState({
@@ -34,6 +39,19 @@ function UserManagement() {
   });
   const [promotionLoading, setPromotionLoading] = useState(false);
   const [promotionResult, setPromotionResult] = useState(null);
+
+  // Bulk Tutor Assignment State
+  const [showBulkTutorModal, setShowBulkTutorModal] = useState(false);
+  const [bulkTutorForm, setBulkTutorForm] = useState({
+    department: "",
+    tutorId: "",
+    semesters: [],
+    isGeneralDepartment: false
+  });
+  const [bulkTutorTutors, setBulkTutorTutors] = useState([]);
+  const [bulkTutorLoading, setBulkTutorLoading] = useState(false);
+  const [bulkTutorResult, setBulkTutorResult] = useState(null);
+  const [primaryDepartments, setPrimaryDepartments] = useState([]);
 
   const token = localStorage.getItem("token");
 
@@ -89,7 +107,7 @@ function UserManagement() {
     }
   };
 
-  const handleEdit = (user) => {
+  const handleEdit = async (user) => {
     setEditingUser(user);
     const hasTutorRole = user.role === "tutor" || (Array.isArray(user.roles) && user.roles.includes("tutor"));
     const hasDisciplinaryRole =
@@ -105,11 +123,40 @@ function UserManagement() {
       roles: user.roles || [],
       department: user.department || "",
       section: user.section || "",
-      password: "", // Leave blank, only update if typed
+      password: "",
       isLabStaff: user.isLabStaff || false,
       isClassTutor: hasTutorRole,
       isDisciplinaryCommittee: hasDisciplinaryRole
     });
+
+    if (user.role === "student") {
+      setAssignedTutorId(user.tutor?._id || user.tutor || "");
+      setStudentId(user.studentRecordId || "");
+      // Use primaryDepartment for General Department students
+      const effectiveDept = user.isGeneralDepartment ? (user.primaryDepartment || user.department) : user.department;
+      // Fetch available tutors for the student's effective department
+      if (effectiveDept) {
+        try {
+          const tutorRes = await axios.get(`${API_BASE}/api/users/tutors-by-department`, {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { department: effectiveDept }
+          });
+          if (tutorRes.data.success) {
+            setAvailableTutors(tutorRes.data.tutors);
+          }
+        } catch (err) {
+          console.error("Failed to fetch tutors:", err);
+          setAvailableTutors([]);
+        }
+      } else {
+        setAvailableTutors([]);
+      }
+    } else {
+      setAssignedTutorId("");
+      setAvailableTutors([]);
+      setStudentId("");
+    }
+
     setShowModal(true);
   };
 
@@ -127,6 +174,9 @@ function UserManagement() {
       isClassTutor: false,
       isDisciplinaryCommittee: false
     });
+    setAssignedTutorId("");
+    setAvailableTutors([]);
+    setStudentId("");
     setShowModal(true);
   };
 
@@ -176,11 +226,105 @@ function UserManagement() {
         });
         showToast("User created successfully", "success");
       }
+
+      // Save tutor assignment for students
+      if (editingUser && editingUser.role === "student" && studentId) {
+        try {
+          const tutorRes = await axios.put(`${API_BASE}/api/students/assign-tutor/${studentId}`, {
+            tutorId: assignedTutorId || null
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          showToast(tutorRes.data?.message || "Tutor assignment saved.", "success");
+        } catch (tutorErr) {
+          console.error("Failed to assign tutor:", tutorErr);
+          showToast(tutorErr.response?.data?.message || "Failed to assign tutor.", "error");
+        }
+      } else if (editingUser && editingUser.role === "student" && !studentId) {
+        showToast("Could not save tutor assignment — student record not found.", "warning");
+      }
+
       fetchUsers();
       setShowModal(false);
     } catch (err) {
       console.error("Failed to save user", err);
       showToast(err.response?.data?.message || "Failed to save user", "error");
+    }
+  };
+
+  // Bulk Tutor Assignment Handlers
+  const handleOpenBulkTutor = async () => {
+    setBulkTutorForm({ department: "", tutorId: "", semesters: [], isGeneralDepartment: false });
+    setBulkTutorTutors([]);
+    setBulkTutorResult(null);
+    setShowBulkTutorModal(true);
+    try {
+      const res = await axios.get(`${API_BASE}/api/students/primary-departments`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        setPrimaryDepartments(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch primary departments:", err);
+    }
+  };
+
+  const handleBulkTutorDeptChange = async (dept) => {
+    setBulkTutorForm(prev => ({ ...prev, department: dept, tutorId: "", semesters: [], isGeneralDepartment: false }));
+    setBulkTutorTutors([]);
+    if (!dept) return;
+    try {
+      const tutorRes = await axios.get(`${API_BASE}/api/users/tutors-by-department`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { department: dept }
+      });
+      if (tutorRes.data.success) {
+        setBulkTutorTutors(tutorRes.data.tutors);
+      }
+    } catch (err) {
+      console.error("Failed to fetch tutors:", err);
+    }
+  };
+
+  const handleBulkTutorSemesterToggle = (sem) => {
+    setBulkTutorForm(prev => {
+      const current = prev.semesters || [];
+      const next = current.includes(sem) ? current.filter(s => s !== sem) : [...current, sem];
+      return { ...prev, semesters: next };
+    });
+  };
+
+  const handleBulkAssignSubmit = async (e) => {
+    e.preventDefault();
+    if (!bulkTutorForm.department || !bulkTutorForm.tutorId) {
+      showToast("Please select a department and tutor.", "warning");
+      return;
+    }
+    if (bulkTutorForm.semesters.length === 0) {
+      showToast("Please select at least one semester.", "warning");
+      return;
+    }
+    setBulkTutorLoading(true);
+    setBulkTutorResult(null);
+    try {
+      const res = await axios.put(`${API_BASE}/api/students/bulk-assign-tutor`, {
+        tutorId: bulkTutorForm.tutorId,
+        department: bulkTutorForm.department,
+        semesters: bulkTutorForm.semesters,
+        isGeneralDepartment: bulkTutorForm.isGeneralDepartment
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        setBulkTutorResult(res.data);
+        showToast(res.data.message, "success");
+      }
+    } catch (err) {
+      console.error("Bulk assign failed:", err);
+      showToast(err.response?.data?.message || "Failed to assign tutor.", "error");
+    } finally {
+      setBulkTutorLoading(false);
     }
   };
 
@@ -257,21 +401,22 @@ function UserManagement() {
   return (
     <div className="user-management-container workspace-container">
       <div className="um-header">
-        <div>
-          <h2>User Management</h2>
+        <div className="um-header-left">
+          <h2><i className="fas fa-users-cog"></i> User Management</h2>
           <p>Create, update, and manage system users</p>
         </div>
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div className="um-header-actions">
+          {["admin", "hraccounts", "hod"].includes(currentUserRole) && (
+            <button className="btn-action btn-assign-tutor" onClick={handleOpenBulkTutor}>
+              <i className="fas fa-user-graduate"></i> Assign Class Tutors
+            </button>
+          )}
           {["admin", "hraccounts"].includes(currentUserRole) && (
-            <button
-              className="btn-secondary"
-              style={{ backgroundColor: "#1e3a8a", color: "#ffffff", padding: "10px 16px", borderRadius: "6px", border: "none", fontWeight: "600", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
-              onClick={() => { setShowPromotionModal(true); setPromotionResult(null); }}
-            >
+            <button className="btn-action btn-promote" onClick={() => { setShowPromotionModal(true); setPromotionResult(null); }}>
               <i className="fas fa-graduation-cap"></i> Promote Semester
             </button>
           )}
-          <button className="btn-primary" onClick={handleCreate}>
+          <button className="btn-action btn-add-user" onClick={handleCreate}>
             <i className="fas fa-user-plus"></i> Add User
           </button>
         </div>
@@ -333,6 +478,7 @@ function UserManagement() {
                 <th>Email</th>
                 <th>Role</th>
                 <th>Department</th>
+                <th>Class Tutor</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -388,6 +534,17 @@ function UserManagement() {
                   </td>
                   <td>{user.department || "-"}</td>
                   <td>
+                    {user.role === "student" ? (
+                      user.tutor ? (
+                        <span className="um-tutor-name">{user.tutor.fullName}</span>
+                      ) : (
+                        <span className="um-tutor-unassigned">Not assigned</span>
+                      )
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+                  <td>
                     <div className="um-actions">
                       <button className="btn-icon edit" onClick={() => handleEdit(user)} title="Edit">
                         <i className="fas fa-edit"></i>
@@ -403,17 +560,17 @@ function UserManagement() {
               ))}
               {filteredUsers.length === 0 && (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: "center", padding: "2.5rem 1rem", color: "#64748b" }}>
-                    <i className="fas fa-users-slash" style={{ fontSize: "2rem", marginBottom: "0.75rem", color: "#94a3b8", display: "block" }}></i>
+                  <td colSpan="5" className="um-empty">
+                    <i className="fas fa-users-slash"></i>
                     {isFilterActive ? (
                       <div>
-                        <p style={{ margin: "0 0 0.75rem 0", fontWeight: 500 }}>No users match your filter criteria.</p>
-                        <button className="btn-secondary" style={{ padding: "6px 14px", fontSize: "0.85rem", cursor: "pointer" }} onClick={handleClearFilters}>
+                        <p>No users match your filter criteria.</p>
+                        <button className="btn-secondary" style={{ marginTop: "8px", padding: "6px 14px", fontSize: "0.85rem" }} onClick={handleClearFilters}>
                           Clear Filters
                         </button>
                       </div>
                     ) : (
-                      <p style={{ margin: 0, fontWeight: 500 }}>No users found in the system.</p>
+                      <p>No users found in the system.</p>
                     )}
                   </td>
                 </tr>
@@ -426,102 +583,126 @@ function UserManagement() {
       {showModal && (
         <div className="um-modal-overlay">
           <div className="um-modal">
-            <h3>{editingUser ? "Edit User" : "Add New User"}</h3>
+            <div className="um-modal-header">
+              <h3><i className={`fas ${editingUser ? "fa-user-edit" : "fa-user-plus"}`}></i> {editingUser ? "Edit User" : "Add New User"}</h3>
+              <button className="um-modal-close" onClick={() => setShowModal(false)}><i className="fas fa-times"></i></button>
+            </div>
             <form onSubmit={handleSave}>
-              <div className="form-group">
-                <label>Full Name *</label>
-                <input type="text" name="fullName" value={formData.fullName} onChange={handleFormChange} required />
-              </div>
-              
-              <div className="form-group">
-                <label>Email *</label>
-                <input type="email" name="email" value={formData.email} onChange={handleFormChange} required />
-              </div>
-
-              <div className="form-group">
-                <label>Role *</label>
-                <select name="role" value={formData.role} onChange={handleFormChange} required disabled={editingUser && !["admin", "hraccounts"].includes(currentUserRole)}>
-                  {["admin", "hraccounts"].includes(currentUserRole) ? (
-                    <>
-                      <option value="admin">Admin</option>
-                      <option value="hod">HOD</option>
-                      <option value="faculty">Faculty</option>
-                      <option value="tutor">Tutor</option>
-                      <option value="disciplinary_committee">Disciplinary Committee</option>
-                      <option value="student">Student</option>
-                      <option value="security">Security</option>
-                      <option value="principal">Principal</option>
-                      <option value="director">Director</option>
-                      <option value="hraccounts">HR / Accounts</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="faculty">Faculty</option>
-                      <option value="tutor">Tutor</option>
-                      <option value="disciplinary_committee">Disciplinary Committee</option>
-                      <option value="student">Student</option>
-                    </>
-                  )}
-                </select>
-              </div>
-
-              {["faculty", "hod", "student", "tutor", "disciplinary_committee"].includes(formData.role) && (
+              <div className="um-modal-body">
                 <div className="form-group">
-                  <label>Department {!["admin", "hraccounts"].includes(currentUserRole) ? "(Locked)" : ""}</label>
-                  <input type="text" name="department" value={formData.department} onChange={handleFormChange} disabled={!["admin", "hraccounts"].includes(currentUserRole)} />
+                  <label>Full Name *</label>
+                  <input type="text" name="fullName" value={formData.fullName} onChange={handleFormChange} required />
                 </div>
-              )}
-
-              {["student"].includes(formData.role) && (
+                
                 <div className="form-group">
-                  <label>Section</label>
-                  <input type="text" name="section" value={formData.section} onChange={handleFormChange} />
+                  <label>Email *</label>
+                  <input type="email" name="email" value={formData.email} onChange={handleFormChange} required />
                 </div>
-              )}
 
-              {["faculty", "tutor"].includes(formData.role) && (
-                <div className="form-group checkbox-group" style={{ marginTop: "0.25rem" }}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      name="isClassTutor"
-                      checked={Boolean(formData.isClassTutor)}
-                      onChange={handleFormChange}
-                    />
-                    Assign as Class Tutor (Tutor Add-on &bull; Max 3 per Department)
-                  </label>
+                <div className="form-group">
+                  <label>Role *</label>
+                  <select name="role" value={formData.role} onChange={handleFormChange} required disabled={editingUser && !["admin", "hraccounts"].includes(currentUserRole)}>
+                    {["admin", "hraccounts"].includes(currentUserRole) ? (
+                      <>
+                        <option value="admin">Admin</option>
+                        <option value="hod">HOD</option>
+                        <option value="faculty">Faculty</option>
+                        <option value="tutor">Tutor</option>
+                        <option value="disciplinary_committee">Disciplinary Committee</option>
+                        <option value="student">Student</option>
+                        <option value="security">Security</option>
+                        <option value="principal">Principal</option>
+                        <option value="director">Director</option>
+                        <option value="hraccounts">HR / Accounts</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="faculty">Faculty</option>
+                        <option value="tutor">Tutor</option>
+                        <option value="disciplinary_committee">Disciplinary Committee</option>
+                        <option value="student">Student</option>
+                      </>
+                    )}
+                  </select>
                 </div>
-              )}
 
-              {["faculty", "tutor", "disciplinary_committee"].includes(formData.role) && (
-                <div className="form-group checkbox-group" style={{ marginTop: "0.25rem" }}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      name="isDisciplinaryCommittee"
-                      checked={Boolean(formData.isDisciplinaryCommittee)}
-                      onChange={handleFormChange}
-                    />
-                    Assign to Disciplinary Committee (Add-on Role)
-                  </label>
+                {["faculty", "hod", "student", "tutor", "disciplinary_committee"].includes(formData.role) && (
+                  <div className="form-group">
+                    <label>Department {!["admin", "hraccounts"].includes(currentUserRole) ? "(Locked)" : ""}</label>
+                    <input type="text" name="department" value={formData.department} onChange={handleFormChange} disabled={!["admin", "hraccounts"].includes(currentUserRole)} />
+                  </div>
+                )}
+
+                {["student"].includes(formData.role) && (
+                  <div className="form-group">
+                    <label>Section</label>
+                    <input type="text" name="section" value={formData.section} onChange={handleFormChange} />
+                  </div>
+                )}
+
+                {["student"].includes(formData.role) && editingUser && (
+                  <div className="form-group">
+                    <label>Assigned Class Tutor</label>
+                    <select
+                      value={assignedTutorId}
+                      onChange={(e) => setAssignedTutorId(e.target.value)}
+                    >
+                      <option value="">-- No Tutor Assigned --</option>
+                      {availableTutors.map((tutor) => (
+                        <option key={tutor._id} value={tutor._id}>
+                          {tutor.fullName} ({tutor.email})
+                        </option>
+                      ))}
+                    </select>
+                    {formData.department && availableTutors.length === 0 && (
+                      <small>No class tutors found. Assign the tutor role to a faculty member first.</small>
+                    )}
+                  </div>
+                )}
+
+                {["faculty", "tutor"].includes(formData.role) && (
+                  <div className="form-group checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="isClassTutor"
+                        checked={Boolean(formData.isClassTutor)}
+                        onChange={handleFormChange}
+                      />
+                      Assign as Class Tutor (Max 3 per Department)
+                    </label>
+                  </div>
+                )}
+
+                {["faculty", "tutor", "disciplinary_committee"].includes(formData.role) && (
+                  <div className="form-group checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="isDisciplinaryCommittee"
+                        checked={Boolean(formData.isDisciplinaryCommittee)}
+                        onChange={handleFormChange}
+                      />
+                      Assign to Disciplinary Committee
+                    </label>
+                  </div>
+                )}
+
+                {["faculty"].includes(formData.role) && (
+                  <div className="form-group checkbox-group">
+                    <label>
+                      <input type="checkbox" name="isLabStaff" checked={formData.isLabStaff} onChange={handleFormChange} />
+                      Is Lab Staff?
+                    </label>
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label>{editingUser ? "New Password (leave blank to keep current)" : "Password *"}</label>
+                  <input type="password" name="password" value={formData.password} onChange={handleFormChange} required={!editingUser} />
                 </div>
-              )}
-
-              {["faculty"].includes(formData.role) && (
-                <div className="form-group checkbox-group">
-                  <label>
-                    <input type="checkbox" name="isLabStaff" checked={formData.isLabStaff} onChange={handleFormChange} />
-                    Is Lab Staff?
-                  </label>
-                </div>
-              )}
-
-              <div className="form-group">
-                <label>{editingUser ? "New Password (leave blank to keep current)" : "Password *"}</label>
-                <input type="password" name="password" value={formData.password} onChange={handleFormChange} required={!editingUser} />
               </div>
-
-              <div className="um-modal-actions">
+              <div className="um-modal-footer">
                 <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
                 <button type="submit" className="btn-primary">Save User</button>
               </div>
@@ -534,99 +715,185 @@ function UserManagement() {
       {showPromotionModal && (
         <div className="um-modal-overlay">
           <div className="um-modal" style={{ maxWidth: "600px" }}>
-            <h3><i className="fas fa-graduation-cap"></i> Student Semester Promotion</h3>
-            <p style={{ fontSize: "0.88rem", color: "#64748b", marginBottom: "16px" }}>
-              Increment student semesters by 1. Students advancing to <strong>Semester 3</strong> will automatically transition from <strong>General Department</strong> back to their primary engineering branches with section assignments intact.
-            </p>
-
+            <div className="um-modal-header">
+              <h3><i className="fas fa-graduation-cap"></i> Semester Promotion</h3>
+              <button className="um-modal-close" onClick={() => setShowPromotionModal(false)}><i className="fas fa-times"></i></button>
+            </div>
             <form onSubmit={handleRunPromotion}>
-              <div className="form-group">
-                <label>Filter by Current Semester (Optional)</label>
-                <select
-                  value={promotionFilters.currentSemester}
-                  onChange={(e) => setPromotionFilters(prev => ({ ...prev, currentSemester: e.target.value }))}
-                >
-                  <option value="">All Semesters (1 through 5)</option>
-                  <option value="1">Semester 1 (Advances to Sem 2 - General Dept)</option>
-                  <option value="2">Semester 2 (Advances to Sem 3 - Transitions to Core Branch)</option>
-                  <option value="3">Semester 3 (Advances to Sem 4)</option>
-                  <option value="4">Semester 4 (Advances to Sem 5)</option>
-                  <option value="5">Semester 5 (Advances to Sem 6)</option>
-                </select>
-              </div>
+              <div className="um-modal-body">
+                <p style={{ fontSize: "0.85rem", color: "#64748b", margin: "0 0 16px 0", lineHeight: 1.5 }}>
+                  Increment student semesters by 1. Students advancing to <strong>Semester 3</strong> will automatically transition from <strong>General Department</strong> back to their primary engineering branches.
+                </p>
 
-              <div className="form-group">
-                <label>Filter by Batch Year (Optional)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 2026-2029 (Leave blank for all active)"
-                  value={promotionFilters.batch}
-                  onChange={(e) => setPromotionFilters(prev => ({ ...prev, batch: e.target.value }))}
-                />
-              </div>
-
-              <div className="form-group checkbox-group" style={{ marginTop: "12px" }}>
-                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
-                  <input
-                    type="checkbox"
-                    checked={promotionFilters.autoUpdateAcademicYear}
-                    onChange={(e) => setPromotionFilters(prev => ({ ...prev, autoUpdateAcademicYear: e.target.checked }))}
-                  />
-                  Auto-sync Academic Year using live calendar
-                </label>
-              </div>
-
-              {promotionResult && (
-                <div style={{
-                  backgroundColor: "#f0fdf4",
-                  border: "1px solid #bbf7d0",
-                  borderRadius: "8px",
-                  padding: "14px",
-                  marginTop: "16px",
-                  fontSize: "0.9rem",
-                  color: "#166534"
-                }}>
-                  <p style={{ fontWeight: "700", marginBottom: "8px" }}>
-                    ✅ Promotion Completed Successfully!
-                  </p>
-                  <ul style={{ margin: "0 0 10px 18px" }}>
-                    <li><strong>Total Processed:</strong> {promotionResult.totalProcessed}</li>
-                    <li><strong>Promoted to Next Semester:</strong> {promotionResult.promotedCount}</li>
-                    <li><strong>Transitioned from General Dept to Core:</strong> {promotionResult.transitionedCount}</li>
-                    <li><strong>Marked Graduated (Post-Sem 6):</strong> {promotionResult.graduatedCount}</li>
-                    <li><strong>Academic Year Applied:</strong> {promotionResult.academicYear}</li>
-                  </ul>
-
-                  {promotionResult.transitionedStudents && promotionResult.transitionedStudents.length > 0 && (
-                    <div style={{ marginTop: "10px", maxHeight: "150px", overflowY: "auto", borderTop: "1px solid #bbf7d0", paddingTop: "8px" }}>
-                      <p style={{ fontWeight: "600", fontSize: "0.85rem", color: "#14532d" }}>
-                        Transitioned Students (Entering 2nd Year):
-                      </p>
-                      {promotionResult.transitionedStudents.map(st => (
-                        <div key={st.studentId} style={{ fontSize: "0.8rem", color: "#166534", padding: "2px 0" }}>
-                          • {st.fullName} ({st.admissionNo}) → <strong>{st.toDepartment}</strong> {st.section ? `[${st.section}]` : ""}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                <div className="form-group">
+                  <label>Filter by Current Semester (Optional)</label>
+                  <select
+                    value={promotionFilters.currentSemester}
+                    onChange={(e) => setPromotionFilters(prev => ({ ...prev, currentSemester: e.target.value }))}
+                  >
+                    <option value="">All Semesters (1 through 5)</option>
+                    <option value="1">Semester 1 (Advances to Sem 2 - General Dept)</option>
+                    <option value="2">Semester 2 (Advances to Sem 3 - Transitions to Core Branch)</option>
+                    <option value="3">Semester 3 (Advances to Sem 4)</option>
+                    <option value="4">Semester 4 (Advances to Sem 5)</option>
+                    <option value="5">Semester 5 (Advances to Sem 6)</option>
+                  </select>
                 </div>
-              )}
 
-              <div className="um-modal-actions" style={{ marginTop: "20px" }}>
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={() => setShowPromotionModal(false)}
-                >
+                <div className="form-group">
+                  <label>Filter by Batch Year (Optional)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 2026-2029 (Leave blank for all active)"
+                    value={promotionFilters.batch}
+                    onChange={(e) => setPromotionFilters(prev => ({ ...prev, batch: e.target.value }))}
+                  />
+                </div>
+
+                <div className="form-group checkbox-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={promotionFilters.autoUpdateAcademicYear}
+                      onChange={(e) => setPromotionFilters(prev => ({ ...prev, autoUpdateAcademicYear: e.target.checked }))}
+                    />
+                    Auto-sync Academic Year using live calendar
+                  </label>
+                </div>
+
+                {promotionResult && (
+                  <div className="um-result-card">
+                    <h4>Promotion Completed Successfully</h4>
+                    <ul>
+                      <li><strong>Total Processed:</strong> {promotionResult.totalProcessed}</li>
+                      <li><strong>Promoted to Next Semester:</strong> {promotionResult.promotedCount}</li>
+                      <li><strong>Transitioned from General Dept to Core:</strong> {promotionResult.transitionedCount}</li>
+                      <li><strong>Marked Graduated (Post-Sem 6):</strong> {promotionResult.graduatedCount}</li>
+                      <li><strong>Academic Year Applied:</strong> {promotionResult.academicYear}</li>
+                    </ul>
+
+                    {promotionResult.transitionedStudents && promotionResult.transitionedStudents.length > 0 && (
+                      <div style={{ marginTop: "8px", maxHeight: "120px", overflowY: "auto", borderTop: "1px solid #bbf7d0", paddingTop: "8px" }}>
+                        <p style={{ fontWeight: "600", fontSize: "0.82rem", color: "#14532d", margin: "0 0 4px 0" }}>
+                          Transitioned Students (Entering 2nd Year):
+                        </p>
+                        {promotionResult.transitionedStudents.map(st => (
+                          <div key={st.studentId} style={{ fontSize: "0.8rem", color: "#166534", padding: "2px 0" }}>
+                            {st.fullName} ({st.admissionNo}) → <strong>{st.toDepartment}</strong> {st.section ? `[${st.section}]` : ""}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="um-modal-footer">
+                <button type="button" className="btn-secondary" onClick={() => setShowPromotionModal(false)}>
                   Close
                 </button>
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  disabled={promotionLoading}
-                  style={{ backgroundColor: "#1e3a8a", border: "none" }}
-                >
-                  {promotionLoading ? "Processing Promotion..." : "Execute Promotion Job"}
+                <button type="submit" className="btn-primary" disabled={promotionLoading}>
+                  {promotionLoading ? "Processing..." : "Execute Promotion"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* BULK TUTOR ASSIGNMENT MODAL */}
+      {showBulkTutorModal && (
+        <div className="um-modal-overlay">
+          <div className="um-modal" style={{ maxWidth: "560px" }}>
+            <div className="um-modal-header">
+              <h3><i className="fas fa-user-graduate"></i> Assign Class Tutors</h3>
+              <button className="um-modal-close" onClick={() => setShowBulkTutorModal(false)}><i className="fas fa-times"></i></button>
+            </div>
+            <form onSubmit={handleBulkAssignSubmit}>
+              <div className="um-modal-body">
+                <p style={{ fontSize: "0.85rem", color: "#64748b", margin: "0 0 16px 0" }}>
+                  Assign a class tutor to all students in a department for selected semesters.
+                </p>
+
+                <div className="form-group checkbox-group" style={{ marginBottom: "1rem" }}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={bulkTutorForm.isGeneralDepartment}
+                      onChange={(e) => setBulkTutorForm(prev => ({ ...prev, isGeneralDepartment: e.target.checked, department: "", tutorId: "", semesters: [] }))}
+                    />
+                    General Department students (Sem 1-2, matched by primary branch)
+                  </label>
+                </div>
+
+                <div className="form-group">
+                  <label>{bulkTutorForm.isGeneralDepartment ? "Primary Branch *" : "Department *"}</label>
+                  <select
+                    value={bulkTutorForm.department}
+                    onChange={(e) => handleBulkTutorDeptChange(e.target.value)}
+                    required
+                  >
+                    <option value="">-- Select {bulkTutorForm.isGeneralDepartment ? "Primary Branch" : "Department"} --</option>
+                    {(bulkTutorForm.isGeneralDepartment ? primaryDepartments : distinctDepartments).map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                  {bulkTutorForm.isGeneralDepartment && primaryDepartments.length === 0 && (
+                    <small>No primary departments found.</small>
+                  )}
+                </div>
+
+                {bulkTutorForm.department && (
+                  <div className="form-group">
+                    <label>Class Tutor *</label>
+                    <select
+                      value={bulkTutorForm.tutorId}
+                      onChange={(e) => setBulkTutorForm(prev => ({ ...prev, tutorId: e.target.value }))}
+                      required
+                    >
+                      <option value="">-- Select Tutor --</option>
+                      {bulkTutorTutors.map(t => (
+                        <option key={t._id} value={t._id}>{t.fullName} ({t.email})</option>
+                      ))}
+                    </select>
+                    {bulkTutorTutors.length === 0 && (
+                      <small>No tutors found in this department.</small>
+                    )}
+                  </div>
+                )}
+
+                {bulkTutorForm.department && (
+                  <div className="form-group">
+                    <label>Semesters *</label>
+                    <div className="semester-pills">
+                      {[1, 2, 3, 4, 5, 6].map(sem => (
+                        <label
+                          key={sem}
+                          className={`semester-pill ${bulkTutorForm.semesters.includes(sem) ? "active" : ""}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={bulkTutorForm.semesters.includes(sem)}
+                            onChange={() => handleBulkTutorSemesterToggle(sem)}
+                            style={{ display: "none" }}
+                          />
+                          Sem {sem}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {bulkTutorResult && (
+                  <div className="um-result-card">
+                    <h4>Assignment Complete</h4>
+                    <p style={{ margin: 0 }}>{bulkTutorResult.message}</p>
+                  </div>
+                )}
+              </div>
+              <div className="um-modal-footer">
+                <button type="button" className="btn-secondary" onClick={() => setShowBulkTutorModal(false)}>Close</button>
+                <button type="submit" className="btn-primary" disabled={bulkTutorLoading}>
+                  {bulkTutorLoading ? "Assigning..." : "Assign Tutor"}
                 </button>
               </div>
             </form>

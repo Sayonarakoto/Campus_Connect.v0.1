@@ -20,7 +20,10 @@ const {
   getLeaveBalance,
   getDashboardSummary,
   getAttendanceSummary,
-  getDepartmentStudents
+  getDepartmentStudents,
+  assignTutor,
+  bulkAssignTutor,
+  getDistinctPrimaryDepartments
 } =
   require("../controllers/studentController");
 
@@ -129,6 +132,49 @@ router.get(
     }
 
   }
+);
+
+/* =========================
+   ASSIGN TUTOR TO STUDENT
+   (must be before /:studentId routes)
+========================= */
+
+router.put(
+  "/assign-tutor/:studentId",
+  authMiddleware,
+  roleMiddleware(
+    "faculty",
+    "hod",
+    "tutor",
+    "principal",
+    "director",
+    "admin"
+  ),
+  assignTutor
+);
+
+/* =========================
+   BULK ASSIGN TUTOR
+========================= */
+
+router.put(
+  "/bulk-assign-tutor",
+  authMiddleware,
+  roleMiddleware(
+    "faculty",
+    "hod",
+    "tutor",
+    "principal",
+    "director",
+    "admin"
+  ),
+  bulkAssignTutor
+);
+
+router.get(
+  "/primary-departments",
+  authMiddleware,
+  getDistinctPrimaryDepartments
 );
 
 router.get(

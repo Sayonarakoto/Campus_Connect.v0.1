@@ -60,6 +60,58 @@ for (const sp of SPECIAL_PASS_DEFAULTS) {
   DEFAULT_PERMISSIONS.push(sp);
 }
 
+// Ensure AcademicCalendarController is present in DEFAULT_PERMISSIONS
+const ACADEMIC_CALENDAR_DEFAULTS = [
+  {
+    role: "hod",
+    masterMenuId: "Academic Calendar",
+    controller: "AcademicCalendarController",
+    moduleTitle: "Academic Calendar",
+    path: "/academic-calendar",
+    icon: "fas fa-calendar-alt",
+    actions: { list: true, add: true, update: true, delete: true, download: true }
+  },
+  {
+    role: "principal",
+    masterMenuId: "Academic Calendar",
+    controller: "AcademicCalendarController",
+    moduleTitle: "Academic Calendar",
+    path: "/academic-calendar",
+    icon: "fas fa-calendar-alt",
+    actions: { list: true, add: true, update: true, delete: true, download: true }
+  },
+  {
+    role: "director",
+    masterMenuId: "Academic Calendar",
+    controller: "AcademicCalendarController",
+    moduleTitle: "Academic Calendar",
+    path: "/academic-calendar/dashboard",
+    icon: "fas fa-calendar-alt",
+    actions: { list: true, add: false, update: false, delete: false, download: true }
+  },
+  {
+    role: "admin",
+    masterMenuId: "Academic Calendar",
+    controller: "AcademicCalendarController",
+    moduleTitle: "Academic Calendar",
+    path: "/academic-calendar",
+    icon: "fas fa-calendar-alt",
+    actions: { list: true, add: true, update: true, delete: true, download: true }
+  },
+  {
+    role: "faculty",
+    masterMenuId: "Academic Calendar",
+    controller: "AcademicCalendarController",
+    moduleTitle: "Academic Calendar",
+    path: "/academic-calendar",
+    icon: "fas fa-calendar-alt",
+    actions: { list: true, add: false, update: false, delete: false, download: true }
+  }
+];
+for (const ac of ACADEMIC_CALENDAR_DEFAULTS) {
+  DEFAULT_PERMISSIONS.push(ac);
+}
+
 /**
  * Get permissions for a specific role or all permissions
  * GET /api/permissions?role=...

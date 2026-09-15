@@ -33,6 +33,28 @@ async function getUserManagementAccess(req) {
   };
 }
 
+// GET /api/users/tutors-by-department?department=XYZ
+exports.getTutorsByDepartment = async (req, res) => {
+  try {
+    const { activeRole, department: accessDepartment } = await getUserManagementAccess(req);
+    const targetDept = req.query.department || accessDepartment;
+
+    if (!targetDept) {
+      return res.status(400).json({ success: false, message: "Department is required." });
+    }
+
+    const tutors = await User.find({
+      department: new RegExp(`^${targetDept.trim()}$`, "i"),
+      $or: [{ role: "tutor" }, { roles: "tutor" }]
+    }).select("fullName email department");
+
+    return res.status(200).json({ success: true, tutors });
+  } catch (err) {
+    console.error("Error fetching tutors:", err);
+    return res.status(500).json({ success: false, message: "Failed to fetch tutors." });
+  }
+};
+
 // GET /api/users
 exports.getUsers = async (req, res) => {
   try {
@@ -76,7 +98,9 @@ exports.getUsers = async (req, res) => {
     const studentUserIds = users.filter(u => u.role === "student").map(u => u._id);
     let studentMap = {};
     if (studentUserIds.length > 0) {
-      const students = await Student.find({ user: { $in: studentUserIds } }).select("user admissionNo regNo semester section");
+      const students = await Student.find({ user: { $in: studentUserIds } })
+        .select("user admissionNo regNo semester section tutor primaryDepartment isGeneralDepartment")
+        .populate("tutor", "fullName email");
       students.forEach(s => {
         studentMap[s.user.toString()] = s;
       });
@@ -90,7 +114,11 @@ exports.getUsers = async (req, res) => {
         profilePhotoUrl: getProfilePhotoUrl(user.profilePhoto),
         admissionNo: studentInfo ? studentInfo.admissionNo : (uObj.customData?.admissionNo || null),
         regNo: studentInfo ? studentInfo.regNo : null,
-        semester: studentInfo ? studentInfo.semester : null
+        semester: studentInfo ? studentInfo.semester : null,
+        tutor: studentInfo && studentInfo.tutor ? studentInfo.tutor : null,
+        studentRecordId: studentInfo ? studentInfo._id : null,
+        primaryDepartment: studentInfo ? studentInfo.primaryDepartment : null,
+        isGeneralDepartment: studentInfo ? studentInfo.isGeneralDepartment : false
       };
     });
 

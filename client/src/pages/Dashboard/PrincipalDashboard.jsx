@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { faCheckSquare, faHistory } from "@fortawesome/free-solid-svg-icons";
+import { faCheckSquare, faHistory, faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
 import "./WorkDashboard.css";
 import DashboardCard from "./DashboardCard";
 import { usePermissions } from "../../context/PermissionContext";
@@ -30,6 +30,22 @@ function PrincipalDashboard() {
       icon: faHistory,
       path: "/audit-dashboard",
       controller: "AuditController",
+      action: "list"
+    },
+    {
+      title: "Academic Calendar",
+      description: "View and manage all academic programs institution-wide.",
+      icon: faCalendarAlt,
+      path: "/academic-calendar",
+      controller: "AcademicCalendarController",
+      action: "list"
+    },
+    {
+      title: "Calendar Dashboard",
+      description: "View department-wise program statistics and completion rates.",
+      icon: faCalendarAlt,
+      path: "/academic-calendar/dashboard",
+      controller: "AcademicCalendarController",
       action: "list"
     }
   ].filter((card) => hasAccess(card.controller, card.action));

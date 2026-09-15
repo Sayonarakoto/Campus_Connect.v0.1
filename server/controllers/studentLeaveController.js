@@ -91,10 +91,18 @@ exports.applyLeave = async (req, res) => {
 
 exports.myLeaves = async (req, res) => {
   try {
-    const student = await Student.findOne({ user: req.user.id });
+    const student = await Student.findOne({ user: req.user.id })
+      .populate("parent", "fullName email phoneNumber")
+      .populate("tutor", "fullName email phoneNumber");
+
     if (!student) return res.status(404).json({ success: false, message: "Student profile not found" });
-    const leaves = await StudentLeave.find({ student: student._id }).sort({ createdAt: -1 });
-    return res.status(200).json({ success: true, leaves });
+
+    const leaves = await StudentLeave.find({ student: student._id })
+      .populate("student", "fullName admissionNo regNo department semester section batchYear primaryDepartment")
+      .populate("approvedBy", "fullName role")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({ success: true, leaves, student });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }

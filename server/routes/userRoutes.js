@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
-const { getUsers, createUser, updateUser, deleteUser } = require("../controllers/userController");
+const { getUsers, createUser, updateUser, deleteUser, getTutorsByDepartment } = require("../controllers/userController");
 
 router.use(authMiddleware);
 
+router.get("/tutors-by-department", getTutorsByDepartment);
 router.get("/", getUsers);
 router.post("/", createUser);
 router.put("/:id", updateUser);

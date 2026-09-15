@@ -995,3 +995,565 @@ body {
 /* Tutor review */
 .tutor-leave-page { min-height: 100vh; padding: 42px 20px 72px; background: #f5f7fb; color: #172033; }.tutor-leave-header, .tutor-leave-table-card { width: min(100%, 1220px); margin-right: auto; margin-left: auto; }.tutor-leave-header { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 24px; }.tutor-leave-header h1 { margin: 8px 0; color: #0f1f3d; font-size: clamp(2rem, 4vw, 2.8rem); letter-spacing: -.045em; }.tutor-leave-header p { margin: 0; color: #64748b; }.tutor-leave-count { display: flex; align-items: baseline; gap: 7px; padding: 12px 15px; border: 1px solid #bfdbfe; border-radius: 13px; background: #eff6ff; color: #2563eb; }.tutor-leave-count strong { font-size: 1.5rem; }.tutor-leave-count span { font-size: .75rem; font-weight: 800; }.tutor-leave-table-card { overflow: hidden; border: 1px solid #e2e8f0; border-radius: 18px; background: #fff; box-shadow: 0 18px 50px rgba(15,31,61,.08); }.tutor-leave-table-wrap { overflow-x: auto; }.tutor-leave-table-wrap .leaves-table { min-width: 980px; margin: 0; }.tutor-leave-table-wrap .leaves-table th { padding: 15px 16px; background: #f8fafc; color: #64748b; font-size: .68rem; letter-spacing: .07em; text-transform: uppercase; }.tutor-leave-table-wrap .leaves-table td { padding: 16px; border-bottom: 1px solid #eef2f7; }.tutor-leave-table-wrap .leaves-table tbody tr:hover { background: #fbfdff; }.tutor-route-chip { display: inline-flex; padding: 6px 8px; border-radius: 999px; font-size: .66rem; font-weight: 800; white-space: nowrap; }.tutor-route-chip.parent { background: #fef3c7; color: #92400e; }.tutor-route-chip.direct { background: #ede9fe; color: #6d28d9; }.tutor-leave-table-wrap .approve-btn, .tutor-leave-table-wrap .reject-btn, .tutor-leave-table-wrap .remarks-btn { border: 0; border-radius: 8px; padding: 8px 10px; font-size: .72rem; font-weight: 800; cursor: pointer; }.tutor-leave-table-wrap .approve-btn { background: #dcfce7; color: #166534; }.tutor-leave-table-wrap .reject-btn { background: #ffe4e6; color: #be123c; }.tutor-leave-table-wrap .remarks-btn { margin-left: 4px; background: #eef4ff; color: #2563eb; }.tutor-leave-table-wrap .table-footer { padding: 14px 16px; border-top: 1px solid #eef2f7; }.tutor-leave-page .loading-state { display: grid; min-height: 340px; place-items: center; align-content: center; gap: 10px; color: #64748b; }.tutor-leave-page .spinner, .parent-leave-spinner { border-radius: 50%; }
 @media (max-width: 620px) { .tutor-leave-page { padding: 30px 15px 52px; }.tutor-leave-header { align-items: flex-start; flex-direction: column; }.tutor-leave-count { align-self: flex-start; } }
+
+/* ===================================================
+   MY STUDENT LEAVES DASHBOARD & ENRICHED TABLE
+=================================================== */
+
+.student-my-leaves-page {
+  min-height: 100vh;
+  padding: 36px 24px 72px;
+  background: #f8fafc;
+  color: #1e293b;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.my-leaves-header-wrap {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.my-leaves-header-wrap h1 {
+  margin: 6px 0;
+  font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+}
+
+.my-leaves-header-wrap p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.sl-eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #0284c7;
+}
+
+.my-leaves-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sl-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0284c7;
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+  transition: all 0.2s;
+}
+
+.sl-btn-primary:hover {
+  background: #0369a1;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.sl-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sl-btn-secondary:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Metric cards */
+.sl-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.sl-metric-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+.sl-metric-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sl-metric-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.sl-metric-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.sl-metric-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.sl-metric-card.total .sl-metric-icon { background: #f0f9ff; color: #0284c7; }
+.sl-metric-card.approved .sl-metric-icon { background: #f0fdf4; color: #16a34a; }
+.sl-metric-card.pending .sl-metric-icon { background: #fefce8; color: #ca8a04; }
+.sl-metric-card.rejected .sl-metric-icon { background: #fef2f2; color: #dc2626; }
+
+/* Filter strip */
+.sl-filters-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #ffffff;
+  padding: 14px 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.sl-search-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 8px 14px;
+  flex: 1;
+  max-width: 420px;
+  position: relative;
+}
+
+.sl-search-input-wrap i {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.sl-search-input-wrap input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 0.88rem;
+  color: #1e293b;
+}
+
+.sl-clear-search {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.sl-filter-selects {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sl-filter-selects select {
+  padding: 8px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+.sl-filter-selects select:focus {
+  border-color: #0284c7;
+}
+
+/* Error Notice */
+.sl-error-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+/* Table Card & Responsive Table */
+.sl-table-card {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+  overflow: hidden;
+}
+
+.sl-table-responsive {
+  overflow-x: auto;
+}
+
+.sl-custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  min-width: 900px;
+}
+
+.sl-custom-table th {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 16px 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.sl-custom-table td {
+  padding: 16px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  font-size: 0.88rem;
+  color: #334155;
+}
+
+.sl-custom-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* Specific Cells */
+.sl-appid-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sl-appid-cell strong {
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.sl-appid-cell small {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.sl-type-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.sl-type-pill.casual {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.sl-type-pill.medical {
+  background: #fdf2f8;
+  color: #be185d;
+}
+
+.sl-schedule-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sl-schedule-cell span {
+  font-weight: 600;
+  color: #1e293b;
+  text-transform: capitalize;
+}
+
+.sl-schedule-cell small {
+  color: #64748b;
+  font-size: 0.75rem;
+  text-transform: capitalize;
+}
+
+.sl-date-range-cell {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+}
+
+.sl-date-range-cell i {
+  color: #0284c7;
+  font-size: 0.85rem;
+}
+
+.sl-days-badge {
+  display: inline-block;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.sl-reason-cell {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #475569;
+}
+
+.sl-route-badge {
+  display: inline-flex;
+  padding: 4px 9px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sl-route-badge.direct {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.sl-route-badge.parent {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Status Badges */
+.sl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.sl-badge-approved {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.sl-badge-pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.sl-badge-rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.sl-badge-verified {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+/* Action Buttons in Rows */
+.sl-action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.sl-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.88rem;
+  transition: all 0.2s;
+}
+
+.sl-action-btn.view {
+  background: #f0f9ff;
+  color: #0284c7;
+  border: 1px solid #bae6fd;
+}
+
+.sl-action-btn.view:hover {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.sl-action-btn.pdf {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.sl-action-btn.pdf:hover {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+/* Loading & Empty States */
+.sl-loading-state,
+.sl-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.sl-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #0284c7;
+  border-radius: 50%;
+  animation: slSpin 0.8s linear infinite;
+  margin-bottom: 14px;
+}
+
+@keyframes slSpin {
+  to { transform: rotate(360deg); }
+}
+
+.sl-empty-icon {
+  width: 60px;
+  height: 60px;
+  background: #f1f5f9;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.6rem;
+  margin-bottom: 16px;
+}
+
+.sl-empty-state h3 {
+  margin: 0 0 8px;
+  color: #1e293b;
+  font-size: 1.15rem;
+}
+
+.sl-empty-state p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  max-width: 380px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .sl-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .student-my-leaves-page {
+    padding: 24px 16px 60px;
+  }
+
+  .my-leaves-header-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .my-leaves-header-actions {
+    width: 100%;
+  }
+
+  .sl-btn-primary {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .sl-filters-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sl-search-input-wrap {
+    max-width: 100%;
+  }
+
+  .sl-filter-selects {
+    width: 100%;
+  }
+
+  .sl-filter-selects select {
+    flex: 1;
+  }
+}
+
+@media (max-width: 540px) {
+  .sl-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

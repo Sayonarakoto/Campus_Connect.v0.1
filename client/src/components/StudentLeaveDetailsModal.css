@@ -1,0 +1,341 @@
+/* ===================================================
+   STUDENT LEAVE DETAILS MODAL - RESPONSIVE STYLES
+=================================================== */
+
+.student-leave-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  padding: 16px;
+  animation: sldmFadeIn 0.2s ease-out;
+}
+
+@keyframes sldmFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.student-leave-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  animation: sldmSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes sldmSlideUp {
+  from {
+    transform: translateY(20px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Header */
+.student-leave-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: #0f172a;
+  color: #ffffff;
+  border-bottom: 1px solid #1e293b;
+}
+
+.student-leave-modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.student-leave-modal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #38bdf8;
+  font-size: 1.25rem;
+}
+
+.student-leave-modal-title h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.student-leave-modal-title span {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.student-leave-modal-close {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #94a3b8;
+  font-size: 1.5rem;
+  line-height: 1;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.student-leave-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* Body */
+.student-leave-modal-body {
+  padding: 22px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Section common */
+.sldm-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sldm-section-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sldm-section-title i {
+  color: #0284c7;
+}
+
+/* Grid Layouts */
+.sldm-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.sldm-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.sldm-info-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sldm-info-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.03em;
+}
+
+.sldm-info-value {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+.sldm-highlight {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.sldm-highlight .sldm-info-value {
+  color: #166534;
+  font-weight: 700;
+}
+
+/* Reason box */
+.sldm-reason-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #0284c7;
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: #334155;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Certificate pill */
+.sldm-cert-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-self: flex-start;
+}
+
+.sldm-cert-btn:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+/* Status Pill */
+.sldm-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.sldm-status-pill.approved {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.sldm-status-pill.pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.sldm-status-pill.rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.sldm-status-pill.verified {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+/* Footer */
+.student-leave-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  gap: 12px;
+}
+
+.sldm-pdf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+}
+
+.sldm-pdf-btn:hover {
+  background: #0369a1;
+  transform: translateY(-1px);
+}
+
+.sldm-close-btn {
+  padding: 11px 20px;
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sldm-close-btn:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+  .student-leave-modal-card {
+    max-height: 95vh;
+    border-radius: 16px;
+  }
+
+  .student-leave-modal-header {
+    padding: 16px 18px;
+  }
+
+  .student-leave-modal-body {
+    padding: 16px 18px;
+    gap: 16px;
+  }
+
+  .sldm-grid-2,
+  .sldm-grid-3 {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .student-leave-modal-footer {
+    flex-direction: column-reverse;
+    padding: 14px 18px;
+  }
+
+  .student-leave-modal-footer button {
+    width: 100%;
+    justify-content: center;
+  }
+}

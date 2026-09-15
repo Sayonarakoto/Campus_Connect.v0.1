@@ -212,6 +212,20 @@ function DirectorDashboard() {
           <h4>Faculty Duty Leaves</h4>
           <p>View Faculty Duty-Leaves</p>
         </div>
+        <div
+          className="module-card"
+          onClick={() => navigate("/academic-calendar/dashboard")}
+        >
+          <h4>Academic Calendar Dashboard</h4>
+          <p>View department-wise program statistics and completion rates.</p>
+        </div>
+        <div
+          className="module-card"
+          onClick={() => navigate("/academic-calendar")}
+        >
+          <h4>Academic Calendar</h4>
+          <p>View all academic programs across departments.</p>
+        </div>
       </div>
 
       {/* LOADING */}

@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { faCheckSquare, faQrcode, faGavel, faCalendarCheck, faUserClock, faCalendar } from "@fortawesome/free-solid-svg-icons";
+import { faCheckSquare, faQrcode, faGavel, faCalendarCheck, faUserClock, faCalendar, faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
 import "./WorkDashboard.css";
 import DashboardCard from "./DashboardCard";
 import { usePermissions } from "../../context/PermissionContext";
@@ -78,6 +78,14 @@ function HODDashboard() {
       icon: faCalendar,
       path: "/student/events",
       controller: "EventController",
+      action: "list"
+    },
+    {
+      title: "Academic Calendar",
+      description: "Manage department academic programs and schedule.",
+      icon: faCalendarAlt,
+      path: "/academic-calendar",
+      controller: "AcademicCalendarController",
       action: "list"
     }
   ].filter((card) => hasAccess(card.controller, card.action));

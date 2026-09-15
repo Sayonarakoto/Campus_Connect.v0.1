@@ -185,6 +185,7 @@ class FluentMigration {
           { role, controller: mod.controller },
           {
             $set: {
+              masterMenuId: mod.masterMenuId || "General Workspace",
               moduleTitle: mod.moduleTitle,
               path: mod.routePath,
               icon: mod.iconClass,

@@ -178,6 +178,9 @@ app.use("/api/sports-verification", require("./routes/sportsVerificationRoutes")
 // Events - UPDATED with GridFS support
 app.use("/api/events", require("./routes/eventRoutes"));
 
+// Academic Calendar
+app.use("/api/academic-calendar", require("./routes/academicCalendarRoutes"));
+
 // =======================
 // TEST ROUTE
 // =======================

@@ -124,7 +124,7 @@ exports.register = async (req, res) => {
     // HASH PASSWORD
     // ==========================================
     let hashedPassword = undefined;
-    if (password) {
+    if (password && role !== "parent") {
       hashedPassword = await bcrypt.hash(password, 10);
     }
 
@@ -400,7 +400,7 @@ exports.register = async (req, res) => {
       roles: [role],
       fullName,
       email: email.toLowerCase().trim(),
-      password: hashedPassword,
+      ...(role !== "parent" && hashedPassword ? { password: hashedPassword } : {}),
       ...(userPhone ? { phoneNumber: userPhone } : {}),
       ...(parsedDateOfJoining ? { dateOfJoining: parsedDateOfJoining } : {}),
       ...(operationalDepartment && ["student", "faculty", "tutor", "hod"].includes(role) ? { department: operationalDepartment } : {}),
@@ -490,6 +490,14 @@ exports.login = async (req, res) => {
     const { email, password, role, identifier: bodyIdentifier, username, employeeId, admissionNo, staffId } = req.body;
     let rawIdentifier = (email || admissionNo || bodyIdentifier || username || employeeId || staffId || "")?.toString().trim();
     let isBypassLogin = false;
+
+    // Parent login is strictly passwordless OTP verification
+    if (role === "parent") {
+      return res.status(400).json({
+        success: false,
+        message: "Parent authentication uses passwordless OTP verification. Please sign in via the Parent Portal."
+      });
+    }
 
     // Validate inputs
     if ((!rawIdentifier || !password) && role !== "security") {

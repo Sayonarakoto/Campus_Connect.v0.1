@@ -1,5 +1,9 @@
 // server/services/emailService.js
 const nodemailer = require("nodemailer");
+const dns = require("dns");
+
+// Force IPv4 for all outbound connections (Render does not support IPv6)
+dns.setDefaultResultOrder("ipv4first");
 
 /**
  * Creates and returns the configured Nodemailer transporter using environment variables.
@@ -18,11 +22,15 @@ function createTransporter() {
   return nodemailer.createTransport({
     host,
     port,
-    secure: port === 465, // true for 465, false for other ports
+    secure: port === 465,
+    requireTLS: port === 587,
     auth: {
       user,
       pass
-    }
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 5000,
+    socketTimeout: 10000
   });
 }
 

@@ -107,7 +107,7 @@ exports.createUser = async (req, res) => {
     const { activeRole, isHod, department: accessDepartment } = await getUserManagementAccess(req);
     const { fullName, email, role, department: requestedDepartment, password, section, isLabStaff } = req.body;
 
-    if (!fullName || !email || !role || !password) {
+    if (!fullName || !email || !role || (!password && role !== "parent")) {
       return res.status(400).json({ success: false, message: "Missing required fields" });
     }
 
@@ -149,14 +149,17 @@ exports.createUser = async (req, res) => {
       }
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    let hashedPassword = undefined;
+    if (password && roleLower !== "parent") {
+      hashedPassword = await bcrypt.hash(password, 10);
+    }
 
     const newUser = new User({
       fullName,
       email: email.toLowerCase().trim(),
       role: roleLower,
       roles: secondaryRoles,
-      password: hashedPassword,
+      ...(roleLower !== "parent" && hashedPassword ? { password: hashedPassword } : {}),
       department: requestedDepartment,
       section,
       isLabStaff: Boolean(isLabStaff)
@@ -234,7 +237,7 @@ exports.updateUser = async (req, res) => {
     if (isLabStaff !== undefined) targetUser.isLabStaff = isLabStaff;
     if (role && ["admin", "hraccounts", "hod"].includes(activeRole)) targetUser.role = newRoleLower;
     if (roles !== undefined) targetUser.roles = newSecondaryRoles;
-    if (password) targetUser.password = await bcrypt.hash(password, 10);
+    if (password && targetUser.role !== "parent") targetUser.password = await bcrypt.hash(password, 10);
 
     await targetUser.save();
     res.json({ success: true, message: "User updated successfully" });

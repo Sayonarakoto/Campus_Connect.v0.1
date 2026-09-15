@@ -608,7 +608,7 @@ function Register() {
           setLoading(false);
           return;
         }
-      } else {
+      } else if (normalizedRole !== "parent") {
         if (!formData.password || formData.password.length < 6) {
           showToast("Password must be at least 6 characters long.", "warning");
           setLoading(false);
@@ -650,7 +650,9 @@ function Register() {
       form.append("role", normalizedRole);
       form.append("fullName", formData.fullName.trim());
       form.append("email", formData.email.trim());
-      form.append("password", formData.password);
+      if (normalizedRole !== "parent" && formData.password) {
+        form.append("password", formData.password);
+      }
       if (normalizedRole !== "admin" && formData.phoneNumber) {
         form.append("phoneNumber", formData.phoneNumber.trim());
       }
@@ -679,8 +681,9 @@ function Register() {
         form.append("profilePhoto", profilePhoto);
       }
 
+      const API_BASE = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(/\/$/, "");
       const response = await fetch(
-        "http://localhost:5000/api/auth/register",
+        `${API_BASE}/api/auth/register`,
         {
           method: "POST",
           body: form

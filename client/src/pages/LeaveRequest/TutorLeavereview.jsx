@@ -3,7 +3,7 @@ import axios from "axios";
 import { generateStudentLeavePDF } from "../../utils/studentLeavePdfGenerator";
 import "./Leaves.css";
 
-const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(/\/$/, "");
 
 function TutorLeaveReview() {
   const [leaves, setLeaves] = useState([]);
@@ -11,8 +11,7 @@ function TutorLeaveReview() {
   const [imageErrors, setImageErrors] = useState({});
   const [selectedLeave, setSelectedLeave] = useState(null);
 
-  const token =
-    localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
   // =========================
   // GET PROFILE PHOTO URL
@@ -26,7 +25,7 @@ function TutorLeaveReview() {
     }
     
     // Fallback for old disk storage
-    if (typeof user.profilePhoto === 'string' && user.profilePhoto) {
+    if (typeof user.profilePhoto === "string" && user.profilePhoto) {
       return `${API}${user.profilePhoto}`;
     }
     
@@ -39,17 +38,12 @@ function TutorLeaveReview() {
   const loadLeaves = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(
-        `${API}/api/tutor-leaves/queue`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+      const res = await axios.get(`${API}/api/tutor-leaves/queue`, {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      );
+      });
 
-      console.log('📊 Loaded leaves:', res.data.leaves);
-      
       setLeaves(res.data.leaves || []);
     } catch (err) {
       console.error("Error loading leaves:", err);
@@ -67,7 +61,10 @@ function TutorLeaveReview() {
   // APPROVE
   // =========================
   const approve = async (leave) => {
-    const callConfirmed = leave.approvalMode === "class_tutor" ? window.confirm("Confirm that you called the parent offline before approving this request.") : true;
+    const callConfirmed =
+      leave.approvalMode === "class_tutor"
+        ? window.confirm("Confirm that you called the parent offline before approving this request.")
+        : true;
     if (!callConfirmed) return;
     const remarks = window.prompt("Optional approval remarks:", "Parent call completed") ?? "";
     if (!window.confirm("Are you sure you want to approve this leave request?")) return;
@@ -94,8 +91,7 @@ function TutorLeaveReview() {
   // REJECT
   // =========================
   const reject = async (leave) => {
-    const remarks =
-      prompt("Reason for rejection?");
+    const remarks = prompt("Reason for rejection?");
     if (remarks === null) return;
     if (!remarks.trim()) {
       alert("Please provide a reason for rejection");
@@ -133,27 +129,27 @@ function TutorLeaveReview() {
   // =========================
   const getStatusClass = (status) => {
     const statusMap = {
-      'pending': 'status-pending',
-      'approved': 'status-approved',
-      'rejected': 'status-rejected',
-      'cancelled': 'status-cancelled'
+      pending: "status-pending",
+      approved: "status-approved",
+      rejected: "status-rejected",
+      cancelled: "status-cancelled"
     };
-    return statusMap[status?.toLowerCase()] || 'status-pending';
+    return statusMap[status?.toLowerCase()] || "status-pending";
   };
 
   // =========================
   // FORMAT DATE
   // =========================
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
       });
     } catch {
-      return 'N/A';
+      return "N/A";
     }
   };
 
@@ -161,7 +157,7 @@ function TutorLeaveReview() {
   // HANDLE IMAGE ERROR
   // =========================
   const handleImageError = (studentId) => {
-    setImageErrors(prev => ({
+    setImageErrors((prev) => ({
       ...prev,
       [studentId]: true
     }));
@@ -198,164 +194,175 @@ function TutorLeaveReview() {
   return (
     <div className="tutor-leave-page">
       <div className="tutor-leave-header">
-        <div><span className="student-leave-eyebrow">Faculty workspace</span><h1>Student leave review</h1><p>Review requests assigned to your approval scope.</p></div>
-        <div className="tutor-leave-count"><strong>{leaves.length}</strong><span>pending</span></div>
+        <div>
+          <span className="student-leave-eyebrow">Faculty workspace</span>
+          <h1>Student leave review</h1>
+          <p>Review requests assigned to your approval scope.</p>
+        </div>
+        <div className="tutor-leave-count">
+          <strong>{leaves.length}</strong>
+          <span>pending</span>
+        </div>
       </div>
 
-      <div className="tutor-leave-table-card"><div className="tutor-leave-table-wrap"><table className="leaves-table">
-        <thead>
-          <tr>
-            <th>Student</th>
-            <th>Type</th>
-            <th>Days</th>
-            <th>Dates</th>
-            <th>Route</th>
-            <th>Attendance %</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {leaves.length === 0 ? (
-            <tr>
-              <td colSpan="8" className="no-leaves">
-                <div className="empty-state">
-                  <span className="empty-icon">📋</span>
-                  <p>No pending leave requests</p>
-                  <small>All caught up!</small>
-                </div>
-              </td>
-            </tr>
-          ) : (
-            leaves.map((leave) => {
-              const attendance = leave.student?.attendancePercentage || 0;
-              const student = leave.student || {};
-              const user = student.user || {};
-              
-              // Get profile photo URL
-              const photoUrl = getProfilePhotoUrl(user);
-              const hasImageError = imageErrors[student._id];
-              
-              console.log(`📸 Student: ${student.fullName}, Photo URL:`, photoUrl);
-
-              return (
-                <tr key={leave._id}>
-                  {/* ===========================
-                      STUDENT WITH PHOTO
-                  =========================== */}
-                  <td>
-                    <div className="student-info">
-                      {photoUrl && !hasImageError ? (
-                        <img
-                          className="student-avatar"
-                          src={photoUrl}
-                          alt={student.fullName || 'Student'}
-                          onError={() => handleImageError(student._id)}
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="student-avatar-placeholder">
-                          {(student.fullName || 'S').charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <div className="student-details">
-                        <strong>
-                          {student.fullName || 'Unknown Student'}
-                        </strong>
-                        <br/>
-                        <small>
-                          Admission No: {student.admissionNo || 'N/A'}
-                        </small>
-                        <br/>
-                        <small>
-                          {student.department || 'No Department'}
-                        </small>
-                      </div>
+      <div className="tutor-leave-table-card">
+        <div className="tutor-leave-table-wrap">
+          <table className="leaves-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Type</th>
+                <th>Days</th>
+                <th>Dates</th>
+                <th>Attendance %</th>
+                <th>Status</th>
+                <th>Actions</th>
+                <th>Route</th>
+              </tr>
+            </thead>
+            <tbody>
+              {leaves.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="no-leaves">
+                    <div className="empty-state">
+                      <span className="empty-icon">📋</span>
+                      <p>No pending leave requests</p>
+                      <small>All caught up!</small>
                     </div>
                   </td>
-
-                  {/* Leave Type */}
-                  <td>
-                    <span className="leave-type-badge">
-                      {leave.leaveType || 'N/A'}
-                    </span>
-                  </td>
-
-                  {/* Days */}
-                  <td className="days-cell">
-                    {leave.daysRequested || leave.days || 0}
-                  </td>
-
-                  {/* Dates */}
-                  <td className="dates-cell">
-                    <div>
-                      <span className="date-label">From:</span>
-                      {formatDate(leave.fromDate || leave.startDate)}
-                    </div>
-                    <div>
-                      <span className="date-label">To:</span>
-                      {formatDate(leave.toDate || leave.endDate)}
-                    </div>
-                  </td>
-
-                  {/* Attendance */}
-                  <td className={getAttendanceClass(attendance)}>
-                    {attendance}%
-                  </td>
-
-                  {/* Status */}
-                  <td>
-                    <span className={`status-badge ${getStatusClass(leave.status)}`}>
-                      {leave.status || 'Pending'}
-                    </span>
-                  </td>
-
-                  {/* Actions */}
-                  <td>
-                    <button
-                      className="approve-btn"
-                      onClick={() => approve(leave)}
-                    >
-                      Approve
-                    </button>
-                    <button
-                      className="reject-btn"
-                      onClick={() => reject(leave)}
-                    >
-                      Reject
-                    </button>
-                    {leave.remarks && (
-                      <button
-                        className="remarks-btn"
-                        onClick={() => alert(`Remarks: ${leave.remarks}`)}
-                        title="View remarks"
-                      <button
-                        className="remarks-btn"
-                        onClick={() => alert(`Remarks: ${leave.remarks}`)}
-                        title="View remarks"
-                      >
-                        💬
-                      </button>
-                    )}
-                    <button className="remarks-btn" onClick={() => setSelectedLeave(leave)} title="View student and parent details" aria-label="View student and parent details">👁</button>
-                    <button
-                      className="remarks-btn"
-                      onClick={() => generateStudentLeavePDF(leave, leave.student)}
-                      title="Download Student Leave Form PDF"
-                      aria-label="Download Student Leave Form PDF"
-                      style={{ background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca" }}
-                    >
-                      📄
-                    </button>
-                  </td>
-
-                  <td><span className={`tutor-route-chip ${leave.approvalMode === "class_tutor" ? "direct" : "parent"}`}>{leave.approvalMode === "class_tutor" ? "Tutor direct" : "Parent → tutor"}</span></td>
                 </tr>
-              );
-            })
-          )}
-        </tbody>
-      </table></div></div>
+              ) : (
+                leaves.map((leave) => {
+                  const attendance = leave.student?.attendancePercentage || 0;
+                  const student = leave.student || {};
+                  const user = student.user || {};
+                  
+                  // Get profile photo URL
+                  const photoUrl = getProfilePhotoUrl(user);
+                  const hasImageError = imageErrors[student._id];
+
+                  return (
+                    <tr key={leave._id}>
+                      {/* ===========================
+                          STUDENT WITH PHOTO
+                      =========================== */}
+                      <td>
+                        <div className="student-info">
+                          {photoUrl && !hasImageError ? (
+                            <img
+                              className="student-avatar"
+                              src={photoUrl}
+                              alt={student.fullName || "Student"}
+                              onError={() => handleImageError(student._id)}
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="student-avatar-placeholder">
+                              {(student.fullName || "S").charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="student-details">
+                            <strong>{student.fullName || "Unknown Student"}</strong>
+                            <br />
+                            <small>Admission No: {student.admissionNo || "N/A"}</small>
+                            <br />
+                            <small>{student.department || "No Department"}</small>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Leave Type */}
+                      <td>
+                        <span className="leave-type-badge">
+                          {leave.leaveType || "N/A"}
+                        </span>
+                      </td>
+
+                      {/* Days */}
+                      <td className="days-cell">
+                        {leave.daysRequested || leave.days || 0}
+                      </td>
+
+                      {/* Dates */}
+                      <td className="dates-cell">
+                        <div>
+                          <span className="date-label">From:</span>
+                          {formatDate(leave.fromDate || leave.startDate)}
+                        </div>
+                        <div>
+                          <span className="date-label">To:</span>
+                          {formatDate(leave.toDate || leave.endDate)}
+                        </div>
+                      </td>
+
+                      {/* Attendance */}
+                      <td className={getAttendanceClass(attendance)}>
+                        {attendance}%
+                      </td>
+
+                      {/* Status */}
+                      <td>
+                        <span className={`status-badge ${getStatusClass(leave.status)}`}>
+                          {leave.status || "Pending"}
+                        </span>
+                      </td>
+
+                      {/* Actions */}
+                      <td>
+                        <button
+                          className="approve-btn"
+                          onClick={() => approve(leave)}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          className="reject-btn"
+                          onClick={() => reject(leave)}
+                        >
+                          Reject
+                        </button>
+                        {leave.remarks && (
+                          <button
+                            className="remarks-btn"
+                            onClick={() => alert(`Remarks: ${leave.remarks}`)}
+                            title="View remarks"
+                          >
+                            💬
+                          </button>
+                        )}
+                        <button
+                          className="remarks-btn"
+                          onClick={() => setSelectedLeave(leave)}
+                          title="View student and parent details"
+                          aria-label="View student and parent details"
+                        >
+                          👁
+                        </button>
+                        <button
+                          className="remarks-btn"
+                          onClick={() => generateStudentLeavePDF(leave, leave.student)}
+                          title="Download Student Leave Form PDF"
+                          aria-label="Download Student Leave Form PDF"
+                          style={{ background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca" }}
+                        >
+                          📄
+                        </button>
+                      </td>
+
+                      {/* Route */}
+                      <td>
+                        <span className={`tutor-route-chip ${leave.approvalMode === "class_tutor" ? "direct" : "parent"}`}>
+                          {leave.approvalMode === "class_tutor" ? "Tutor direct" : "Parent → tutor"}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       <div className="table-footer">
         <button className="refresh-btn" onClick={loadLeaves}>

@@ -20,10 +20,28 @@ const {
   getManualOverrideQueue,
   approveLeave,
   rejectLeave,
-  manualOverride
+  manualOverride,
+  getHistory,
+  downloadHistory
 } = require("../controllers/tutorLeaveController");
 
 const CONTROLLER_NAME = "TutorLeaveReviewController";
+
+router.get(
+  "/history",
+  authMiddleware,
+  roleMiddleware("faculty", "tutor", "hod", "admin"),
+  authorizeClaim(CONTROLLER_NAME, "list"),
+  getHistory
+);
+
+router.get(
+  "/history/export",
+  authMiddleware,
+  roleMiddleware("faculty", "tutor", "hod", "admin"),
+  authorizeClaim(CONTROLLER_NAME, "download"),
+  downloadHistory
+);
 
 router.get(
   "/queue",

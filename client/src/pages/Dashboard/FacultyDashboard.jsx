@@ -20,7 +20,8 @@ import {
   faGavel,
   faTrophy,
   faRunning,
-  faCalendarCheck
+  faCalendarCheck,
+  faHistory
 } from "@fortawesome/free-solid-svg-icons";
 import "./WorkDashboard.css";
 import DashboardCard from "./DashboardCard";
@@ -46,6 +47,11 @@ export default function FacultyDashboard() {
     user?.isTempHOD &&
     user?.tempHODUntil &&
     new Date(user.tempHODUntil) > new Date();
+
+  const canAccessTutorWorkspace =
+    ["admin", "hod", "tutor", "class_tutor"].includes(String(user.role || "").toLowerCase()) ||
+    (String(user.role || "").toLowerCase() === "faculty" &&
+      (user.roles || []).some((role) => ["tutor", "class_tutor"].includes(String(role).toLowerCase())));
 
   // Section 1: Faculty Operations
   const facultyWorkflowCards = [
@@ -128,8 +134,18 @@ export default function FacultyDashboard() {
       description: "Review and clear student leave requests.",
       icon: faTasks,
       path: "/tutor/review",
-      controller: "StudentLeaveController",
-      action: "list"
+      controller: "TutorLeaveReviewController",
+      action: "list",
+      requiresTutorWorkspace: true
+    },
+    {
+      title: "Student Leave History",
+      description: "Filter, review, and export student leave history.",
+      icon: faHistory,
+      path: "/tutor/leave-history",
+      controller: "TutorLeaveReviewController",
+      action: "list",
+      requiresTutorWorkspace: true
     },
     {
       title: "Student Duty Leave",
@@ -163,7 +179,10 @@ export default function FacultyDashboard() {
       controller: "StudentLeaveController",
       action: "update"
     }
-  ].filter((card) => hasAccess(card.controller, card.action));
+  ].filter((card) =>
+    (!card.requiresTutorWorkspace || canAccessTutorWorkspace) &&
+    hasAccess(card.controller, card.action)
+  );
 
   // Section 4: Attendance Operations
   const attendanceCards = [

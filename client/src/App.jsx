@@ -41,6 +41,7 @@ import MyStudentLeaves from "./pages/LeaveRequest/MyStudentLeaves";
 import ParentLeaveVerification from "./pages/LeaveRequest/ParentLeaveVerifaction";
 import TutorLeaveReview from "./pages/LeaveRequest/TutorLeavereview";
 import TutorManualOverride from "./pages/LeaveRequest/ManualOverride";
+import StudentLeaveHistory from "./pages/LeaveRequest/StudentLeaveHistory";
 
 import AuditTrail from "./pages/Audit/AuditTrails";
 
@@ -181,6 +182,7 @@ function App() {
           <Route path="/student-leave/parent" element={<ProtectedRoute><ParentLeaveVerification /></ProtectedRoute>} />
 
           <Route path="/tutor/review" element={<ProtectedRoute><TutorLeaveReview /></ProtectedRoute>} />
+          <Route path="/tutor/leave-history" element={<ProtectedRoute><StudentLeaveHistory /></ProtectedRoute>} />
           <Route path="/tutor/manual-override" element={<ProtectedRoute><TutorManualOverride /></ProtectedRoute>} />
 
           <Route path="/audit/:leaveId" element={<ProtectedRoute><AuditTrail /></ProtectedRoute>} />

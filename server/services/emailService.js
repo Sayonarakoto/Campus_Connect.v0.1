@@ -194,9 +194,41 @@ async function sendParentLoginOTP(email, fullName, otp) {
   return sendEmail({ to: email, subject, html });
 }
 
+async function sendStudentLeaveApprovalRequest({
+  email,
+  parentName,
+  studentName,
+  leaveType,
+  fromDate,
+  toDate,
+  reason,
+  portalUrl,
+  secureApprovalUrl
+}) {
+  const subject = `${studentName} has requested ${leaveType} leave`;
+  const html = `
+    <div style="max-width:620px;margin:24px auto;padding:28px;border:1px solid #e2e8f0;border-radius:16px;font-family:Arial,sans-serif;color:#172033">
+      <div style="padding-bottom:18px;border-bottom:3px solid #2563eb">
+        <h1 style="margin:0;color:#14284d;font-size:24px">Campus Connect</h1>
+        <p style="margin:6px 0 0;color:#64748b">Student leave approval</p>
+      </div>
+      <p style="font-size:16px;line-height:1.6">Dear <strong>${parentName || "Parent/Guardian"}</strong>,</p>
+      <p style="font-size:15px;line-height:1.6"><strong>${studentName}</strong> has applied for <strong>${leaveType}</strong> leave from <strong>${fromDate}</strong> to <strong>${toDate}</strong>.</p>
+      <p style="padding:14px;background:#f8fafc;border-radius:10px;color:#475569;line-height:1.5">${reason}</p>
+      <div style="margin:24px 0;text-align:center">
+        <a href="${secureApprovalUrl}" style="display:inline-block;margin:5px;padding:12px 18px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-weight:700">Approve leave</a>
+        <a href="${portalUrl}" style="display:inline-block;margin:5px;padding:12px 18px;background:#eef4ff;color:#1d4ed8;text-decoration:none;border-radius:8px;font-weight:700">Open parent portal</a>
+      </div>
+      <p style="font-size:13px;color:#64748b;line-height:1.5">The secure approval button is single-use and expires shortly. You may also sign in to the parent portal with your normal verification code.</p>
+    </div>`;
+
+  return sendEmail({ to: email, subject, html });
+}
+
 module.exports = {
   sendEmail,
   sendPasswordResetOTP,
   sendParentLoginOTP,
+  sendStudentLeaveApprovalRequest,
   verifyConnection
 };

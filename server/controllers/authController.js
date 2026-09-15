@@ -1623,6 +1623,7 @@ exports.getAppMenu = async (req, res) => {
   try {
     const Permission = require("../models/Permission");
     const activeRole = req.user.role?.toLowerCase();
+    const hasTutorRole = Array.isArray(req.user.roles) && req.user.roles.some((role) => ["tutor", "class_tutor"].includes(String(role).toLowerCase().trim()));
 
     // 1. Super Admin gets master menu with full permissions
     if (activeRole === "admin") {
@@ -1761,6 +1762,32 @@ exports.getAppMenu = async (req, res) => {
               path: "/student-leave/my",
               controller: p.controller,
               icon: "fas fa-clipboard-list",
+              permissions: p.actions
+            }
+          ];
+        }
+
+        if (p.controller === "TutorLeaveReviewController" &&
+          !(["tutor", "hod", "admin"].includes(activeRole) || (activeRole === "faculty" && hasTutorRole))) {
+          return [];
+        }
+
+        if (p.controller === "TutorLeaveReviewController") {
+          return [
+            {
+              masterMenuId: p.masterMenuId || "Leaves & Passes",
+              title: "Student Leave Review",
+              path: "/tutor/review",
+              controller: p.controller,
+              icon: "fas fa-clipboard-check",
+              permissions: p.actions
+            },
+            {
+              masterMenuId: p.masterMenuId || "Leaves & Passes",
+              title: "Student Leave History",
+              path: "/tutor/leave-history",
+              controller: p.controller,
+              icon: "fas fa-history",
               permissions: p.actions
             }
           ];

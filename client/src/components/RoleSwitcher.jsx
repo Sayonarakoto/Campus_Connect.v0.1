@@ -39,6 +39,28 @@ const RoleSwitcher = ({ user }) => {
     new Set([user.role, ...(user.roles || [])])
   ).filter((r) => r && !EXCLUDED_ROLES.includes(r.toLowerCase()));
 
+  const isFacultyClassTutor =
+    String(user.role || "").toLowerCase() === "faculty" &&
+    allRoles.some((role) => String(role).toLowerCase() === "tutor");
+
+  if (isFacultyClassTutor) {
+    return (
+      <div className="role-switcher-container role-badge-group" aria-label="Assigned workspaces">
+        <div className="role-switcher-header">
+          <span className="role-switcher-label">
+            <i className="fas fa-layer-group" aria-hidden="true"></i>
+            Assigned Workspaces
+          </span>
+          <span className="role-switcher-active-badge">Faculty active</span>
+        </div>
+        <div className="role-badge-group-list">
+          <span className="role-badge role-badge-primary">Faculty</span>
+          <span className="role-badge role-badge-secondary">Class Tutor</span>
+        </div>
+      </div>
+    );
+  }
+
   // If user only holds a single role, no switcher is needed
   if (allRoles.length <= 1) {
     return null;

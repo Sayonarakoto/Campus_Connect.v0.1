@@ -152,6 +152,63 @@ async function initializeWorkflowInstance({ moduleName, targetRefId, applicantId
   return { instance, resolution };
 }
 
+// Student leave has an explicit two-route workflow. It intentionally does not
+// resolve the configurable StudentLeave definition, because older definitions
+// may contain unrelated faculty/HOD steps.
+async function initializeStudentLeaveWorkflow({ targetRefId, applicantId, department, approvalMode, metadata = {} }) {
+  const instance = new ApprovalInstance({
+    moduleName: "StudentLeave",
+    targetRefId,
+    applicantId,
+    department,
+    currentStepOrder: 1,
+    currentRoleRequired: approvalMode === "parent" ? "parent" : "class_tutor",
+    workflowSource: "hardcoded_fallback",
+    metadata: { ...metadata, approvalMode, routeAware: true },
+    status: "Pending"
+  });
+  await instance.save();
+  return instance;
+}
+
+async function advanceStudentLeaveParentApproval({ instanceId, approverId }) {
+  if (!instanceId) return null;
+  const instance = await ApprovalInstance.findById(instanceId);
+  if (!instance || instance.status !== "Pending") return instance;
+  if (approverId) {
+    instance.history.push({
+      stepOrder: 1,
+      approverId,
+      role: "parent",
+      action: "Approved",
+      comment: "Parent approved the leave request.",
+      timestamp: new Date()
+    });
+  }
+  instance.currentStepOrder = 2;
+  instance.currentRoleRequired = "class_tutor";
+  instance.metadata = { ...(instance.metadata || {}), parentVerifiedAt: new Date() };
+  await instance.save();
+  return instance;
+}
+
+async function completeStudentLeaveWorkflow({ instanceId, approverId, role, action, comment = "" }) {
+  if (!instanceId) return null;
+  const instance = await ApprovalInstance.findById(instanceId);
+  if (!instance || instance.status !== "Pending") return instance;
+  instance.history.push({
+    stepOrder: instance.currentStepOrder,
+    approverId,
+    role: role || "class_tutor",
+    action,
+    comment: comment.trim(),
+    timestamp: new Date()
+  });
+  instance.status = action === "Rejected" ? "Rejected" : "Approved";
+  await instance.save();
+  return instance;
+}
+
 /**
  * Process an approver's action (Approve or Reject)
  */
@@ -328,6 +385,9 @@ module.exports = {
   HARDCODED_DEFAULT_WORKFLOWS,
   resolveWorkflowSteps,
   initializeWorkflowInstance,
+  initializeStudentLeaveWorkflow,
+  advanceStudentLeaveParentApproval,
+  completeStudentLeaveWorkflow,
   processApprovalAction,
   getPendingQueueForUser
 };

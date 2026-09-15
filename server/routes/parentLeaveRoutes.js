@@ -12,7 +12,8 @@ require("../middleware/roleMiddleware");
 
 const {
   getPendingLeaves,
-  verifyLeave
+  verifyLeave,
+  verifyByToken
 }
 =
 require(
@@ -30,7 +31,12 @@ router.put(
  "/verify/:id",
  authMiddleware,
  roleMiddleware("parent"),
- verifyLeave
+  verifyLeave
+);
+
+router.put(
+  "/verify-token/:token",
+  verifyByToken
 );
 
 module.exports =

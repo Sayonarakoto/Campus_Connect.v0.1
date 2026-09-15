@@ -135,6 +135,10 @@ app.use("/api/disciplinary", require("./routes/disciplinaryRoutes"));
 // Admin
 app.use("/api/admin", require("./routes/adminRoutes"));
 
+// User Management
+// UserManagement.jsx consumes /api/users for admin/HR/HOD CRUD operations.
+app.use("/api/users", require("./routes/userRoutes"));
+
 // Permissions & Claims Matrix
 app.use("/api/permissions", require("./routes/permissionRoutes"));
 

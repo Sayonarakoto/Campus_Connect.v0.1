@@ -6,6 +6,7 @@ const roleMiddleware = require("../middleware/roleMiddleware");
 const authorizeClaim = require("../middleware/claimMiddleware");
 
 const studentLeaveController = require("../controllers/studentLeaveController");
+const upload = require("../middleware/upload");
 
 // APPLY LEAVE
 router.post(
@@ -13,6 +14,7 @@ router.post(
   authMiddleware,
   roleMiddleware("student"),
   authorizeClaim("StudentLeaveController", "add"),
+  upload.uploadDocument,
   studentLeaveController.applyLeave
 );
 
@@ -34,5 +36,11 @@ router.get(
   ),
   authorizeClaim("StudentLeaveController", "list"),
   studentLeaveController.getFacultyPendingLeaves
+);
+
+router.get(
+  "/:id/medical-certificate",
+  authMiddleware,
+  studentLeaveController.getMedicalCertificate
 );
 module.exports = router;

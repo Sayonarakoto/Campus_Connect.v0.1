@@ -10,15 +10,41 @@ const getProfilePhotoUrl = (photoObj) => {
   return null;
 };
 
+async function getUserManagementAccess(req) {
+  const account = await User.findById(req.user.id).select("role roles department tempHODDepartment");
+  const roles = new Set([
+    String(req.user.role || "").toLowerCase(),
+    ...(Array.isArray(req.user.roles) ? req.user.roles : []).map((role) => String(role).toLowerCase().trim()),
+    String(account?.role || "").toLowerCase(),
+    ...(Array.isArray(account?.roles) ? account.roles : []).map((role) => String(role).toLowerCase().trim())
+  ]);
+
+  const isAdmin = roles.has("admin");
+  const isHod = !isAdmin && roles.has("hod");
+  const department = req.user.department || account?.department || (isHod ? account?.tempHODDepartment : null);
+
+  return {
+    account,
+    roles,
+    isAdmin,
+    isHod,
+    activeRole: isAdmin ? "admin" : isHod ? "hod" : String(account?.role || req.user.role || "").toLowerCase(),
+    department
+  };
+}
+
 // GET /api/users
 exports.getUsers = async (req, res) => {
   try {
-    const activeRole = req.user.role.toLowerCase();
+    const { activeRole, isHod, department: accessDepartment } = await getUserManagementAccess(req);
     const institutionalRoles = ["admin", "hraccounts", "principal", "director"];
     let query = {};
 
-    if (activeRole === "hod") {
-      query.department = req.user.department;
+    if (isHod) {
+      if (!accessDepartment) {
+        return res.status(403).json({ success: false, message: "Your HOD account has no department assigned. Contact an administrator." });
+      }
+      query.department = accessDepartment;
       query.role = { $in: ["faculty", "student", "tutor"] };
     } else if (!institutionalRoles.includes(activeRole)) {
       return res.status(403).json({ success: false, message: "Unauthorized access" });
@@ -26,7 +52,7 @@ exports.getUsers = async (req, res) => {
 
     const { role, department, search } = req.query;
     if (role && role !== "all") {
-      if (activeRole === "hod") {
+      if (isHod) {
         if (["faculty", "student", "tutor"].includes(role.toLowerCase())) {
           query.role = role.toLowerCase();
         }
@@ -35,7 +61,7 @@ exports.getUsers = async (req, res) => {
       }
     }
     if (department && department !== "all") {
-      if (activeRole !== "hod") {
+      if (!isHod) {
         query.department = department;
       }
     }
@@ -78,19 +104,19 @@ exports.getUsers = async (req, res) => {
 // POST /api/users
 exports.createUser = async (req, res) => {
   try {
-    const activeRole = req.user.role.toLowerCase();
-    const { fullName, email, role, department, password, section, isLabStaff } = req.body;
+    const { activeRole, isHod, department: accessDepartment } = await getUserManagementAccess(req);
+    const { fullName, email, role, department: requestedDepartment, password, section, isLabStaff } = req.body;
 
     if (!fullName || !email || !role || !password) {
       return res.status(400).json({ success: false, message: "Missing required fields" });
     }
 
     // RBAC validation
-    if (activeRole === "hod") {
+    if (isHod) {
       if (!["faculty", "student", "tutor"].includes(role)) {
         return res.status(403).json({ success: false, message: "HODs can only create faculty, student, or tutor roles." });
       }
-      if (department !== req.user.department) {
+      if (requestedDepartment !== accessDepartment) {
         return res.status(403).json({ success: false, message: "HODs can only create users in their own department." });
       }
     } else if (!["admin", "hraccounts"].includes(activeRole)) {
@@ -105,20 +131,20 @@ exports.createUser = async (req, res) => {
     // Enforce Class Tutor department quota: maximum 3 per department
     const isAssigningTutor = roleLower === "tutor" || secondaryRoles.includes("tutor");
     if (isAssigningTutor) {
-      if (!department || !department.trim()) {
+      if (!requestedDepartment || !requestedDepartment.trim()) {
         return res.status(400).json({
           success: false,
           message: "Department is required when assigning the Class Tutor role."
         });
       }
       const activeTutorCount = await User.countDocuments({
-        department: new RegExp(`^${department.trim()}$`, "i"),
+        department: new RegExp(`^${requestedDepartment.trim()}$`, "i"),
         $or: [{ role: "tutor" }, { roles: "tutor" }]
       });
       if (activeTutorCount >= 3) {
         return res.status(400).json({
           success: false,
-          message: `Department '${department}' has already reached the maximum limit of 3 Class Tutors.`
+          message: `Department '${requestedDepartment}' has already reached the maximum limit of 3 Class Tutors.`
         });
       }
     }
@@ -131,7 +157,7 @@ exports.createUser = async (req, res) => {
       role: roleLower,
       roles: secondaryRoles,
       password: hashedPassword,
-      department,
+      department: requestedDepartment,
       section,
       isLabStaff: Boolean(isLabStaff)
     });
@@ -155,22 +181,25 @@ exports.createUser = async (req, res) => {
 // PUT /api/users/:id
 exports.updateUser = async (req, res) => {
   try {
-    const activeRole = req.user.role.toLowerCase();
+    const { activeRole, isHod, department: accessDepartment } = await getUserManagementAccess(req);
     const { id } = req.params;
-    const { fullName, email, department, section, isLabStaff, role, roles, password } = req.body;
+    const { fullName, email, department: requestedDepartment, section, isLabStaff, role, roles, password } = req.body;
 
     const targetUser = await User.findById(id);
     if (!targetUser) return res.status(404).json({ success: false, message: "User not found" });
 
-    if (activeRole === "hod") {
-      if (targetUser.department !== req.user.department || !["faculty", "student", "tutor"].includes(targetUser.role)) {
+    if (isHod) {
+      if (!accessDepartment || targetUser.department !== accessDepartment || !["faculty", "student", "tutor"].includes(targetUser.role)) {
         return res.status(403).json({ success: false, message: "Unauthorized to update this user" });
+      }
+      if (requestedDepartment !== undefined && requestedDepartment !== accessDepartment) {
+        return res.status(403).json({ success: false, message: "HODs can only keep users in their own department." });
       }
     } else if (!["admin", "hraccounts"].includes(activeRole)) {
       return res.status(403).json({ success: false, message: "Unauthorized access" });
     }
 
-    const targetDept = department !== undefined ? department.trim() : targetUser.department;
+    const targetDept = requestedDepartment !== undefined ? requestedDepartment.trim() : targetUser.department;
     const newRoleLower = role ? role.toLowerCase().trim() : targetUser.role;
     const newSecondaryRoles = roles !== undefined
       ? (Array.isArray(roles) ? roles.map((r) => r.toLowerCase().trim()) : [])
@@ -200,7 +229,7 @@ exports.updateUser = async (req, res) => {
 
     targetUser.fullName = fullName || targetUser.fullName;
     targetUser.email = email ? email.toLowerCase().trim() : targetUser.email;
-    if (department !== undefined) targetUser.department = department;
+    if (requestedDepartment !== undefined) targetUser.department = requestedDepartment;
     if (section !== undefined) targetUser.section = section;
     if (isLabStaff !== undefined) targetUser.isLabStaff = isLabStaff;
     if (role && ["admin", "hraccounts", "hod"].includes(activeRole)) targetUser.role = newRoleLower;
@@ -221,7 +250,7 @@ exports.updateUser = async (req, res) => {
 // DELETE /api/users/:id
 exports.deleteUser = async (req, res) => {
   try {
-    const activeRole = req.user.role.toLowerCase();
+    const { activeRole } = await getUserManagementAccess(req);
     const { id } = req.params;
 
     if (!["admin", "hraccounts"].includes(activeRole)) {

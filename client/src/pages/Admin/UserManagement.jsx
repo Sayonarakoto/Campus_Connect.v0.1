@@ -360,10 +360,12 @@ function UserManagement() {
                   </td>
                   <td>{user.email}</td>
                   <td>
-                    <span className={`um-role-badge role-${user.role}`}>{user.role}</span>
+                    <span className={`um-role-badge role-${user.role}`}>
+                      {user.role === "faculty" ? "Faculty" : user.role === "tutor" ? "Class Tutor" : user.role}
+                    </span>
                     {user.roles && user.roles.includes("tutor") && user.role !== "tutor" && (
                       <span className="um-role-badge role-tutor" style={{ marginLeft: "0.35rem" }}>
-                        + Tutor
+                        Class Tutor
                       </span>
                     )}
                     {user.roles &&

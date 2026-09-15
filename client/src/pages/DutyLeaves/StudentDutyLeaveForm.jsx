@@ -91,7 +91,6 @@ function StudentDutyLeaveForm() {
     <main className="duty-leave-page">
       <section className="duty-leave-hero">
         <div>
-          <span className="duty-leave-eyebrow">Student services</span>
           <h1>Apply Duty Leave</h1>
           <p>Share the programme details and supporting proof for HOD review.</p>
         </div>

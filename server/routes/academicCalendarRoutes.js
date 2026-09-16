@@ -13,6 +13,14 @@ router.get("/ics/:id", controller.getIcsFile);
 // AUTHENTICATED ROUTES
 // ======================================
 
+// Get valid departments
+router.get(
+  "/departments",
+  authMiddleware,
+  roleMiddleware("admin", "director", "principal", "hod", "faculty"),
+  controller.getDepartments
+);
+
 // Get all programs (filtered by role/dept)
 router.get(
   "/",

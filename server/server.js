@@ -175,6 +175,13 @@ app.use("/api/attendance-corrections", require("./routes/attendanceCorrectionRou
 // Sports Verification
 app.use("/api/sports-verification", require("./routes/sportsVerificationRoutes"));
 
+// Sports Phase-1: houses, masters, workflow, results, reports
+app.use("/api/sports-houses", require("./routes/houseRoutes"));
+app.use("/api/sports-masters", require("./routes/sportsMasterRoutes"));
+app.use("/api/sports-workflow", require("./routes/sportsWorkflowRoutes"));
+app.use("/api/sports-results", require("./routes/sportsResultRoutes"));
+app.use("/api/sports-reports", require("./routes/sportsReportRoutes"));
+
 // Events - UPDATED with GridFS support
 app.use("/api/events", require("./routes/eventRoutes"));
 

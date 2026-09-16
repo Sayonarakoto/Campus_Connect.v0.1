@@ -33,6 +33,29 @@ const roleMiddleware = (...allowedRoles) => {
         userRoles.add("disciplinary_committee");
       }
 
+      // Sports committee variants: canonical "sports committee" (space) + legacy spellings
+      if (
+        userRoles.has("sports committee") ||
+        userRoles.has("sports-committee") ||
+        userRoles.has("sportscommittee")
+      ) {
+        userRoles.add("sports committee");
+        userRoles.add("sports-committee");
+        userRoles.add("sportscommittee");
+      }
+
+      // Phase-1 sports secondary flags: coordinators/captains keep base role,
+      // sports coordinator implies faculty-level sports access
+      if (
+        userRoles.has("sports_coordinator") ||
+        userRoles.has("sports coordinator") ||
+        userRoles.has("sports-coordinator")
+      ) {
+        userRoles.add("sports_coordinator");
+        userRoles.add("sports coordinator");
+        userRoles.add("sports-coordinator");
+      }
+
       // Check if user's roles match any of the allowed roles
       const hasPermission = allowedRoles.some((allowed) => userRoles.has(allowed));
       if (!hasPermission) {

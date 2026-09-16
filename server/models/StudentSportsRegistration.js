@@ -80,6 +80,37 @@ const StudentSportsRegistrationSchema = new mongoose.Schema(
       default: ""
     },
 
+    // Phase-1 approval workflow:
+    // PENDING_CAPTAIN -> PENDING_COORDINATOR -> PENDING_SPORTS_COORD -> APPROVED
+    // REJECTED can happen at captain/coordinator/sports-coord stage.
+    approvalStatus: {
+      type: String,
+      enum: [
+        "PENDING_CAPTAIN",
+        "PENDING_COORDINATOR",
+        "PENDING_SPORTS_COORD",
+        "APPROVED",
+        "REJECTED",
+        "WITHDRAWN"
+      ],
+      default: "PENDING_CAPTAIN"
+    },
+
+    approvalHistory: [{
+      action: { type: String },
+      by: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      at: { type: Date, default: Date.now },
+      remarks: { type: String, default: "" }
+    }],
+
+    // Denormalized house ObjectId for fast house-scoped queries
+    // (existing `house` string field kept for backward compat)
+    houseRef: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "House",
+      default: null
+    },
+
     registrationStatus: {
       type: String,
       enum: [

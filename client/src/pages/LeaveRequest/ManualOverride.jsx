@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "./Leaves.css"
 
+const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 function TutorManualOverride() {
   const [leaves, setLeaves] = useState([]);
@@ -12,7 +13,7 @@ function TutorManualOverride() {
   const loadLeaves = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/tutor-leaves/manual-queue",
+        `${API}/api/tutor-leaves/manual-queue`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -33,7 +34,7 @@ function TutorManualOverride() {
   const override = async (id) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/tutor-leaves/manual-override/${id}`,
+        `${API}/api/tutor-leaves/manual-override/${id}`,
         {
           remarks: remarks[id]
         },

@@ -47,7 +47,7 @@ exports.getPendingLeaves = async (req, res) => {
     })
       .populate({
         path: "applicantId",
-        select: "fullName email department primaryDepartment customData profilePhoto",
+        select: "fullName email department primaryDepartment designation phoneNumber customData profilePhoto",
         match: {
           $or: [
             { department: departmentRegex },
@@ -57,7 +57,7 @@ exports.getPendingLeaves = async (req, res) => {
       })
       .populate(
         "coverageFaculty",
-        "fullName email"
+        "fullName email department"
       );
 
     // Remove leaves whose applicant didn't match the department
@@ -152,7 +152,22 @@ exports.rejectLeave = async (req, res) => {
       });
     }
 
+    if (!["COVERAGE_ACCEPTED", "EMERGENCY_PENDING"].includes(leave.status)) {
+      return res.status(400).json({
+        success: false,
+        message: "This leave request is not waiting for HOD review."
+      });
+    }
+
     leave.status = "HOD_REJECTED";
+    leave.hodId = req.user.id;
+    leave.hodRemarks = req.body.remarks || "";
+    leave.hodVerifiedAt = new Date();
+    leave.auditLogs.push({
+      action: "HOD_REJECTED",
+      performedBy: req.user.id,
+      remarks: leave.hodRemarks
+    });
     await leave.save();
 
     res.json({
@@ -419,9 +434,21 @@ exports.directorRejectLeave = async (req, res) => {
       });
     }
 
+    if (leave.status !== "PRINCIPAL_REVIEWED") {
+      return res.status(400).json({
+        success: false,
+        message: "This leave request is not waiting for Director review."
+      });
+    }
+
     leave.status = "DIRECTOR_REJECTED";
-    leave.directorRemarks = req.body.remarks;
+    leave.directorRemarks = req.body.remarks || "";
     leave.directorId = req.user.id;
+    leave.auditLogs.push({
+      action: "DIRECTOR_REJECTED",
+      performedBy: req.user.id,
+      remarks: leave.directorRemarks
+    });
 
     await leave.save();
 
@@ -762,26 +789,27 @@ exports.getPendingCoverage = async (
 
   try {
 
+    const filter = {
+      coverageFaculty: req.user.id
+    };
+
+    if (req.query.status && req.query.status !== "ALL") {
+      filter.coverageStatus = req.query.status.toUpperCase();
+    } else if (!req.query.status) {
+      filter.coverageStatus = "PENDING";
+    }
+
     const requests =
-      await StaffLeave.find({
-
-        coverageFaculty:
-          req.user.id,
-
-        coverageStatus:
-          "PENDING"
-
-      })
-
+      await StaffLeave.find(filter)
       .populate(
         "applicantId",
-        "fullName email"
+        "fullName email department primaryDepartment designation profilePhoto phoneNumber"
       )
-
       .populate(
         "coverageFaculty",
-        "fullName"
-      );
+        "fullName email department"
+      )
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,

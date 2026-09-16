@@ -8,7 +8,7 @@ function StudentLeaveHistory() {
   const token = localStorage.getItem("token");
   const [leaves, setLeaves] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
-  const [filters, setFilters] = useState({ fromDate: "", toDate: "", semester: "", student: "", status: "", approvalMode: "" });
+  const [filters, setFilters] = useState({ fromDate: "", toDate: "", semester: "", student: "", status: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -33,7 +33,7 @@ function StudentLeaveHistory() {
   useEffect(() => { loadHistory(1); }, [filters]);
 
   const updateFilter = (name, value) => setFilters((current) => ({ ...current, [name]: value }));
-  const clearFilters = () => setFilters({ fromDate: "", toDate: "", semester: "", student: "", status: "", approvalMode: "" });
+  const clearFilters = () => setFilters({ fromDate: "", toDate: "", semester: "", student: "", status: "" });
   const download = async () => {
     try {
       const response = await axios.get(`${API}/api/tutor-leaves/history/export?${query.toString()}`, {
@@ -70,15 +70,14 @@ function StudentLeaveHistory() {
       <label>Semester<select value={filters.semester} onChange={(e) => updateFilter("semester", e.target.value)}><option value="">All</option>{[1,2,3,4,5,6].map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
       <label>Student / admission no.<input value={filters.student} onChange={(e) => updateFilter("student", e.target.value)} placeholder="Search student" /></label>
       <label>Status<select value={filters.status} onChange={(e) => updateFilter("status", e.target.value)}><option value="">All</option><option value="TUTOR_APPROVED">Approved</option><option value="REJECTED">Rejected</option><option value="PARENT_VERIFIED">Parent verified</option></select></label>
-      <label>Approval route<select value={filters.approvalMode} onChange={(e) => updateFilter("approvalMode", e.target.value)}><option value="">All</option><option value="parent">Parent then tutor</option><option value="class_tutor">Class tutor</option></select></label>
       <div className="student-leave-filter-actions"><span>{Object.values(filters).filter(Boolean).length} active filter(s)</span><button type="button" onClick={clearFilters}>Clear filters</button></div>
     </section>
     {error && <div className="student-leave-history-error" role="alert">{error}</div>}
     <section className="student-leave-history-card">
       <div className="student-leave-history-summary"><strong>{pagination.total || 0} records</strong>{loading && <span>Loading…</span>}</div>
-      <div className="student-leave-history-table-wrap"><table className="leaves-table"><thead><tr><th>Student</th><th>Leave</th><th>Dates</th><th>Route</th><th>Status</th><th>Certificate</th><th>Remarks</th></tr></thead><tbody>
-        {leaves.map((leave) => <tr key={leave._id}><td><strong>{leave.student?.fullName}</strong><small>{leave.student?.admissionNo} · Sem {leave.student?.semester}</small></td><td>{leave.leaveType}<small>{leave.daysAvailed || leave.days} day(s)</small></td><td>{new Date(leave.fromDate).toLocaleDateString()} – {new Date(leave.toDate).toLocaleDateString()}</td><td>{leave.approvalMode === "class_tutor" ? "Class tutor" : "Parent → tutor"}</td><td><span className="status-badge">{leave.status}</span></td><td>{leave.medicalCertificate?.fileId ? <button className="student-leave-certificate-link" onClick={() => openCertificate(leave._id)}>View PDF</button> : "—"}</td><td>{leave.tutorRemarks || leave.overrideRemarks || "—"}</td></tr>)}
-        {!leaves.length && !loading && <tr><td colSpan="7" className="no-leaves">No leave history matches these filters.</td></tr>}
+      <div className="student-leave-history-table-wrap"><table className="leaves-table"><thead><tr><th>Student</th><th>Leave</th><th>Dates</th><th>Status</th><th>Certificate</th><th>Remarks</th></tr></thead><tbody>
+        {leaves.map((leave) => <tr key={leave._id}><td><strong>{leave.student?.fullName}</strong><small>{leave.student?.admissionNo} · Sem {leave.student?.semester}</small></td><td>{leave.leaveType}<small>{leave.daysAvailed || leave.days} day(s)</small></td><td>{new Date(leave.fromDate).toLocaleDateString()} – {new Date(leave.toDate).toLocaleDateString()}</td><td><span className="status-badge">{leave.status}</span></td><td>{leave.medicalCertificate?.fileId ? <button className="student-leave-certificate-link" onClick={() => openCertificate(leave._id)}>View PDF</button> : "—"}</td><td>{leave.tutorRemarks || leave.overrideRemarks || "—"}</td></tr>)}
+        {!leaves.length && !loading && <tr><td colSpan="6" className="no-leaves">No leave history matches these filters.</td></tr>}
       </tbody></table></div>
       <div className="student-leave-pagination"><button disabled={pagination.page <= 1} onClick={() => loadHistory(pagination.page - 1)}>Previous</button><span>Page {pagination.page} of {pagination.pages || 1}</span><button disabled={pagination.page >= pagination.pages} onClick={() => loadHistory(pagination.page + 1)}>Next</button></div>
     </section>

@@ -1,5 +1,23 @@
 const AcademicProgram = require("../models/AcademicProgram");
 const mongoose = require("mongoose");
+const { ALL_DEPARTMENTS } = require("../constants/academicConfig");
+
+// ======================================
+// GET VALID DEPARTMENTS
+// ======================================
+
+const getDepartments = async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      departments: ALL_DEPARTMENTS,
+      coreDepartments: ALL_DEPARTMENTS.filter(d => d !== "General Department")
+    });
+  } catch (error) {
+    console.error("GET DEPARTMENTS ERROR:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 // ======================================
 // GET ALL PROGRAMS (filtered by role)
@@ -115,6 +133,14 @@ const createProgram = async (req, res) => {
       period, venue, semester, academicYear
     } = req.body;
 
+    // Validate department
+    if (!ALL_DEPARTMENTS.includes(department) && department !== "All") {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid department. Must be one of: ${ALL_DEPARTMENTS.join(", ")}`
+      });
+    }
+
     // Validate dates
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -177,6 +203,25 @@ const bulkCreatePrograms = async (req, res) => {
 
     if (programs.length > 500) {
       return res.status(400).json({ success: false, message: "Cannot exceed 500 programs per batch" });
+    }
+
+    // Pre-validate departments before bulk insert
+    const invalidDeptPrograms = [];
+    programs.forEach((prog, index) => {
+      if (prog.department && !ALL_DEPARTMENTS.includes(prog.department) && prog.department !== "All") {
+        invalidDeptPrograms.push({
+          row: index + 1,
+          message: `Invalid department "${prog.department}". Must be one of: ${ALL_DEPARTMENTS.join(", ")}`
+        });
+      }
+    });
+
+    if (invalidDeptPrograms.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid departments found",
+        errors: invalidDeptPrograms
+      });
     }
 
     const results = { saved: 0, failed: 0, errors: [] };

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "./Leaves.css";
 
+const API = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 function MyLeaves() {
   const [leaves, setLeaves] = useState([]);
   const token = localStorage.getItem("token");
@@ -9,7 +11,7 @@ function MyLeaves() {
   const fetchLeaves = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/staffleave/my",
+        `${API}/api/staffleave/my`,
         {
           headers: {
             Authorization: `Bearer ${token}`

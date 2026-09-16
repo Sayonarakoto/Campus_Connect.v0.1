@@ -104,10 +104,13 @@ exports.registerForEvent = async (req, res) => {
       semester: student.semester,
       academicYear: student.academicYear,
       house: registrationHouse,
+      houseRef: student.house || null,
       gender: student.gender,
       eventCategory: event.category,
       eventType: event.eventType,
-      teamName: ""
+      teamName: "",
+      approvalStatus: "PENDING_CAPTAIN",
+      approvalHistory: [{ action: "STUDENT_SUBMITTED", by: req.user.id, remarks: "legacy single-register path" }]
     });
 
     res.status(201).json({

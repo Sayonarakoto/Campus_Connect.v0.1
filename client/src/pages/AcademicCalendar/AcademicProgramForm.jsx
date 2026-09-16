@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -24,6 +24,7 @@ function AcademicProgramForm() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [departments, setDepartments] = useState([]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -41,9 +42,27 @@ function AcademicProgramForm() {
   });
 
   useEffect(() => {
+    fetchDepartments();
     if (isEdit) loadProgram();
     // eslint-disable-next-line
   }, [id]);
+
+  const fetchDepartments = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/academic-calendar/departments`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success && res.data.departments) {
+        setDepartments(res.data.departments);
+      }
+    } catch (err) {
+      setDepartments([
+        "Mechanical Engineering", "Computer Engineering", "Automobile Engineering",
+        "Electrical and Electronics Engineering", "Civil Engineering",
+        "Fire Technology and Safety", "General Department"
+      ]);
+    }
+  }, [token]);
 
   const loadProgram = async () => {
     try {
@@ -193,14 +212,13 @@ function AcademicProgramForm() {
 
               <div className="ac-form-group">
                 <label>Department <span className="required">*</span></label>
-                <input
-                  type="text"
-                  name="department"
-                  className="ac-form-input"
-                  value={formData.department}
-                  onChange={handleChange}
-                  placeholder="e.g. CSE, ECE, All"
-                />
+                <select name="department" className="ac-form-select" value={formData.department} onChange={handleChange}>
+                  <option value="">Select Department</option>
+                  {departments.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                  <option value="All">All Departments</option>
+                </select>
               </div>
 
               <div className="ac-form-group">

@@ -106,6 +106,14 @@ import AcademicCalendarDashboard from "./pages/AcademicCalendar/AcademicCalendar
 import ExcelBulkUpload from "./pages/AcademicCalendar/ExcelBulkUpload";
 import ProgramDetail from "./pages/AcademicCalendar/ProgramDetail";
 
+import SportsHouses from "./pages/SportsPhase1/Houses";
+import SportsMasters from "./pages/SportsPhase1/Masters";
+import SportsStudentRegister from "./pages/SportsPhase1/StudentRegister";
+import SportsCaptain from "./pages/SportsPhase1/Captain";
+import SportsCoordinator from "./pages/SportsPhase1/Coordinator";
+import SportsResultsImport from "./pages/SportsPhase1/ResultsImport";
+import SportsReports from "./pages/SportsPhase1/Reports";
+
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
 
@@ -330,6 +338,15 @@ function App() {
               </ProtectedRoute>
             } 
           />
+
+          {/* Sports Phase-1 Routes (claim-gated via /sports/* workflow engine paths) */}
+          <Route path="/sports/houses" element={<ProtectedRoute><SportsHouses /></ProtectedRoute>} />
+          <Route path="/sports/masters" element={<ProtectedRoute><SportsMasters /></ProtectedRoute>} />
+          <Route path="/sports/workflow" element={<ProtectedRoute><SportsStudentRegister /></ProtectedRoute>} />
+          <Route path="/sports/captain" element={<ProtectedRoute><SportsCaptain /></ProtectedRoute>} />
+          <Route path="/sports/coordinator" element={<ProtectedRoute><SportsCoordinator /></ProtectedRoute>} />
+          <Route path="/sports/results-import" element={<ProtectedRoute><SportsResultsImport /></ProtectedRoute>} />
+          <Route path="/sports/reports" element={<ProtectedRoute><SportsReports /></ProtectedRoute>} />
 
           {/* Special Attendance Routes */}
           <Route 

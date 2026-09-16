@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import * as XLSX from "xlsx";
@@ -24,7 +24,7 @@ const EXCEL_COLUMNS = [
   "Period", "Venue", "Semester", "Academic Year"
 ];
 
-const validateRow = (row, index) => {
+const validateRow = (row, index, validDepartments) => {
   const errors = {};
 
   if (!row.Title || String(row.Title).trim().length < 3) {
@@ -43,6 +43,11 @@ const validateRow = (row, index) => {
 
   if (!row.Department || !String(row.Department).trim()) {
     errors.Department = "Department is required";
+  } else if (validDepartments && validDepartments.length > 0) {
+    const dept = String(row.Department).trim();
+    if (dept !== "All" && !validDepartments.includes(dept)) {
+      errors.Department = `Invalid department. Must be: ${validDepartments.join(", ")}`;
+    }
   }
 
   if (!row["Start Date"]) {
@@ -105,6 +110,31 @@ function ExcelBulkUpload() {
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState(null);
   const [toast, setToast] = useState(null);
+  const [validDepartments, setValidDepartments] = useState([]);
+
+  // Fetch valid departments on mount
+  const fetchDepartments = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/academic-calendar/departments`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success && res.data.departments) {
+        setValidDepartments(res.data.departments);
+      }
+    } catch (err) {
+      console.error("Failed to load departments:", err);
+      // Fallback to hardcoded list if API fails
+      setValidDepartments([
+        "Mechanical Engineering", "Computer Engineering", "Automobile Engineering",
+        "Electrical and Electronics Engineering", "Civil Engineering",
+        "Fire Technology and Safety", "General Department"
+      ]);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchDepartments();
+  }, [fetchDepartments]);
 
   const showToast = (message, type = "info") => {
     setToast({ message, type });
@@ -143,7 +173,7 @@ function ExcelBulkUpload() {
 
         // Validate all rows
         const validated = jsonData.map((row, idx) => {
-          const errors = validateRow(row, idx);
+          const errors = validateRow(row, idx, validDepartments);
           const hasErrors = Object.keys(errors).length > 0;
           return {
             ...row,
@@ -239,7 +269,7 @@ function ExcelBulkUpload() {
         Title: "Workshop on AI/ML",
         Type: "Workshop",
         Description: "Introduction to Artificial Intelligence and Machine Learning concepts",
-        Department: "CSE",
+        Department: "Computer Engineering",
         "Start Date": "2026-09-20",
         "End Date": "2026-09-20",
         "Start Time": "09:00",
@@ -253,7 +283,7 @@ function ExcelBulkUpload() {
         Title: "Technical Seminar",
         Type: "Seminar",
         Description: "Seminar on recent trends in IoT and embedded systems",
-        Department: "ECE",
+        Department: "Electrical and Electronics Engineering",
         "Start Date": "2026-09-22",
         "End Date": "2026-09-22",
         "Start Time": "10:00",

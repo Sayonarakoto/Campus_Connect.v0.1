@@ -1,8 +1,4 @@
 const mongoose = require("mongoose");
-const Student = require("../models/Student");
-const SportsEvent = require("../models/SportsEvent");
-const StudentSportsRegistration = require("../models/StudentSportsRegistration");
-const House = require("../models/House");
 
 const HouseSchema = new mongoose.Schema(
   {
@@ -13,15 +9,37 @@ const HouseSchema = new mongoose.Schema(
       trim: true
     },
 
+    // Short prefix code, e.g. GAN / KAV / GOD / YAM for rivers.
+    // Reserved for Phase-2 chest numbers; optional in Phase-1.
+    shortCode: {
+      type: String,
+      default: "",
+      trim: true,
+      uppercase: true
+    },
+
     houseColor: {
       type: String,
       default: ""
     },
 
+    // Legacy single captain (kept for backward compat)
     captain: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
       default: null
+    },
+
+    // Phase-1: multiple student captains per house
+    captains: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }],
+      default: []
+    },
+
+    // Phase-1: faculty house coordinators per house
+    coordinators: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+      default: []
     },
 
     totalPoints: {

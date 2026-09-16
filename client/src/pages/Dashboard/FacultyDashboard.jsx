@@ -269,6 +269,14 @@ export default function FacultyDashboard() {
       path: "/events",
       controller: "EventController",
       action: "list"
+    },
+    {
+      title: "Academic Calendar",
+      description: "View academic programs and schedule.",
+      icon: faCalendarAlt,
+      path: "/academic-calendar",
+      controller: "AcademicCalendarController",
+      action: "list"
     }
   ].filter((card) => hasAccess(card.controller, card.action));
 

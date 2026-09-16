@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 import "./Leaves.css";
 import "../Leave/Leaves.css";
 
@@ -21,6 +22,7 @@ function LeaveRequest() {
   const [formData, setFormData] = useState(initialForm);
   const [loadingFaculty, setLoadingFaculty] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [alertModal, setAlertModal] = useState({ open: false, title: "", message: "", variant: "primary" });
 
   const fetchFaculty = useCallback(async () => {
     try {
@@ -69,7 +71,7 @@ function LeaveRequest() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (formData.startDate > formData.endDate) {
-      window.alert("End date must be on or after the start date.");
+      setAlertModal({ open: true, title: "Invalid Dates", message: "End date must be on or after the start date.", variant: "warning" });
       return;
     }
 
@@ -78,10 +80,10 @@ function LeaveRequest() {
       const res = await axios.post(`${API_BASE}/api/staffleave/request`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      window.alert(res.data.message || "Leave request submitted.");
+      setAlertModal({ open: true, title: "Submitted", message: res.data.message || "Leave request submitted.", variant: "success" });
       setFormData(initialForm);
     } catch (error) {
-      window.alert(error.response?.data?.message || "Request failed. Please try again.");
+      setAlertModal({ open: true, title: "Error", message: error.response?.data?.message || "Request failed. Please try again.", variant: "danger" });
     } finally {
       setSubmitting(false);
     }
@@ -178,6 +180,17 @@ function LeaveRequest() {
           </button>
         </div>
       </form>
+
+      <ConfirmModal
+        isOpen={alertModal.open}
+        title={alertModal.title}
+        message={alertModal.message}
+        variant={alertModal.variant}
+        confirmText="OK"
+        cancelText=""
+        onConfirm={() => setAlertModal(prev => ({ ...prev, open: false }))}
+        onCancel={() => setAlertModal(prev => ({ ...prev, open: false }))}
+      />
     </main>
   );
 }

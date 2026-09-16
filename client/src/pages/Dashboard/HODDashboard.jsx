@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { faCheckSquare, faQrcode, faGavel, faCalendarCheck, faUserClock, faCalendar, faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
+import { faCheckSquare, faQrcode, faGavel, faUserClock, faCalendar, faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
 import "./WorkDashboard.css";
 import DashboardCard from "./DashboardCard";
 import { usePermissions } from "../../context/PermissionContext";
@@ -38,14 +38,6 @@ function HODDashboard() {
       icon: faGavel,
       path: "/discipline/hod",
       controller: "DisciplinaryController",
-      action: "list"
-    },
-    {
-      title: "Duty Leaves",
-      description: "View and manage Duty-Leaves.",
-      icon: faCalendarCheck,
-      path: "/hod/duty-leaves",
-      controller: "DutyLeaveController",
       action: "list"
     },
     {

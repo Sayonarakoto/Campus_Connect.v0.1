@@ -218,7 +218,7 @@ function App() {
 
           <Route path="/student/duty-leave" element={<ProtectedRoute><StudentDutyLeaveForm /></ProtectedRoute>} />
           <Route path="/student/my-duty-leaves" element={<ProtectedRoute><MyDutyLeaves /></ProtectedRoute>} />
-          <Route path="/hod/duty-leaves" element={<ProtectedRoute><HODDutyLeaveDashboard /></ProtectedRoute>} />
+          <Route path="/faculty/student-duty-leaves" element={<ProtectedRoute><HODDutyLeaveDashboard /></ProtectedRoute>} />
           <Route path="/tutor/duty-leaves" element={<ProtectedRoute><TutorDutyLeaveDashboard /></ProtectedRoute>} />
           <Route path="/faculty/duty-leaves" element={<ProtectedRoute><ApplyFacultyDutyLeave /></ProtectedRoute>} />
           <Route path="/director/duty-leaves" element={<ProtectedRoute><FacultyDutyLeaveApproval /></ProtectedRoute>} />
@@ -265,9 +265,27 @@ function App() {
               </ProtectedRoute>
             } 
           />
+
+          <Route 
+            path="/sports-controller/dashboard" 
+            element={
+              <ProtectedRoute>
+                <SportsCommitteeDashboard />
+              </ProtectedRoute>
+            } 
+          />
           
           <Route 
             path="/sportscommittee/roster/:eventId" 
+            element={
+              <ProtectedRoute>
+                <EventRoster />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route 
+            path="/sports-controller/roster/:eventId" 
             element={
               <ProtectedRoute>
                 <EventRoster />

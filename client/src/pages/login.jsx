@@ -62,6 +62,13 @@ function Login() {
       name: "Security",
       iconClass: "fas fa-shield-alt",
       desc: "Front-line gatekeeper: scan student QR codes for verified entry/exit."
+    },
+    {
+      name: "Sports Controller",
+      role: "sports committee",
+      iconClass: "fas fa-running",
+      desc: "Manage tournaments, event rosters, results, and student sports participation.",
+      allowRegistration: false
     }
   ];
 
@@ -84,7 +91,7 @@ function Login() {
 
         <div className="portal-grid">
           {portals.map((portal) => {
-            const role = portal.name
+            const role = portal.role || portal.name
               .toLowerCase()
               .replace(/[^a-z0-9]/g, "");
 
@@ -118,12 +125,14 @@ function Login() {
                     Access Account
                   </Link>
 
-                  <Link
-                    to={`/${role}/register`}
-                    className="portal-btn btn-register"
-                  >
-                    Register
-                  </Link>
+                  {portal.allowRegistration !== false && (
+                    <Link
+                      to={`/${role}/register`}
+                      className="portal-btn btn-register"
+                    >
+                      Register
+                    </Link>
+                  )}
                 </div>
               </div>
             );

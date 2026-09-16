@@ -46,6 +46,10 @@ return null;
 
 }
 
+const annualLeavePool = user.annualLeavePool ?? 0;
+const usedLeaveDays = user.usedLeaveDays ?? 0;
+const remainingLeaveDays = annualLeavePool - usedLeaveDays;
+
 return(
 
 <div className="module-card">
@@ -58,7 +62,7 @@ Annual Leave Pool
 
 <h1>
 
-{user.annualLeavePool}
+{annualLeavePool}
 
  Days
 
@@ -68,7 +72,7 @@ Annual Leave Pool
 
 Used:
 
-{user.usedLeaveDays}
+{usedLeaveDays}
 
  Days
 
@@ -80,8 +84,7 @@ Remaining:
 
 {
 
-user.annualLeavePool-
-user.usedLeaveDays
+remainingLeaveDays
 
 }
 

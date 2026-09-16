@@ -10,6 +10,7 @@ import AdminDashboard from "./AdminDashboard";
 import DirectorDashboard from "./DirectorDashboard";
 import HRDashboard from "./HRDashboard";
 import PrincipalDashboard from "./PrincipalDashboard";
+import SportsCommitteeDashboard from "../SportsCommittee/SportCommiteeDashboard";
 
 
 function WorkspaceDashboard() {
@@ -144,6 +145,10 @@ function WorkspaceDashboard() {
     case "principal":
 
       return <PrincipalDashboard />;
+
+    case "sports committee":
+
+      return <SportsCommitteeDashboard />;
 
 
 

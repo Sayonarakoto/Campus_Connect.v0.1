@@ -149,11 +149,11 @@ export default function FacultyDashboard() {
     },
     {
       title: "Student Duty Leave",
-      description: "Review and process student duty leaves.",
+      description: "Review and approve student duty leave requests.",
       icon: faUserGraduate,
-      path: "/tutor/duty-leaves",
+      path: "/faculty/student-duty-leaves",
       controller: "DutyLeaveController",
-      action: "list"
+      action: "update"
     },
     {
       title: "Late Entry Requests",

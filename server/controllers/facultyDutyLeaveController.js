@@ -186,45 +186,96 @@ async (req, res) => {
 
     }
 
-    leave.status = "Approved";
+    if (leave.status !== "Pending") {
 
-    leave.approvedBy = req.user.id;
+      return res.status(400).json({
 
-    leave.compensationGranted = true;
+        success: false,
 
-    leave.auditLogs.push({
+        message: `Only pending duty leave requests can be approved. Current status: ${leave.status}.`
 
-      action: "APPROVED",
+      });
 
-      performedBy: req.user.id,
+    }
 
-      remarks: "Duty Leave Approved"
-
-    });
-
-    await leave.save();
-
-    await User.findByIdAndUpdate(
-
-      leave.faculty,
-
+    // Claim this request before crediting the faculty member. The conditional
+    // update prevents two approvers from granting the same credit twice.
+    const approvedLeave = await FacultyDutyLeave.findOneAndUpdate(
       {
-
-        $inc: {
-
-          annualLeavePool: 1
-
+        _id: leave._id,
+        status: "Pending",
+        compensationGranted: { $ne: true }
+      },
+      {
+        $set: {
+          status: "Approved",
+          approvedBy: req.user.id,
+          compensationGranted: true
+        },
+        $push: {
+          auditLogs: {
+            action: "APPROVED",
+            performedBy: req.user.id,
+            remarks: "Duty Leave Approved. Annual leave pool credited."
+          }
         }
-
-      }
-
+      },
+      { new: true }
     );
+
+    if (!approvedLeave) {
+
+      return res.status(409).json({
+
+        success: false,
+
+        message: "This duty leave request was already processed."
+
+      });
+
+    }
+
+    const faculty = await User.findByIdAndUpdate(
+      approvedLeave.faculty,
+      { $inc: { annualLeavePool: 1 } },
+      { new: true, runValidators: true }
+    ).select("annualLeavePool usedLeaveDays");
+
+    if (!faculty) {
+
+      // Keep the request eligible for a safe retry if its faculty record is missing.
+      await FacultyDutyLeave.findByIdAndUpdate(approvedLeave._id, {
+        $set: { status: "Pending", compensationGranted: false, approvedBy: null },
+        $push: {
+          auditLogs: {
+            action: "APPROVAL_REVERSED",
+            performedBy: req.user.id,
+            remarks: "Approval reverted because the faculty record was not found."
+          }
+        }
+      });
+
+      return res.status(404).json({
+
+        success: false,
+
+        message: "Faculty record not found. The duty leave approval was not completed."
+
+      });
+
+    }
 
     res.json({
 
       success: true,
 
-      message: "Duty Leave Approved. Annual Leave Pool +1."
+      message: "Duty Leave Approved. Annual Leave Pool +1.",
+
+      leaveBalance: {
+        annualLeavePool: faculty.annualLeavePool,
+        usedLeaveDays: faculty.usedLeaveDays || 0,
+        remaining: (faculty.annualLeavePool || 0) - (faculty.usedLeaveDays || 0)
+      }
 
     });
 

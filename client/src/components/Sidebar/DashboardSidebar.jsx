@@ -36,8 +36,8 @@ const ROLE_NAV_CONFIG = {
   ],
   parent: [
     { label: "Dashboard Home", path: "/parent/workdashboard", icon: "fas fa-th-large" },
-    { label: "Leave Verification", path: "/leave/parent/verification", icon: "fas fa-check-circle" },
-    { label: "Disciplinary Reports", path: "/discipline/parent", icon: "fas fa-exclamation-triangle" }
+    { label: "Leave Verification", path: "/student-leave/parent", icon: "fas fa-check-circle" },
+    { label: "Disciplinary Reports", path: "/discpline/parent", icon: "fas fa-exclamation-triangle" }
   ],
   hod: [
     { label: "Dashboard Home", path: "/hod/workdashboard", icon: "fas fa-th-large", masterMenuId: "General Workspace" },

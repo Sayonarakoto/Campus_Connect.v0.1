@@ -42,32 +42,32 @@ router.get(
 
 
 // ======================================
-// HOD
+// FACULTY APPROVAL
 // ======================================
 
 // Pending Requests
 router.get(
-  "/hod/pending",
+  "/faculty/pending",
   authMiddleware,
-  roleMiddleware("hod"),
+  roleMiddleware("faculty"),
   authorizeClaim("DutyLeaveController", "list"),
   dutyLeaveController.getPendingDutyLeaves
 );
 
 // Approve
 router.put(
-  "/hod/approve/:id",
+  "/faculty/approve/:id",
   authMiddleware,
-  roleMiddleware("hod"),
+  roleMiddleware("faculty"),
   authorizeClaim("DutyLeaveController", "update"),
   dutyLeaveController.approveDutyLeave
 );
 
 // Reject
 router.put(
-  "/hod/reject/:id",
+  "/faculty/reject/:id",
   authMiddleware,
-  roleMiddleware("hod"),
+  roleMiddleware("faculty"),
   authorizeClaim("DutyLeaveController", "update"),
   dutyLeaveController.rejectDutyLeave
 );

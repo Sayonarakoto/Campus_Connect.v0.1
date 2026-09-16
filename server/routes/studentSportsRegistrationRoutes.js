@@ -8,8 +8,9 @@ require("../middleware/authMiddleware");
 const roleMiddleware=
 require("../middleware/roleMiddleware");
 
+// Registrations are served by the central sports event controller.
 const controller=
-require("../controllers/studentSportsRegistrationController");
+require("../controllers/sportsEventController");
 
 router.get(
 
@@ -44,6 +45,18 @@ authMiddleware,
 roleMiddleware("student"),
 
 controller.getMyRegistrations
+
+);
+
+router.get(
+
+"/profile",
+
+authMiddleware,
+
+roleMiddleware("student"),
+
+controller.getSportsProfile
 
 );
 

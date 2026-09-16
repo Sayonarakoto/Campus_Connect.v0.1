@@ -1,9 +1,24 @@
 const crypto = require("crypto");
 const Student = require("../models/Student");
 const StudentLeave = require("../models/StudentLeave");
+const User = require("../models/User");
 const createAuditLog = require("../utils/createAuditLog");
 
 const hashToken = (token) => crypto.createHash("sha256").update(token).digest("hex");
+
+// Parents and students may be registered in either order.  Resolve any older
+// profiles that have the parent's email but were not linked to its User id.
+async function getLinkedStudentIds(parentId) {
+  const parent = await User.findById(parentId).select("email").lean();
+  if (parent?.email) {
+    const escapedEmail = parent.email.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    await Student.updateMany(
+      { parent: null, parentEmail: new RegExp(`^${escapedEmail}$`, "i") },
+      { $set: { parent: parentId } }
+    );
+  }
+  return Student.find({ parent: parentId }).distinct("_id");
+}
 
 async function approveLeave(leave, actorId, action = "PARENT_VERIFIED") {
   if (leave.status !== "PENDING_PARENT") {
@@ -34,7 +49,7 @@ async function approveLeave(leave, actorId, action = "PARENT_VERIFIED") {
 
 exports.getPendingLeaves = async (req, res) => {
   try {
-    const studentIds = await Student.find({ parent: req.user.id }).distinct("_id");
+    const studentIds = await getLinkedStudentIds(req.user.id);
     const leaves = await StudentLeave.find({ student: { $in: studentIds }, status: "PENDING_PARENT" })
       .populate("student", "fullName admissionNo department semester")
       .sort({ createdAt: -1 });
@@ -46,7 +61,7 @@ exports.getPendingLeaves = async (req, res) => {
 
 exports.verifyLeave = async (req, res) => {
   try {
-    const studentIds = await Student.find({ parent: req.user.id }).distinct("_id");
+    const studentIds = await getLinkedStudentIds(req.user.id);
     const leave = await StudentLeave.findOne({ _id: req.params.id, student: { $in: studentIds } });
     if (!leave) return res.status(404).json({ success: false, message: "Leave not found" });
     await approveLeave(leave, req.user.id);

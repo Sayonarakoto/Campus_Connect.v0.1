@@ -40,8 +40,8 @@ function SportsCommitteeDashboard() {
   return (
     <div className="sports-page">
       <div className="dashboard-header">
-        <h1>🏅 Sports Committee Dashboard</h1>
-        <p>Manage sports event results and registrations</p>
+        <h1>🏅 Sports Controller Portal</h1>
+        <p>Manage sports events, registrations, and results</p>
       </div>
 
       <div className="events-grid">
@@ -92,7 +92,7 @@ function SportsCommitteeDashboard() {
                 {event.pendingResults > 0 ? (
                 // In SportCommiteeDashboard.jsx
 <Link 
-  to={`/sportscommittee/roster/${event._id}`}  // Changed from event-roster to roster
+  to={`/sports-controller/roster/${event._id}`}
   className="primary-btn"
 >
   Enter Results ({event.pendingResults})

@@ -347,9 +347,18 @@ exports.directorApproveLeave = async (req, res) => {
       });
     }
 
-    const remaining =
-      applicant.annualLeavePool -
-      applicant.usedLeaveDays;
+    const annualLeavePool = applicant.annualLeavePool || 0;
+    const usedLeaveDays = applicant.usedLeaveDays || 0;
+    const leaveDays = Number(leave.daysRequested);
+
+    if (!Number.isFinite(leaveDays) || leaveDays <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "The leave request has an invalid number of days."
+      });
+    }
+
+    const remaining = annualLeavePool - usedLeaveDays;
 
     if (leave.daysRequested > remaining) {
       return res.status(400).json({
@@ -359,11 +368,33 @@ exports.directorApproveLeave = async (req, res) => {
       });
     }
 
-    // Deduct leave days
-    applicant.usedLeaveDays +=
-      leave.daysRequested;
+    // Atomically record the approved leave. $inc also correctly initializes
+    // usedLeaveDays for faculty records created before this field existed.
+    const updatedApplicant = await User.findOneAndUpdate(
+      {
+        _id: applicant._id,
+        $expr: {
+          $gte: [
+            {
+              $subtract: [
+                { $ifNull: ["$annualLeavePool", 0] },
+                { $ifNull: ["$usedLeaveDays", 0] }
+              ]
+            },
+            leaveDays
+          ]
+        }
+      },
+      { $inc: { usedLeaveDays: leaveDays } },
+      { new: true, runValidators: true }
+    ).select("annualLeavePool usedLeaveDays");
 
-    await applicant.save();
+    if (!updatedApplicant) {
+      return res.status(400).json({
+        success: false,
+        message: "Insufficient leave balance"
+      });
+    }
 
     // Generate Leave Pass
 leave.leavePassId =
@@ -405,7 +436,14 @@ leave.isLocked =
       message:
         "Leave Approved",
       leavePassId:
-        leave.leavePassId
+        leave.leavePassId,
+      leaveBalance: {
+        annualLeavePool: updatedApplicant.annualLeavePool || 0,
+        usedLeaveDays: updatedApplicant.usedLeaveDays || 0,
+        remaining:
+          (updatedApplicant.annualLeavePool || 0) -
+          (updatedApplicant.usedLeaveDays || 0)
+      }
     });
 
   } catch (error) {

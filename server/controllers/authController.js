@@ -1701,7 +1701,7 @@ exports.getAppMenu = async (req, res) => {
       },
       faculty: {
         LateEntryController: "/faculty/late-entries",
-        DutyLeaveController: "/faculty/duty-leaves",
+        DutyLeaveController: "/faculty/student-duty-leaves",
         DisciplinaryController: "/discpline/faculty"
       },
       disciplinary_committee: {
@@ -1709,11 +1709,13 @@ exports.getAppMenu = async (req, res) => {
       },
       hod: {
         LateEntryController: "/hod/late-entries",
-        DutyLeaveController: "/hod/duty-leaves",
         DisciplinaryController: "/discipline/hod"
       },
       tutor: {
         DutyLeaveController: "/tutor/duty-leaves"
+      },
+      "sports committee": {
+        SportsController: "/sports-controller/dashboard"
       },
       director: {
         DutyLeaveController: "/director/duty-leaves"

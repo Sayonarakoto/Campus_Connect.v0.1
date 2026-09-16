@@ -26,7 +26,7 @@ function HODDutyLeaveDashboard() {
         const res =
           await axios.get(
 
-            "http://localhost:5000/api/duty-leaves/hod/pending",
+            "http://localhost:5000/api/duty-leaves/faculty/pending",
 
             {
               headers: {
@@ -38,7 +38,7 @@ function HODDutyLeaveDashboard() {
           );
 
         setRequests(
-          res.data.leaves || []
+          res.data.requests || []
         );
 
       } catch (err) {
@@ -56,7 +56,7 @@ function HODDutyLeaveDashboard() {
 
         await axios.put(
 
-          `http://localhost:5000/api/duty-leaves/hod/approve/${id}`,
+          `http://localhost:5000/api/duty-leaves/faculty/approve/${id}`,
 
           {},
 
@@ -92,7 +92,7 @@ function HODDutyLeaveDashboard() {
 
         await axios.put(
 
-          `http://localhost:5000/api/duty-leaves/hod/reject/${id}`,
+          `http://localhost:5000/api/duty-leaves/faculty/reject/${id}`,
 
           {
 
@@ -133,7 +133,7 @@ function HODDutyLeaveDashboard() {
     <div className="container mt-4">
 
       <h2>
-        Pending Faculty Duty Leave Requests
+        Pending Student Duty Leave Requests
       </h2>
 
       {
@@ -159,30 +159,30 @@ function HODDutyLeaveDashboard() {
             <div className="card-body">
 
               <h4>
-                {leave.faculty?.fullName}
+                {leave.student?.fullName}
               </h4>
 
               <p>
 
                 <strong>Email:</strong>{" "}
 
-                {leave.faculty?.email}
+                {leave.student?.admissionNo || "-"}
 
               </p>
 
               <p>
 
-                <strong>Role:</strong>{" "}
+                <strong>Department:</strong>{" "}
 
-                {leave.faculty?.role}
+                {leave.student?.department || "-"}
 
               </p>
 
               <p>
 
-                <strong>Current Leave Pool:</strong>{" "}
+                <strong>Semester:</strong>{" "}
 
-                {leave.faculty?.annualLeavePool}
+                {leave.student?.semester || "-"}
 
               </p>
 
@@ -206,12 +206,16 @@ function HODDutyLeaveDashboard() {
 
               <p>
 
-                <strong>Duty Date:</strong>{" "}
+                <strong>Duty Dates:</strong>{" "}
 
                 {
 
                   new Date(
-                    leave.dutyDate
+                    leave.fromDate
+                  ).toLocaleDateString()}
+                  {" to "}
+                  {new Date(
+                    leave.toDate
                   ).toLocaleDateString()
 
                 }
@@ -271,7 +275,7 @@ function HODDutyLeaveDashboard() {
 
               >
 
-                Approve (+1 Leave)
+                Approve Duty Leave
 
               </button>
 

@@ -1,4 +1,5 @@
 const SportsEvent = require("../models/SportsEvent");
+const registrationController = require("./studentSportsRegistrationController");
 
 // =========================
 // CREATE EVENT
@@ -290,3 +291,12 @@ async (req, res) => {
   }
 
 };
+
+// Student registration handlers belong to the sports event domain as well.
+// Keep their implementation in the dedicated module so existing imports remain
+// compatible, while exposing one controller for all sports-event operations.
+exports.registerForEvent = registrationController.registerForEvent;
+exports.getMyRegistrations = registrationController.getMyRegistrations;
+exports.getAvailableEvents = registrationController.getAvailableEvents;
+exports.cancelRegistration = registrationController.cancelRegistration;
+exports.getSportsProfile = registrationController.getSportsProfile;

@@ -188,6 +188,7 @@ function App() {
           <Route path="/faculty/coverage" element={<ProtectedRoute><CoverageDashboard /></ProtectedRoute>} />
 
           <Route path="/leave/hod" element={<ProtectedRoute><HODLeaves /></ProtectedRoute>} />
+          <Route path="/leave/hod/approval" element={<ProtectedRoute><HODLeaves /></ProtectedRoute>} />
           <Route path="/leave/principal" element={<ProtectedRoute><PrincipalLeaves /></ProtectedRoute>} />
           <Route path="/leave/director" element={<ProtectedRoute><DirectorLeaves /></ProtectedRoute>} />
 

@@ -512,6 +512,7 @@ const getIcsFile = async (req, res) => {
 };
 
 module.exports = {
+  getDepartments,
   getPrograms,
   getProgramsByMonth,
   getProgram,

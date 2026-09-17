@@ -31,9 +31,32 @@ const HouseSchema = new mongoose.Schema(
     },
 
     // Phase-1: multiple student captains per house
+    // Refactor: enforced to max 1 captain per house per academicYear.
+    // `captainAcademicYear` + `captainSemester` scope the single captain.
     captains: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }],
-      default: []
+      default: [],
+      validate: {
+        validator: function (v) {
+          return !v || v.length <= 1;
+        },
+        message: "Only one sports captain is allowed per house per year.",
+      },
+    },
+
+    // Academic year the current captain belongs to (e.g. "2026-2027").
+    captainAcademicYear: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // Semester of the current captain (1-6), for semester-wise assigning.
+    captainSemester: {
+      type: Number,
+      default: null,
+      min: 1,
+      max: 6,
     },
 
     // Phase-1: faculty house coordinators per house

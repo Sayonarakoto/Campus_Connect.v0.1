@@ -1,16 +1,16 @@
 const SportsEvent = require("../models/SportsEvent");
-const { SPORTS_CATALOGUE } = require("../constants/sportsCatalogue");
+const { SPORTS_CATALOGUE, sectionFor } = require("../constants/sportsCatalogue");
 const { isSportsCoordinator, isExcludedRole } = require("../middleware/sportsAuth");
 
 // GET /api/sports-masters — catalogue (static list merged with DB event names for the year)
 exports.listMasters = async (req, res) => {
   try {
     if (isExcludedRole(req)) return res.status(403).json({ success: false, message: "Sports module is not applicable to your role." });
-    const { academicYear } = req.query;
+    const { academicYear, section } = req.query;
     const existing = academicYear
-      ? await SportsEvent.find({ academicYear }).select("eventName category eventType gender academicYear eventStatus").sort({ eventName: 1 })
+      ? await SportsEvent.find({ academicYear, ...(section ? { section } : {}) }).select("eventName category section eventType gender academicYear eventStatus eligibleSemesters").sort({ eventName: 1 })
       : [];
-    res.json({ success: true, catalogue: SPORTS_CATALOGUE, existingEvents: existing });
+    res.json({ success: true, catalogue: SPORTS_CATALOGUE, existingEvents: existing, sections: ["Athletic", "Non-Athletic"] });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
   }
@@ -36,6 +36,7 @@ exports.seedMasters = async (req, res) => {
       await SportsEvent.create({
         eventName: item.eventName,
         category: item.category,
+        section: item.section || sectionFor(item.category),
         eventType: item.eventType,
         gender: item.gender,
         academicYear,

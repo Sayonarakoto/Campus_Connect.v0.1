@@ -32,6 +32,12 @@ function genderOk(eventGender, studentGender) {
   return eventGender === studentGender;
 }
 
+function semesterOk(event, studentSemester) {
+  const list = event.eligibleSemesters || [];
+  if (!list.length) return true;
+  return list.map(Number).includes(Number(studentSemester));
+}
+
 async function createPendingRegistration(student, event, teamName, actorId, directByCaptain) {
   const houseDoc = await houseOf(student);
   const houseName = houseDoc ? houseDoc.houseName : "";
@@ -82,6 +88,7 @@ exports.studentSubmit = async (req, res) => {
       if (!event || !event.isActive) { errors.push({ eventId, message: "Event not found or inactive." }); continue; }
       if (!["REGISTRATION_OPEN", "UPCOMING"].includes(event.eventStatus)) { errors.push({ eventId, message: `Registrations closed (${event.eventStatus}).` }); continue; }
       if (!genderOk(event.gender, student.gender)) { errors.push({ eventId, message: `Gender mismatch: event is ${event.gender}.` }); continue; }
+      if (!semesterOk(event, student.semester)) { errors.push({ eventId, message: `Semester ${student.semester} not eligible (needs ${(event.eligibleSemesters || []).join(", ")}).` }); continue; }
       const dup = await StudentSportsRegistration.findOne({ student: student._id, event: event._id });
       if (dup) { errors.push({ eventId, message: "Already registered for this event." }); continue; }
       try {
@@ -103,7 +110,7 @@ exports.myStatus = async (req, res) => {
     if (guardExcluded(req, res)) return;
     const student = await Student.findOne({ user: req.user.id });
     if (!student) return res.status(404).json({ success: false, message: "Student not found." });
-    const regs = await StudentSportsRegistration.find({ student: student._id }).populate("event", "eventName category eventType").sort({ createdAt: -1 });
+    const regs = await StudentSportsRegistration.find({ student: student._id }).populate("event", "eventName category section eventType gender eligibleSemesters").sort({ createdAt: -1 });
     res.json({ success: true, registrations: regs });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
@@ -127,7 +134,7 @@ exports.captainPending = async (req, res) => {
       $or: [{ houseRef: { $in: houseIds } }],
     })
       .populate("student", "fullName admissionNo department semester gender")
-      .populate("event", "eventName category eventType gender")
+      .populate("event", "eventName category section eventType gender eligibleSemesters")
       .sort({ createdAt: 1 })
       .limit(500);
     res.json({ success: true, count: regs.length, registrations: regs });
@@ -153,7 +160,7 @@ exports.captainRoster = async (req, res) => {
     if (status) filter.approvalStatus = status;
     const regs = await StudentSportsRegistration.find(filter)
       .populate("student", "fullName admissionNo department semester gender")
-      .populate("event", "eventName category eventType gender")
+      .populate("event", "eventName category section eventType gender eligibleSemesters")
       .sort({ createdAt: -1 })
       .limit(1000);
     res.json({ success: true, count: regs.length, registrations: regs });
@@ -201,6 +208,7 @@ exports.captainAdd = async (req, res) => {
     const event = await SportsEvent.findById(eventId);
     if (!event || !event.isActive) return res.status(404).json({ success: false, message: "Event not found." });
     if (!genderOk(event.gender, student.gender)) return res.status(400).json({ success: false, message: "Gender mismatch." });
+    if (!semesterOk(event, student.semester)) return res.status(400).json({ success: false, message: `Semester ${student.semester} not eligible for this event.` });
     const dup = await StudentSportsRegistration.findOne({ student: student._id, event: event._id });
     if (dup) return res.status(400).json({ success: false, message: "Already registered." });
     // find a User id for history: captain's own user id
@@ -263,7 +271,7 @@ exports.coordinatorPending = async (req, res) => {
     if (!houseIds.length) return res.status(403).json({ success: false, message: "You are not a house coordinator." });
     const regs = await StudentSportsRegistration.find({ approvalStatus: "PENDING_COORDINATOR", houseRef: { $in: houseIds } })
       .populate("student", "fullName admissionNo department semester gender")
-      .populate("event", "eventName category eventType gender")
+      .populate("event", "eventName category section eventType gender eligibleSemesters")
       .sort({ createdAt: 1 })
       .limit(1000);
     res.json({ success: true, count: regs.length, registrations: regs });
@@ -309,7 +317,7 @@ exports.finalPending = async (req, res) => {
     if (eventId) filter.event = eventId;
     const regs = await StudentSportsRegistration.find(filter)
       .populate("student", "fullName admissionNo department semester gender")
-      .populate("event", "eventName category eventType gender")
+      .populate("event", "eventName category section eventType gender eligibleSemesters")
       .populate("houseRef", "houseName shortCode")
       .sort({ createdAt: 1 })
       .limit(2000);

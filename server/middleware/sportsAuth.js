@@ -38,14 +38,16 @@ async function myCaptainHouseIds(req) {
   return houses.map((h) => h._id);
 }
 
-// All houseIds where current faculty user is a coordinator
+// All houseIds where current user is a coordinator.
+// Faculty (faculty/tutor/hod/admin) AND students can both be house
+// coordinators — any user carrying the `house_coordinator` secondary flag
+// qualifies, plus direct House.coordinators membership.
 async function myCoordinatorHouseIds(req) {
-  if (!["faculty", "tutor", "hod"].includes(req.user?.role)) {
-    // still allow if secondary flag present on other roles (except excluded)
-    if (!hasSecondary(req, "house_coordinator")) return [];
-  }
-  const houses = await House.find({ coordinators: req.user.id }).select("_id");
-  return houses.map((h) => h._id);
+  const housesByMember = await House.find({ coordinators: req.user.id }).select("_id");
+  if (housesByMember.length) return housesByMember.map((h) => h._id);
+  if (!hasSecondary(req, "house_coordinator")) return [];
+  const housesByFlag = await House.find({ coordinators: req.user.id }).select("_id");
+  return housesByFlag.map((h) => h._id);
 }
 
 // Excluded roles have zero sports access (even if stale claims exist)

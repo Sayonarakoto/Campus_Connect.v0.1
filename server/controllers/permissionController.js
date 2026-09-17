@@ -64,7 +64,7 @@ for (const sp of SPECIAL_PASS_DEFAULTS) {
 const ACADEMIC_CALENDAR_DEFAULTS = [
   {
     role: "hod",
-    masterMenuId: "Academic Calendar",
+    masterMenuId: "Academics & Conduct",
     controller: "AcademicCalendarController",
     moduleTitle: "Academic Calendar",
     path: "/academic-calendar",
@@ -73,7 +73,7 @@ const ACADEMIC_CALENDAR_DEFAULTS = [
   },
   {
     role: "principal",
-    masterMenuId: "Academic Calendar",
+    masterMenuId: "Academics & Conduct",
     controller: "AcademicCalendarController",
     moduleTitle: "Academic Calendar",
     path: "/academic-calendar",
@@ -82,7 +82,7 @@ const ACADEMIC_CALENDAR_DEFAULTS = [
   },
   {
     role: "director",
-    masterMenuId: "Academic Calendar",
+    masterMenuId: "Academics & Conduct",
     controller: "AcademicCalendarController",
     moduleTitle: "Academic Calendar",
     path: "/academic-calendar/dashboard",
@@ -91,7 +91,7 @@ const ACADEMIC_CALENDAR_DEFAULTS = [
   },
   {
     role: "admin",
-    masterMenuId: "Academic Calendar",
+    masterMenuId: "Academics & Conduct",
     controller: "AcademicCalendarController",
     moduleTitle: "Academic Calendar",
     path: "/academic-calendar",
@@ -100,7 +100,7 @@ const ACADEMIC_CALENDAR_DEFAULTS = [
   },
   {
     role: "faculty",
-    masterMenuId: "Academic Calendar",
+    masterMenuId: "Academics & Conduct",
     controller: "AcademicCalendarController",
     moduleTitle: "Academic Calendar",
     path: "/academic-calendar",

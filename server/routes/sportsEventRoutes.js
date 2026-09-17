@@ -11,8 +11,13 @@ require("../middleware/roleMiddleware");
 const sportsEventController =
 require("../controllers/sportsEventController");
 
+// Broad gating here; fine-grained sports-coordinator checks live in the
+// controller via sportsAuth so secondary flags (incl. student coordinators) work.
+const ANY_SPORTS = ["admin", "faculty", "tutor", "hod", "student", "sports committee", "sports-committee", "sportscommittee"];
+
 // ========================
-// CREATE EVENT
+// CREATE EVENT (sports coordinator creates event types with
+// section + semester-wise eligibility for students to register)
 // ========================
 
 router.post(
@@ -21,10 +26,7 @@ router.post(
 
   authMiddleware,
 
-  roleMiddleware(
-    "admin",
-    "sportscommittee"
-  ),
+  roleMiddleware(...ANY_SPORTS),
 
   sportsEventController.createEvent
 
@@ -54,10 +56,7 @@ router.put(
 
   authMiddleware,
 
-  roleMiddleware(
-    "admin",
-    "sportscommittee"
-  ),
+  roleMiddleware(...ANY_SPORTS),
 
   sportsEventController.updateEvent
 
@@ -73,10 +72,7 @@ router.delete(
 
   authMiddleware,
 
-  roleMiddleware(
-    "admin",
-    "sportscommittee"
-  ),
+  roleMiddleware(...ANY_SPORTS),
 
   sportsEventController.deleteEvent
 

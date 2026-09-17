@@ -66,6 +66,7 @@ pids
 .qodo/
 *.sublime-project
 *.sublime-workspace
+.opencode/
 
 # Operating System Files
 .DS_Store

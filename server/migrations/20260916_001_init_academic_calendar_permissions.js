@@ -27,7 +27,7 @@ module.exports = {
             controller: "AcademicCalendarController",
             moduleTitle: "Academic Calendar",
             path: "/academic-calendar",
-            masterMenuId: "Academic Calendar",
+            masterMenuId: "Academics & Conduct",
             icon: "fas fa-calendar-alt",
             actions: {
               list: true,
@@ -52,7 +52,7 @@ module.exports = {
             controller: "AcademicCalendarController",
             moduleTitle: "Academic Calendar",
             path: "/academic-calendar",
-            masterMenuId: "Academic Calendar",
+            masterMenuId: "Academics & Conduct",
             icon: "fas fa-calendar-alt",
             actions: {
               list: true,
@@ -77,7 +77,7 @@ module.exports = {
             controller: "AcademicCalendarController",
             moduleTitle: "Academic Calendar",
             path: "/academic-calendar/dashboard",
-            masterMenuId: "Academic Calendar",
+            masterMenuId: "Academics & Conduct",
             icon: "fas fa-calendar-alt",
             actions: {
               list: true,
@@ -102,7 +102,7 @@ module.exports = {
             controller: "AcademicCalendarController",
             moduleTitle: "Academic Calendar",
             path: "/academic-calendar",
-            masterMenuId: "Academic Calendar",
+            masterMenuId: "Academics & Conduct",
             icon: "fas fa-calendar-alt",
             actions: {
               list: true,
@@ -129,7 +129,7 @@ module.exports = {
             controller: "AcademicCalendarController",
             moduleTitle: "Academic Calendar",
             path: "/academic-calendar",
-            masterMenuId: "Academic Calendar",
+            masterMenuId: "Academics & Conduct",
             icon: "fas fa-calendar-alt",
             actions: {
               list: true,

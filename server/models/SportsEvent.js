@@ -62,6 +62,23 @@ const SportsEventSchema = new mongoose.Schema(
         default: ""
     },
 
+    // Athletic vs Non-Athletic section grouping for the registration form.
+    // Athletics = Track + Field; everything else = Non-Athletic.
+    section: {
+        type: String,
+        enum: [
+            "Athletic",
+            "Non-Athletic"
+        ],
+        default: "Athletic"
+    },
+
+    // Semester-wise eligibility. Empty array = open to all semesters (1-6).
+    eligibleSemesters: {
+        type: [Number],
+        default: []
+    },
+
     academicYear: {
         type: String,
         required: true
